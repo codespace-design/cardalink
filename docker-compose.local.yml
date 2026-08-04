@@ -1,7 +1,7 @@
 volumes:
   carda_link_local_postgres_data: {}
   carda_link_local_postgres_data_backups: {}
-  
+
 
 services:
   django:
