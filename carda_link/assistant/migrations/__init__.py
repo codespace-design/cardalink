@@ -1,0 +1,1 @@
+# Assistant migrations package

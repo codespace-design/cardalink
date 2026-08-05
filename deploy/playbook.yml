@@ -1,0 +1,58 @@
+---
+- name: Deploy CardaLink Application to AWS EC2
+  hosts: webserver
+  become: yes
+  vars:
+    app_dir: /opt/cardalink
+    docker_compose_file: docker-compose.production.yml
+
+  tasks:
+    - name: Ensure Docker & Docker Compose are installed
+      apt:
+        name:
+          - docker.io
+          - docker-compose-plugin
+          - awscli
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy docker-compose production file to host
+      copy:
+        src: ../docker-compose.production.yml
+        dest: "{{ app_dir }}/docker-compose.production.yml"
+        mode: '0644'
+
+    - name: Authenticate Docker with AWS ECR
+      shell: |
+        aws ecr get-login-password --region {{ aws_region }} | docker login --username AWS --password-stdin {{ ecr_registry }}
+
+    - name: Pull latest production images from ECR
+      shell: |
+        docker pull {{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}
+        docker tag {{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }} carda_link_production_django:latest
+
+    - name: Run Database Migrations & Collect Static Files
+      shell: |
+        cd {{ app_dir }}
+        docker compose -f docker-compose.production.yml run --rm django python manage.py migrate --noinput
+        docker compose -f docker-compose.production.yml run --rm django python manage.py collectstatic --noinput
+
+    - name: Start production container stack
+      shell: |
+        cd {{ app_dir }}
+        docker compose -f docker-compose.production.yml up -d --remove-orphans
+
+    - name: Clean up unused Docker images
+      shell: docker image prune -f

@@ -1,54 +1,64 @@
-# CardaLink
+# CardaLink: Smart Cardamom Marketplace & Farm Intelligence Platform
 
-Cardamom auction and estate monitoring system.
+CardaLink is a cloud-enabled digital platform designed to modernize the cardamom trading ecosystem in Idukki, Kerala by integrating farm management, digital marketplace services, live auction mechanisms, AI-driven plant health diagnostics, and an NLP agricultural assistant into a containerized web application.
 
-[![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+- **GitHub Repository**: [https://github.com/codespace-design/cardalink](https://github.com/codespace-design/cardalink)
+- **Tech Stack**: Python 3.14, Django 6.0, Django Ninja API, PostgreSQL 18, Redis, Docker, AWS ECR, Ansible.
 
-License: MIT
+---
 
-## Settings
+## 👥 Team Architecture & Feature Distribution
 
-Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getting-started/settings.html).
+| Team Member | Role | Django App Directory | Feature Branch |
+| :--- | :--- | :--- | :--- |
+| **Member 1 (Lead)** | Auth, RBAC & Infrastructure | `carda_link/users/` | `feature/gouri-auth-roles` |
+| **Member 2** | Farm Management & Plant Health AI | `carda_link/estates/` | `feature/alex-estate-mgmt` |
+| **Member 3** | Auction Engine & Bidding | `carda_link/auctions/` | `feature/sam-auction-engine` |
+| **Member 4** | Invoicing & Payments | `carda_link/invoicing/` | `feature/priya-invoicing` |
+| **Member 5** | AI Assistant & Analytics | `carda_link/assistant/` | `feature/rahul-analytics` |
 
-## Basic Commands
+---
 
-### Setting Up Your Users
+## 🛠 Local Development & Commands
 
-- To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a "Verify Your E-mail Address" page. Go to your console to see a simulated email verification message. Copy the link into your browser. Now the user's email should be verified and ready to go.
+### 1. Clone Repository & Start Containers
+```bash
+git clone https://github.com/codespace-design/cardalink.git
+cd cardalink
 
-- To create a **superuser account**, use this command:
+# Start local Docker environment using 'just'
+just up
+```
 
-      uv run python manage.py createsuperuser
+### 2. Basic Developer Commands (`justfile`)
+- **`just build`**: Rebuild python container images.
+- **`just up`**: Start up local environment in detached mode.
+- **`just down`**: Stop running containers.
+- **`just pytest`**: Run unit test suite inside container stack.
+- **`just manage <cmd>`**: Run Django `manage.py` commands (e.g. `just manage makemigrations`).
 
-For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar), so that you can see how the site behaves for both kinds of users.
+---
 
-### Type checks
+## 🌿 Developer Branching & Git Workflow
 
-Running type checks with mypy:
+1. Always branch off `main`:
+   ```bash
+   git checkout main && git pull origin main
+   git checkout -b feature/<your-name>-<module-name>
+   ```
+2. Develop inside your assigned app folder (`carda_link/<app_name>/`).
+3. Run tests locally before committing:
+   ```bash
+   just pytest
+   ```
+4. Push and open a Pull Request (PR) to `main`.
+5. Automated CI will check linting and unit tests. Upon Lead approval, merge to `main`.
 
-    uv run mypy carda_link
+---
 
-### Test coverage
+## 🚀 Automated CI/CD & Deployment Pipeline
 
-To run the tests, check your test coverage, and generate an HTML coverage report:
-
-    uv run coverage run -m pytest
-    uv run coverage html
-    uv run open htmlcov/index.html
-
-#### Running tests with pytest
-
-    uv run pytest
-
-### Live reloading and Sass CSS compilation
-
-Moved to [Live reloading and SASS compilation](https://cookiecutter-django.readthedocs.io/en/latest/2-local-development/developing-locally.html#using-webpack-or-gulp).
-
-## Deployment
-
-The following details how to deploy this application.
-
-### Docker
-
-See detailed [cookiecutter-django Docker documentation](https://cookiecutter-django.readthedocs.io/en/latest/3-deployment/deployment-with-docker.html).
+- **GitHub Actions (`.github/workflows/ci-cd.yml`)**:
+  - Automatically runs `ruff` linter and `pytest` on PRs and pushes to `main`.
+  - Builds production Docker image and pushes tag to **AWS ECR**.
+  - Triggers **Ansible Playbook** (`deploy/playbook.yml`) to deploy live to AWS EC2 instance.
