@@ -2,8 +2,7 @@ from typing import ClassVar
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import CharField
-from django.db.models import EmailField
+from django.db.models import CharField, EmailField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -11,8 +10,8 @@ from .managers import UserManager
 
 
 class User(AbstractUser):
-    """
-    Default custom user model for CardaLink.
+    """Default custom user model for CardaLink.
+
     Supports role-based user management for Farmers (Sellers), Buyers, Auctioneers, and Admins.
     """
 
@@ -28,10 +27,20 @@ class User(AbstractUser):
     email = EmailField(_("email address"), unique=True)
     username = None  # type: ignore[assignment]
 
-    role = CharField(_("User Role"), max_length=20, choices=Role.choices, default=Role.SELLER)
+    role = CharField(
+        _("User Role"),
+        max_length=20,
+        choices=Role.choices,
+        default=Role.SELLER,
+    )
     phone_number = CharField(_("Phone Number"), max_length=20, blank=True, default="")
     address = models.TextField(_("Address / Location"), blank=True, default="")
-    license_number = CharField(_("Spices Board / Trading License Number"), max_length=100, blank=True, default="")
+    license_number = CharField(
+        _("Spices Board / Trading License Number"),
+        max_length=100,
+        blank=True,
+        default="",
+    )
     is_verified = models.BooleanField(_("Is Verified User"), default=False)
 
     USERNAME_FIELD = "email"

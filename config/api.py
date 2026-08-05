@@ -10,7 +10,15 @@ api = NinjaAPI(
 
 api.add_router("/users/", "carda_link.users.api.views.router")
 api.add_router("/estates/", "carda_link.estates.api.router")
-api.add_router("/auctions/", "carda_link.auctions.api.router")
-api.add_router("/invoicing/", "carda_link.invoicing.api.router")
-api.add_router("/assistant/", "carda_link.assistant.api.router")
-
+api.add_router(
+    "/auctions/",
+    "carda_link.auctions.api.router",
+)
+api.add_router(
+    "/invoicing/",
+    "carda_link.invoicing.api.router",
+)
+api.add_router(
+    "/assistant/",
+    "carda_link.assistant.api.router",
+)

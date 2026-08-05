@@ -4,8 +4,7 @@ from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.utils.translation import gettext_lazy as _
 
-from .forms import UserAdminChangeForm
-from .forms import UserAdminCreationForm
+from .forms import UserAdminChangeForm, UserAdminCreationForm
 from .models import User
 
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
@@ -21,7 +20,19 @@ class UserAdmin(auth_admin.UserAdmin):
     add_form = UserAdminCreationForm
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("name", "role", "phone_number", "address", "license_number", "is_verified")}),
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    "name",
+                    "role",
+                    "phone_number",
+                    "address",
+                    "license_number",
+                    "is_verified",
+                ),
+            },
+        ),
         (
             _("Permissions"),
             {
@@ -36,7 +47,14 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    list_display = ["email", "name", "role", "phone_number", "is_verified", "is_superuser"]
+    list_display = [
+        "email",
+        "name",
+        "role",
+        "phone_number",
+        "is_verified",
+        "is_superuser",
+    ]
     list_filter = ["role", "is_verified", "is_staff", "is_superuser"]
     search_fields = ["name", "email", "phone_number", "license_number"]
     ordering = ["id"]
