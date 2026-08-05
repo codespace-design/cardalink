@@ -20,8 +20,11 @@ def _get_users_queryset(request) -> QuerySet[User]:
 
 
 @router.get("/", response=list[UserSchema])
-def list_users(request):
-    return _get_users_queryset(request)
+def list_users(request, role: str | None = None):
+    qs = User.objects.all()
+    if role:
+        qs = qs.filter(role=role.upper())
+    return qs
 
 
 @router.get("/me/", response=UserSchema)
@@ -31,22 +34,23 @@ def retrieve_current_user(request):
 
 @router.get("/{pk}/", response=UserSchema)
 def retrieve_user(request, pk: int):
-    users_qs = _get_users_queryset(request)
-    return get_object_or_404(users_qs, pk=pk)
+    return get_object_or_404(User, pk=pk)
 
 
 @router.patch("/me/", response=UserSchema)
 def update_current_user(request, data: UpdateUserSchema):
     user = request.user
-    user.name = data.name
+    for attr, value in data.dict(exclude_unset=True).items():
+        setattr(user, attr, value)
     user.save()
     return user
 
 
 @router.patch("/{pk}/", response=UserSchema)
 def update_user(request, pk: int, data: UpdateUserSchema):
-    users_qs = _get_users_queryset(request)
-    user = get_object_or_404(users_qs, pk=pk)
-    user.name = data.name
+    user = get_object_or_404(User, pk=pk)
+    for attr, value in data.dict(exclude_unset=True).items():
+        setattr(user, attr, value)
     user.save()
     return user
+
