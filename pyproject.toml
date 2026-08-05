@@ -131,12 +131,11 @@ lint.select = [
   "YTT",
 ]
 lint.ignore = [
+  "EXE001", # Executable file without shebang
+  "EXE002", # Executable file permissions on Windows git
   "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
   "S101",   # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
   "SIM102", # sometimes it's better to nest
-  # of types for comparison.
-  # Deactivated because it can make the code slow:
-  # https://github.com/astral-sh/ruff/issues/7871
 ]
 lint.isort.force-single-line = true
 

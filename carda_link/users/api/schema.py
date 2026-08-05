@@ -7,7 +7,7 @@ from carda_link.users.models import User
 class UpdateUserSchema(ModelSchema):
     class Meta:
         model = User
-        fields = ["name"]
+        fields = ["name", "phone_number", "address", "license_number"]
 
 
 class UserSchema(ModelSchema):
@@ -15,7 +15,16 @@ class UserSchema(ModelSchema):
 
     class Meta:
         model = User
-        fields = ["email", "name"]
+        fields = [
+            "id",
+            "email",
+            "name",
+            "role",
+            "phone_number",
+            "address",
+            "license_number",
+            "is_verified",
+        ]
 
     @staticmethod
     def resolve_url(obj: User):
