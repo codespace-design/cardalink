@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 from django.shortcuts import get_object_or_404
 from ninja import Router
 
-from carda_link.users.api.schema import UpdateUserSchema, UserSchema
+from carda_link.users.api.schema import UpdateUserSchema
+from carda_link.users.api.schema import UserSchema
 from carda_link.users.models import User
 
 if TYPE_CHECKING:

@@ -2,7 +2,8 @@ from typing import ClassVar
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import CharField, EmailField
+from django.db.models import CharField
+from django.db.models import EmailField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -12,7 +13,8 @@ from .managers import UserManager
 class User(AbstractUser):
     """Default custom user model for CardaLink.
 
-    Supports role-based user management for Farmers (Sellers), Buyers, Auctioneers, and Admins.
+    Supports role-based user management for Farmers (Sellers),
+    Buyers, Auctioneers, and Admins.
     """
 
     class Role(models.TextChoices):
