@@ -18,6 +18,9 @@ class AccountAdapter(DefaultAccountAdapter):
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
 
 
+
+
+
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(
         self,
