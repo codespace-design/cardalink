@@ -40,8 +40,9 @@ class User(AbstractUser):
 
     role = models.CharField(
         _("Role"),
-        max_length=10,
+        max_length=20,
         choices=Role.choices,
+        default=Role.SELLER,
     )
     status = models.CharField(
         _("Status"),
@@ -53,8 +54,7 @@ class User(AbstractUser):
         _("Phone Number"),
         max_length=20,
         blank=True,
-        null=True,
-        unique=True,
+        default="",
     )
     address = models.TextField(_("Address / Location"), blank=True, default="")
     license_number = models.CharField(
@@ -177,7 +177,7 @@ class SellerProfile(models.Model):
     cultivation_details = models.TextField(
         _("Cultivation Details"),
         blank=True,
-        default="",
+        null=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -199,7 +199,7 @@ class BuyerProfile(models.Model):
     business_details = models.TextField(
         _("Business Details"),
         blank=True,
-        default="",
+        null=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
