@@ -56,6 +56,14 @@ class User(AbstractUser):
         null=True,
         unique=True,
     )
+    address = models.TextField(_("Address / Location"), blank=True, default="")
+    license_number = models.CharField(
+        _("Spices Board / Trading License Number"),
+        max_length=100,
+        blank=True,
+        default="",
+    )
+    is_verified = models.BooleanField(_("Is Verified User"), default=False)
 
     @property
     def farm_name(self):
