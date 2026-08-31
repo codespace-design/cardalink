@@ -85,7 +85,15 @@ class TestUserRedirectView:
         request.user = user
 
         view.request = request
-        assert view.get_redirect_url() == f"/users/{user.pk}/"
+        if user.role == "ADMIN":
+            expected = "/admin-dashboard/"
+        elif user.role == "SELLER":
+            expected = "/seller-dashboard/"
+        elif user.role == "BUYER":
+            expected = "/buyer-dashboard/"
+        else:
+            expected = f"/users/{user.pk}/"
+        assert view.get_redirect_url() == expected
 
 
 class TestUserDetailView:

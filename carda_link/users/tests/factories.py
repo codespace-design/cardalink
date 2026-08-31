@@ -10,6 +10,8 @@ from carda_link.users.models import User
 class UserFactory(DjangoModelFactory[User]):
     email = Faker("email")
     name = Faker("name")
+    role = "BUYER"
+    status = "ACTIVE"
 
     @post_generation
     def password(self: User, create: bool, extracted: str | None, **kwargs):
