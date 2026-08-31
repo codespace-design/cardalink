@@ -187,6 +187,7 @@ class BuyerProfile(models.Model):
     )
     company_name = models.CharField(_("Company/Business Name"), max_length=255)
     business_type = models.CharField(_("Business Type"), max_length=100)
+    business_address = models.TextField(_("Business Address"))
     business_details = models.TextField(
         _("Business Details"),
         blank=True,
