@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pytest
 from django.db.utils import IntegrityError
 
 from carda_link.users.models import User
 from carda_link.users.tests.factories import UserFactory
-
-if TYPE_CHECKING:
-    from carda_link.users.models import User
 
 
 def test_user_get_absolute_url(user: User):
@@ -49,7 +44,7 @@ def test_user_is_active_sync():
 def test_unique_phone_number():
     # Create user with a phone number
     UserFactory.create(email="user1@example.com", phone_number="1234567890")
-    
+
     # Try creating another user with the same phone number
     with pytest.raises(IntegrityError):
         UserFactory.create(email="user2@example.com", phone_number="1234567890")

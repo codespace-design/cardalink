@@ -5,7 +5,9 @@ from django.contrib.auth import forms as admin_forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from .models import User, SellerProfile, BuyerProfile
+from .models import BuyerProfile
+from .models import SellerProfile
+from .models import User
 
 
 class UserAdminChangeForm(admin_forms.UserChangeForm):
@@ -19,6 +21,7 @@ class UserAdminCreationForm(admin_forms.AdminUserCreationForm):
     Form for User Creation in the Admin Area.
     To change user signup, see UserSignupForm and UserSocialSignupForm.
     """
+
     role = forms.ChoiceField(
         choices=User.Role.choices,
         initial=User.Role.BUYER,
@@ -143,7 +146,10 @@ class SellerSignupForm(forms.ModelForm):
 
         cardamom_plants = cleaned_data.get("cardamom_plants")
         if cardamom_plants is not None and cardamom_plants < 0:
-            self.add_error("cardamom_plants", _("Number of cardamom plants cannot be negative."))
+            self.add_error(
+                "cardamom_plants",
+                _("Number of cardamom plants cannot be negative."),
+            )
 
         return cleaned_data
 
@@ -161,7 +167,7 @@ class SellerSignupForm(forms.ModelForm):
                 farm_area=self.cleaned_data["farm_area"],
                 area_unit=self.cleaned_data["area_unit"],
                 cardamom_plants=self.cleaned_data["cardamom_plants"],
-                cultivation_details=self.cleaned_data.get("cultivation_details", "")
+                cultivation_details=self.cleaned_data.get("cultivation_details", ""),
             )
         return user
 
@@ -241,7 +247,7 @@ class BuyerSignupForm(forms.ModelForm):
                 company_name=self.cleaned_data["business_name"],
                 business_type=self.cleaned_data["business_type"],
                 business_address=self.cleaned_data["business_address"],
-                business_details=self.cleaned_data.get("business_details", "")
+                business_details=self.cleaned_data.get("business_details", ""),
             )
         return user
 
@@ -255,7 +261,7 @@ class SellerProfileForm(forms.ModelForm):
             "farm_area",
             "area_unit",
             "cardamom_plants",
-            "cultivation_details"
+            "cultivation_details",
         )
         widgets = {
             "farm_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -263,7 +269,9 @@ class SellerProfileForm(forms.ModelForm):
             "farm_area": forms.NumberInput(attrs={"class": "form-control"}),
             "area_unit": forms.Select(attrs={"class": "form-select"}),
             "cardamom_plants": forms.NumberInput(attrs={"class": "form-control"}),
-            "cultivation_details": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "cultivation_details": forms.Textarea(
+                attrs={"class": "form-control", "rows": 3},
+            ),
         }
 
     def clean(self):
@@ -274,7 +282,10 @@ class SellerProfileForm(forms.ModelForm):
 
         cardamom_plants = cleaned_data.get("cardamom_plants")
         if cardamom_plants is not None and cardamom_plants < 0:
-            self.add_error("cardamom_plants", _("Number of cardamom plants cannot be negative."))
+            self.add_error(
+                "cardamom_plants",
+                _("Number of cardamom plants cannot be negative."),
+            )
 
         return cleaned_data
 
@@ -283,7 +294,7 @@ class BuyerProfileForm(forms.ModelForm):
     company_name = forms.CharField(
         label=_("Company / Business Name"),
         widget=forms.TextInput(attrs={"class": "form-control"}),
-        required=True
+        required=True,
     )
 
     class Meta:
@@ -292,12 +303,16 @@ class BuyerProfileForm(forms.ModelForm):
             "company_name",
             "business_type",
             "business_address",
-            "business_details"
+            "business_details",
         )
         widgets = {
             "business_type": forms.TextInput(attrs={"class": "form-control"}),
-            "business_address": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-            "business_details": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "business_address": forms.Textarea(
+                attrs={"class": "form-control", "rows": 3},
+            ),
+            "business_details": forms.Textarea(
+                attrs={"class": "form-control", "rows": 3},
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -315,17 +330,22 @@ class BuyerProfileForm(forms.ModelForm):
 
 from allauth.account.forms import LoginForm
 
+
 class CustomLoginForm(LoginForm):
     def clean(self):
         cleaned_data = super().clean()
         if hasattr(self, "user") and self.user:
             user = self.user
             if user.status == "PENDING":
-                raise forms.ValidationError("Your account has not yet been approved by the administrator. Please wait for admin approval.")
-            elif user.status == "REJECTED":
-                raise forms.ValidationError("Your registration has been rejected by the administrator.")
-            elif user.status == "SUSPENDED":
-                raise forms.ValidationError("Your account has been suspended. Please contact the administrator.")
+                raise forms.ValidationError(
+                    "Your account has not yet been approved by the administrator. Please wait for admin approval.",
+                )
+            if user.status == "REJECTED":
+                raise forms.ValidationError(
+                    "Your registration has been rejected by the administrator.",
+                )
+            if user.status == "SUSPENDED":
+                raise forms.ValidationError(
+                    "Your account has been suspended. Please contact the administrator.",
+                )
         return cleaned_data
-
-
