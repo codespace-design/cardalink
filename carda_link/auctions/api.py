@@ -1,11 +1,9 @@
-from typing import List, Optional
-
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja.errors import HttpError
 
 from carda_link.auctions.models import Auction
-from carda_link.auctions.models import Bid
 from carda_link.auctions.models import Lot
 from carda_link.auctions.schemas import AuctionCreateSchema
 from carda_link.auctions.schemas import AuctionDetailOutSchema
@@ -36,7 +34,10 @@ def _serialize_auction(auction: Auction) -> AuctionOutSchema:
 
 
 def _serialize_auction_detail(auction: Auction) -> AuctionDetailOutSchema:
-    lots_out = [LotOutSchema.from_orm_model(lot) for lot in auction.lots.select_related("harvest_batch__estate").all()]
+    lots_out = [
+        LotOutSchema.from_orm_model(lot)
+        for lot in auction.lots.select_related("harvest_batch__estate").all()
+    ]
     return AuctionDetailOutSchema(
         id=auction.id,
         title=auction.title,
@@ -56,8 +57,8 @@ def auctions_health_check(request):
     return {"status": "ok", "module": "Live Auction Engine"}
 
 
-@router.get("/", response=List[AuctionOutSchema], auth=None)
-def list_auctions(request, status: Optional[str] = None):
+@router.get("/", response=list[AuctionOutSchema], auth=None)
+def list_auctions(request, status: str | None = None):
     qs = Auction.objects.all()
     if status:
         qs = qs.filter(status=status.upper())
@@ -77,8 +78,8 @@ def create_auction(request, payload: AuctionCreateSchema):
     return _serialize_auction(auction)
 
 
-@router.get("/lots/", response=List[LotOutSchema], auth=None)
-def list_lots(request, auction_id: Optional[int] = None, is_sold: Optional[bool] = None):
+@router.get("/lots/", response=list[LotOutSchema], auth=None)
+def list_lots(request, auction_id: int | None = None, is_sold: bool | None = None):
     qs = Lot.objects.select_related("harvest_batch__estate", "auction").all()
     if auction_id is not None:
         qs = qs.filter(auction_id=auction_id)
@@ -99,9 +100,8 @@ def update_auction(request, auction_id: int, payload: AuctionUpdateSchema):
     auction = get_object_or_404(Auction, pk=auction_id)
     for attr, value in payload.dict(exclude_unset=True).items():
         if value is not None:
-            if attr == "status":
-                value = value.upper()
-            setattr(auction, attr, value)
+            attr_val = value.upper() if attr == "status" else value
+            setattr(auction, attr, attr_val)
     auction.save()
     return _serialize_auction(auction)
 
@@ -110,7 +110,11 @@ def update_auction(request, auction_id: int, payload: AuctionUpdateSchema):
 def close_auction(request, auction_id: int):
     auction = get_object_or_404(Auction, pk=auction_id)
     auction.close_auction()
-    return MessageResponseSchema(message=f"Auction '{auction.title}' successfully closed and sold lots finalized.")
+    return MessageResponseSchema(
+        message=(
+            f"Auction '{auction.title}' successfully closed and sold lots finalized."
+        ),
+    )
 
 
 @router.post("/{auction_id}/lots/", response=LotOutSchema, auth=None)
@@ -119,7 +123,11 @@ def add_lot_to_auction(request, auction_id: int, payload: LotCreateSchema):
     harvest_batch = get_object_or_404(HarvestBatch, pk=payload.harvest_batch_id)
 
     if hasattr(harvest_batch, "auction_lot"):
-        raise HttpError(400, f"HarvestBatch #{harvest_batch.id} is already assigned to Lot #{harvest_batch.auction_lot.lot_number}.")
+        msg = (
+            f"HarvestBatch #{harvest_batch.id} is already assigned "
+            f"to Lot #{harvest_batch.auction_lot.lot_number}."
+        )
+        raise HttpError(400, msg)
 
     lot = Lot.objects.create(
         auction=auction,
@@ -132,7 +140,10 @@ def add_lot_to_auction(request, auction_id: int, payload: LotCreateSchema):
 
 @router.get("/lots/{lot_id}/", response=LotOutSchema, auth=None)
 def retrieve_lot(request, lot_id: int):
-    lot = get_object_or_404(Lot.objects.select_related("harvest_batch__estate", "auction"), pk=lot_id)
+    lot = get_object_or_404(
+        Lot.objects.select_related("harvest_batch__estate", "auction"),
+        pk=lot_id,
+    )
     return LotOutSchema.from_orm_model(lot)
 
 
@@ -140,9 +151,12 @@ def retrieve_lot(request, lot_id: int):
 def place_bid_on_lot(request, lot_id: int, payload: BidCreateSchema):
     bidder = request.user if (request.user and request.user.is_authenticated) else None
     if not bidder:
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        bidder = User.objects.filter(role="BUYER").first() or User.objects.filter(is_superuser=True).first() or User.objects.first()
+        user_model = get_user_model()
+        bidder = (
+            user_model.objects.filter(role="BUYER").first()
+            or user_model.objects.filter(is_superuser=True).first()
+            or user_model.objects.first()
+        )
 
     if not bidder:
         raise HttpError(401, "Authentication required to place bids.")
@@ -153,9 +167,13 @@ def place_bid_on_lot(request, lot_id: int, payload: BidCreateSchema):
     try:
         bid = lot.place_bid(bidder=bidder, amount_per_kg=payload.amount_per_kg)
     except ValueError as e:
-        raise HttpError(400, str(e))
+        raise HttpError(400, str(e)) from e
 
-    bidder_name = getattr(bidder, "name", "") or getattr(bidder, "email", "Simulated Buyer")
+    bidder_name = getattr(bidder, "name", "") or getattr(
+        bidder,
+        "email",
+        "Simulated Buyer",
+    )
     return BidOutSchema(
         id=bid.id,
         lot_id=lot.id,
@@ -167,7 +185,7 @@ def place_bid_on_lot(request, lot_id: int, payload: BidCreateSchema):
     )
 
 
-@router.get("/lots/{lot_id}/bids/", response=List[BidOutSchema], auth=None)
+@router.get("/lots/{lot_id}/bids/", response=list[BidOutSchema], auth=None)
 def list_lot_bids(request, lot_id: int):
     lot = get_object_or_404(Lot, pk=lot_id)
     bids = lot.bids.select_related("bidder").all()
@@ -183,6 +201,6 @@ def list_lot_bids(request, lot_id: int):
                 bidder_name=b_name,
                 amount_per_kg=b.amount_per_kg,
                 timestamp=b.timestamp,
-            )
+            ),
         )
     return out

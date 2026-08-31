@@ -50,7 +50,10 @@ class Auction(models.Model):
         self.status = "COMPLETED"
         self.save(update_fields=["status"])
         for lot in self.lots.all():
-            if lot.highest_bid_per_kg is not None and lot.highest_bid_per_kg >= lot.base_price_per_kg:
+            if (
+                lot.highest_bid_per_kg is not None
+                and lot.highest_bid_per_kg >= lot.base_price_per_kg
+            ):
                 lot.is_sold = True
                 lot.save(update_fields=["is_sold"])
 
@@ -89,30 +92,46 @@ class Lot(models.Model):
 
     @property
     def current_price(self) -> Decimal:
-        return self.highest_bid_per_kg if self.highest_bid_per_kg is not None else self.base_price_per_kg
+        return (
+            self.highest_bid_per_kg
+            if self.highest_bid_per_kg is not None
+            else self.base_price_per_kg
+        )
 
-    def place_bid(self, bidder, amount_per_kg: Decimal) -> "Bid":
+    def place_bid(self, bidder, amount_per_kg: Decimal) -> Bid:
         amount_decimal = Decimal(str(amount_per_kg))
         now = timezone.now()
 
         # Check auction status
         if self.auction.status != "ACTIVE":
-            raise ValueError(f"Bidding is closed. Current auction status is '{self.auction.get_status_display()}'.")
+            status_display = self.auction.get_status_display()
+            msg = f"Bidding is closed. Current auction status is '{status_display}'."
+            raise ValueError(msg)
 
         if not (self.auction.start_time <= now <= self.auction.end_time):
-            raise ValueError("Bidding is only permitted between the auction start time and end time.")
+            msg = (
+                "Bidding is only permitted between the auction start time and end time."
+            )
+            raise ValueError(msg)
 
         # Check bid amount vs base price
         if amount_decimal <= self.base_price_per_kg:
-            raise ValueError(
-                f"Bid amount (₹{amount_decimal}/kg) must be strictly greater than the base price (₹{self.base_price_per_kg}/kg)."
+            msg = (
+                f"Bid amount (₹{amount_decimal}/kg) must be strictly greater than "
+                f"the base price (₹{self.base_price_per_kg}/kg)."
             )
+            raise ValueError(msg)
 
         # Check bid amount vs highest bid
-        if self.highest_bid_per_kg is not None and amount_decimal <= self.highest_bid_per_kg:
-            raise ValueError(
-                f"Bid amount (₹{amount_decimal}/kg) must be strictly higher than the current highest bid (₹{self.highest_bid_per_kg}/kg)."
+        if (
+            self.highest_bid_per_kg is not None
+            and amount_decimal <= self.highest_bid_per_kg
+        ):
+            msg = (
+                f"Bid amount (₹{amount_decimal}/kg) must be strictly higher than "
+                f"the current highest bid (₹{self.highest_bid_per_kg}/kg)."
             )
+            raise ValueError(msg)
 
         # Record bid
         bid = Bid.objects.create(
@@ -151,4 +170,3 @@ class Bid(models.Model):
         return (
             f"₹{self.amount_per_kg}/kg by {self.bidder} on Lot #{self.lot.lot_number}"
         )
-

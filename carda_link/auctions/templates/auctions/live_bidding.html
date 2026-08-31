@@ -1,597 +1,690 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CardaLink — Live Auction Simulation Engine</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-page: #f8fafc;
-      --bg-card: #ffffff;
-      --bg-card-hover: #f1f5f9;
-      --border-color: #e2e8f0;
-      --border-emerald: #10b981;
-      
-      --accent-emerald: #10b981;
-      --accent-emerald-dark: #059669;
-      --accent-emerald-light: #ecfdf5;
-      --accent-teal: #0d9488;
-      --accent-gold: #d97706;
-      --accent-crimson: #dc2626;
-
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --text-dark: #1e293b;
-
-      --font-sans: 'Plus Jakarta Sans', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg-page);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      min-height: 100vh;
-      line-height: 1.5;
-      padding-bottom: 40px;
-    }
-
-    header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 16px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--text-main);
-    }
-
-    .brand-logo {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-emerald-dark));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 20px;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-    }
-
-    .brand-title {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--text-main);
-    }
-
-    .brand-badge {
-      background: var(--accent-emerald-light);
-      border: 1px solid var(--accent-emerald);
-      color: var(--accent-emerald-dark);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .btn {
-      padding: 9px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-emerald-dark));
-      color: #ffffff;
-      font-weight: 700;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
-    }
-
-    .btn-secondary {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-    }
-
-    .btn-secondary:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-    }
-
-    .container {
-      max-width: 1320px;
-      margin: 32px auto;
-      padding: 0 24px;
-    }
-
-    .hero-banner {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      border-left: 5px solid var(--accent-emerald);
-      border-radius: 14px;
-      padding: 24px 32px;
-      margin-bottom: 28px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    }
-
-    .hero-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-
-    .hero-subtitle {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--accent-emerald-light);
-      border: 1px solid var(--accent-emerald);
-      color: var(--accent-emerald-dark);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent-emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 6px var(--accent-emerald);
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
-    }
-
-    .grid-layout {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 28px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .lot-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 18px;
-    }
-
-    .lot-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 20px;
-      transition: all 0.25s ease;
-      position: relative;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-      cursor: pointer;
-    }
-
-    .lot-card:hover {
-      border-color: var(--accent-emerald);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.12);
-    }
-
-    .lot-card.active-selected {
-      border-color: var(--accent-emerald);
-      box-shadow: 0 0 0 2px var(--accent-emerald);
-      background: #fafcfb;
-    }
-
-    .lot-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .lot-num {
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 16px;
-      color: var(--text-main);
-    }
-
-    .grade-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .grade-AGEB { background: var(--accent-emerald-light); color: var(--accent-emerald-dark); border: 1px solid rgba(16, 185, 129, 0.4); }
-    .grade-AGB { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .grade-AGS { background: #fffbeb; color: #b45309; border: 1px solid #fef3c7; }
-    .grade-UNGRADED { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-
-    .estate-info {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-    }
-
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-
-    .price-label { color: var(--text-muted); }
-    .price-value { font-family: var(--font-mono); font-weight: 600; color: var(--text-main); }
-
-    .highest-price {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--accent-emerald-dark);
-      font-family: var(--font-mono);
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed var(--border-color);
-    }
-
-    .bidding-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 24px;
-      position: sticky;
-      top: 90px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .form-control {
-      width: 100%;
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px 14px;
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      font-size: 15px;
-      transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: var(--accent-emerald);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-    }
-
-    .bid-stream {
-      margin-top: 20px;
-      max-height: 280px;
-      overflow-y: auto;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: #fafcfb;
-    }
-
-    .bid-log-item {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .bid-time { font-family: var(--font-mono); color: var(--text-muted); font-size: 11px; }
-    .bid-amount { font-family: var(--font-mono); font-weight: 700; color: var(--accent-emerald-dark); }
-
-    .toast-msg {
-      margin-top: 12px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: none;
-    }
-    .toast-success { background: var(--accent-emerald-light); border: 1px solid var(--accent-emerald); color: var(--accent-emerald-dark); }
-    .toast-error { background: #fef2f2; border: 1px solid #fca5a5; color: var(--accent-crimson); }
-
-    @media (max-width: 900px) {
-      .grid-layout { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <a href="#" class="brand">
-      <div class="brand-logo">C</div>
-      <div>
-        <div class="brand-title">CardaLink</div>
-      </div>
-      <span class="brand-badge">LIVE AUCTION ENGINE</span>
-    </a>
-
-    <div class="nav-actions">
-      <button class="btn btn-secondary" onclick="seedMockData()">⚡ Re-seed Test Data</button>
-      <a href="/api/docs" target="_blank" class="btn btn-primary">📖 OpenAPI Docs</a>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="hero-banner">
-      <div>
-        <h1 class="hero-title">{{ active_auction.title }}</h1>
-        <p class="hero-subtitle">Real-time Cardamom Auction & Bidding Engine | Idukki Spice Market</p>
-      </div>
-      <div>
-        <span class="status-indicator">
-          <span class="pulse-dot"></span>
-          {{ active_auction.get_status_display }}
-        </span>
-      </div>
-    </div>
-
-    <div class="grid-layout">
-      <!-- Left Column: Catalog Lots -->
-      <div>
-        <div class="section-title">
-          <span>Catalog Lots ({{ active_auction.lots.count }})</span>
-          <span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">Click any lot card to target</span>
-        </div>
-
-        <div class="lot-grid" id="lotCatalogGrid">
-          {% for lot in active_auction.lots.all %}
-          <div class="lot-card {% if forloop.first %}active-selected{% endif %}" id="lot-card-{{ lot.id }}" onclick="selectLot({{ lot.id }}, {{ lot.lot_number }}, '{{ lot.harvest_batch.grade }}', {{ lot.current_price }})">
-            <div class="lot-header">
-              <span class="lot-num">LOT #{{ lot.lot_number }}</span>
-              <span class="grade-badge grade-{{ lot.harvest_batch.grade }}">{{ lot.harvest_batch.grade }}</span>
-            </div>
-
-            <div class="estate-info">
-              🌱 {{ lot.harvest_batch.estate.name }}<br>
-              ⚖️ Batch Weight: {{ lot.harvest_batch.weight_kg }} kg
-            </div>
-
-            <div class="price-row">
-              <span class="price-label">Base Starting Price:</span>
-              <span class="price-value">₹{{ lot.base_price_per_kg }}/kg</span>
-            </div>
-
-            <div class="highest-price" id="highest-price-{{ lot.id }}">
-              ₹{{ lot.current_price }}/kg
-            </div>
-          </div>
-          {% empty %}
-          <div style="color: var(--text-muted); padding: 20px;">No active lots in this auction. Run <code>python manage.py seed_auction_data</code> to populate test data.</div>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Right Column: Interactive Bidding Console -->
-      <div>
-        <div class="bidding-panel">
-          <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text-main);">Bid Submission Console</h2>
-
-          <div class="form-group">
-            {% csrf_token %}
-            <label class="form-label">Target Lot</label>
-            <input type="text" id="targetLotDisplay" class="form-control" value="Lot #1 (AGEB Grade)" readonly style="background: #f8fafc;">
-            <input type="hidden" id="selectedLotId" value="{% if active_auction.lots.first %}{{ active_auction.lots.first.id }}{% else %}1{% endif %}">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Bid Amount per kg (₹)</label>
-            <input type="number" id="bidAmountInput" class="form-control" placeholder="e.g. 2100.00" step="10">
-          </div>
-
-          <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="submitBid()">
-            🚀 Submit Bid via Ninja API
-          </button>
-
-          <button class="btn btn-secondary" style="width: 100%; justify-content: center; margin-top: 10px; padding: 10px;" onclick="simulateAutoBid()">
-            🎲 Simulate Random Rival Bid
-          </button>
-
-          <div id="toastMsg" class="toast-msg"></div>
-
-          <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 24px; margin-bottom: 10px;">
-            📡 Live Bid Activity Stream
-          </h3>
-
-          <div class="bid-stream" id="bidStream">
-            <div class="bid-log-item">
-              <div>
-                <strong style="color: var(--text-main);">Global Spices Traders</strong> placed bid on Lot #1
-                <div class="bid-time">Just now</div>
-              </div>
-              <div class="bid-amount">₹2050.00/kg</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let currentSelectedPrice = 2050;
-
-    function selectLot(lotId, lotNum, grade, currentPrice) {
-      document.querySelectorAll('.lot-card').forEach(card => card.classList.remove('active-selected'));
-      const selectedCard = document.getElementById(`lot-card-${lotId}`);
-      if (selectedCard) selectedCard.classList.add('active-selected');
-
-      document.getElementById('selectedLotId').value = lotId;
-      document.getElementById('targetLotDisplay').value = `Lot #${lotNum} (${grade} Grade)`;
-      currentSelectedPrice = parseFloat(currentPrice);
-      document.getElementById('bidAmountInput').value = (currentSelectedPrice + 50).toFixed(2);
-    }
-
-    async function submitBid() {
-      const lotId = document.getElementById('selectedLotId').value;
-      const amount = parseFloat(document.getElementById('bidAmountInput').value);
-
-      if (!amount || isNaN(amount)) {
-        showToast('Please enter a valid numeric bid amount.', false);
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CardaLink — Live Auction Simulation Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+          rel="stylesheet" />
+    <style>
+      :root {
+        --bg-page: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f1f5f9;
+        --border-color: #e2e8f0;
+        --border-emerald: #10b981;
+
+        --accent-emerald: #10b981;
+        --accent-emerald-dark: #059669;
+        --accent-emerald-light: #ecfdf5;
+        --accent-teal: #0d9488;
+        --accent-gold: #d97706;
+        --accent-crimson: #dc2626;
+
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --text-dark: #1e293b;
+
+        --font-sans: 'Plus Jakarta Sans', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
       }
 
-      try {
-        const response = await fetch(`/api/auctions/lots/${lotId}/bids/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
-          },
-          body: JSON.stringify({ amount_per_kg: amount })
-        });
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        const data = await response.json();
+      body {
+        background-color: var(--bg-page);
+        color: var(--text-main);
+        font-family: var(--font-sans);
+        min-height: 100vh;
+        line-height: 1.5;
+        padding-bottom: 40px;
+      }
 
-        if (response.ok) {
-          showToast(`✓ Bid placed successfully! New highest bid: ₹${data.amount_per_kg}/kg`, true);
-          updateLotPriceUI(lotId, data.amount_per_kg);
-          appendBidStream(data.bidder_name, lotId, data.amount_per_kg);
-        } else {
-          showToast(`❌ Error: ${data.detail || data.message || 'Bid validation failed'}`, false);
+      header {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: var(--text-main);
+      }
+
+      .brand-logo {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--accent-emerald), var(--accent-emerald-dark));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 20px;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
+
+      .brand-title {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text-main);
+      }
+
+      .brand-badge {
+        background: var(--accent-emerald-light);
+        border: 1px solid var(--accent-emerald);
+        color: var(--accent-emerald-dark);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .nav-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 9px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent-emerald), var(--accent-emerald-dark));
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+      }
+
+      .btn-secondary {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+      }
+
+      .btn-secondary:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+      }
+
+      .container {
+        max-width: 1320px;
+        margin: 32px auto;
+        padding: 0 24px;
+      }
+
+      .hero-banner {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-left: 5px solid var(--accent-emerald);
+        border-radius: 14px;
+        padding: 24px 32px;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      }
+
+      .hero-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 4px;
+      }
+
+      .hero-subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent-emerald-light);
+        border: 1px solid var(--accent-emerald);
+        color: var(--accent-emerald-dark);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent-emerald);
+        border-radius: 50%;
+        box-shadow: 0 0 6px var(--accent-emerald);
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.95);
+          opacity: 0.8;
         }
-      } catch (err) {
-        showToast(`❌ API Error: ${err.message}`, false);
+
+        50% {
+          transform: scale(1.3);
+          opacity: 1;
+        }
+
+        100% {
+          transform: scale(0.95);
+          opacity: 0.8;
+        }
       }
-    }
 
-    function simulateAutoBid() {
-      const lotId = document.getElementById('selectedLotId').value;
-      const priceElem = document.getElementById(`highest-price-${lotId}`);
-      let current = priceElem ? parseFloat(priceElem.innerText.replace('₹', '').replace('/kg', '')) : 2000;
-      let nextBid = (current + Math.floor(Math.random() * 5 + 1) * 20).toFixed(2);
-      
-      document.getElementById('bidAmountInput').value = nextBid;
-      submitBid();
-    }
+      .grid-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 28px;
+      }
 
-    function updateLotPriceUI(lotId, newPrice) {
-      const elem = document.getElementById(`highest-price-${lotId}`);
-      if (elem) elem.innerText = `₹${parseFloat(newPrice).toFixed(2)}/kg`;
-    }
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-    function appendBidStream(bidder, lotId, amount) {
-      const stream = document.getElementById('bidStream');
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const item = document.createElement('div');
-      item.className = 'bid-log-item';
-      item.innerHTML = `
+      .lot-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 18px;
+      }
+
+      .lot-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 20px;
+        transition: all 0.25s ease;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        cursor: pointer;
+      }
+
+      .lot-card:hover {
+        border-color: var(--accent-emerald);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.12);
+      }
+
+      .lot-card.active-selected {
+        border-color: var(--accent-emerald);
+        box-shadow: 0 0 0 2px var(--accent-emerald);
+        background: #fafcfb;
+      }
+
+      .lot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .lot-num {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--text-main);
+      }
+
+      .grade-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .grade-AGEB {
+        background: var(--accent-emerald-light);
+        color: var(--accent-emerald-dark);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+      }
+
+      .grade-AGB {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+
+      .grade-AGS {
+        background: #fffbeb;
+        color: #b45309;
+        border: 1px solid #fef3c7;
+      }
+
+      .grade-UNGRADED {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+      }
+
+      .estate-info {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .price-label {
+        color: var(--text-muted);
+      }
+
+      .price-value {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        color: var(--text-main);
+      }
+
+      .highest-price {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--accent-emerald-dark);
+        font-family: var(--font-mono);
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed var(--border-color);
+      }
+
+      .bidding-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        position: sticky;
+        top: 90px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      .form-control {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 12px 14px;
+        color: var(--text-main);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        transition: border-color 0.2s;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--accent-emerald);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      }
+
+      .bid-stream {
+        margin-top: 20px;
+        max-height: 280px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: #fafcfb;
+      }
+
+      .bid-log-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .bid-time {
+        font-family: var(--font-mono);
+        color: var(--text-muted);
+        font-size: 11px;
+      }
+
+      .bid-amount {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--accent-emerald-dark);
+      }
+
+      .toast-msg {
+        margin-top: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        display: none;
+      }
+
+      .toast-success {
+        background: var(--accent-emerald-light);
+        border: 1px solid var(--accent-emerald);
+        color: var(--accent-emerald-dark);
+      }
+
+      .toast-error {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        color: var(--accent-crimson);
+      }
+
+      @media (max-width: 900px) {
+        .grid-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="{% url 'home' %}" class="brand">
+        <div class="brand-logo">C</div>
+        <div>
+          <div class="brand-title">CardaLink</div>
+        </div>
+        <span class="brand-badge">LIVE AUCTION ENGINE</span>
+      </a>
+      <div class="nav-actions">
+        <button class="btn btn-secondary" onclick="seedMockData()">Re-seed Test Data</button>
+        <a href="/api/docs" target="_blank" class="btn btn-primary">OpenAPI Docs</a>
+      </div>
+    </header>
+    <div class="container">
+      <div class="hero-banner">
+        <div>
+          <h1 class="hero-title">{{ active_auction.title }}</h1>
+          <p class="hero-subtitle">Real-time Cardamom Auction & Bidding Engine | Idukki Spice Market</p>
+        </div>
+        <div>
+          <span class="status-indicator">
+            <span class="pulse-dot"></span>
+            {{ active_auction.get_status_display }}
+          </span>
+        </div>
+      </div>
+      <div class="grid-layout">
+        <!-- Left Column: Catalog Lots -->
+        <div>
+          <div class="section-title">
+            <span>Catalog Lots ({{ active_auction.lots.count }})</span>
+            <span style="font-size: 12px;
+                         font-weight: normal;
+                         color: var(--text-muted)">Click any lot card to
+            target</span>
+          </div>
+          <div class="lot-grid" id="lotCatalogGrid">
+            {% for lot in active_auction.lots.all %}
+              <div class="lot-card {% if forloop.first %}active-selected{% endif %}"
+                   id="lot-card-{{ lot.id }}"
+                   onclick="selectLot({{ lot.id }}, {{ lot.lot_number }}, '{{ lot.harvest_batch.grade }}', {{ lot.current_price }})">
+                <div class="lot-header">
+                  <span class="lot-num">LOT #{{ lot.lot_number }}</span>
+                  <span class="grade-badge grade-{{ lot.harvest_batch.grade }}">{{ lot.harvest_batch.grade }}</span>
+                </div>
+                <div class="estate-info">
+                  🌱 {{ lot.harvest_batch.estate.name }}
+                  <br />
+                  ⚖️ Batch Weight: {{ lot.harvest_batch.weight_kg }} kg
+                </div>
+                <div class="price-row">
+                  <span class="price-label">Base Starting Price:</span>
+                  <span class="price-value">₹{{ lot.base_price_per_kg }}/kg</span>
+                </div>
+                <div class="highest-price" id="highest-price-{{ lot.id }}">₹{{ lot.current_price }}/kg</div>
+              </div>
+            {% empty %}
+              <div style="color: var(--text-muted); padding: 20px;">
+                No active lots in this auction. Run
+                <code>python manage.py seed_auction_data</code> to populate test data.
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <!-- Right Column: Interactive Bidding Console -->
+        <div>
+          <div class="bidding-panel">
+            <h2 style="font-size: 16px;
+                       font-weight: 700;
+                       margin-bottom: 16px;
+                       color: var(--text-main)">
+              Bid Submission
+              Console
+            </h2>
+            <div class="form-group">
+              {% csrf_token %}
+              <label class="form-label">Target Lot</label>
+              <input type="text"
+                     id="targetLotDisplay"
+                     class="form-control"
+                     value="Lot #1 (AGEB Grade)"
+                     readonly
+                     style="background: #f8fafc" />
+              <input type="hidden"
+                     id="selectedLotId"
+                     value="{% if active_auction.lots.first %}{{ active_auction.lots.first.id }}{% else %}1{% endif %}" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bid Amount per kg (₹)</label>
+              <input type="number"
+                     id="bidAmountInput"
+                     class="form-control"
+                     placeholder="e.g. 2100.00"
+                     step="10" />
+            </div>
+            <button class="btn btn-primary"
+                    style="width: 100%;
+                           justify-content: center;
+                           padding: 12px"
+                    onclick="submitBid()">Submit Bid via Ninja API</button>
+            <button class="btn btn-secondary"
+                    style="width: 100%;
+                           justify-content: center;
+                           margin-top: 10px;
+                           padding: 10px"
+                    onclick="simulateAutoBid()">Simulate Random Rival Bid</button>
+            <div id="toastMsg" class="toast-msg"></div>
+            <h3 style="font-size: 13px;
+                       font-weight: 700;
+                       color: var(--text-muted);
+                       text-transform: uppercase;
+                       margin-top: 24px;
+                       margin-bottom: 10px">Live Bid Activity Stream</h3>
+            <div class="bid-stream" id="bidStream">
+              <div class="bid-log-item">
+                <div>
+                  <strong style="color: var(--text-main);">Global Spices Traders</strong> placed bid on Lot #1
+                  <div class="bid-time">Just now</div>
+                </div>
+                <div class="bid-amount">₹2050.00/kg</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      let currentSelectedPrice = 2050;
+
+      function selectLot(lotId, lotNum, grade, currentPrice) {
+        document.querySelectorAll('.lot-card').forEach(card => card.classList.remove('active-selected'));
+        const selectedCard = document.getElementById(`lot-card-${lotId}`);
+        if (selectedCard) selectedCard.classList.add('active-selected');
+
+        document.getElementById('selectedLotId').value = lotId;
+        document.getElementById('targetLotDisplay').value = `Lot #${lotNum} (${grade} Grade)`;
+        currentSelectedPrice = parseFloat(currentPrice);
+        document.getElementById('bidAmountInput').value = (currentSelectedPrice + 50).toFixed(2);
+      }
+
+      async function submitBid() {
+        const lotId = document.getElementById('selectedLotId').value;
+        const amount = parseFloat(document.getElementById('bidAmountInput').value);
+
+        if (!amount || isNaN(amount)) {
+          showToast('Please enter a valid numeric bid amount.', false);
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/auctions/lots/${lotId}/bids/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+              amount_per_kg: amount
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showToast(`✓ Bid placed successfully! New highest bid: ₹${data.amount_per_kg}/kg`, true);
+            updateLotPriceUI(lotId, data.amount_per_kg);
+            appendBidStream(data.bidder_name, lotId, data.amount_per_kg);
+          } else {
+            showToast(`❌ Error: ${data.detail || data.message || 'Bid validation failed'}`, false);
+          }
+        } catch (err) {
+          showToast(`❌ API Error: ${err.message}`, false);
+        }
+      }
+
+      function simulateAutoBid() {
+        const lotId = document.getElementById('selectedLotId').value;
+        const priceElem = document.getElementById(`highest-price-${lotId}`);
+        let current = priceElem ? parseFloat(priceElem.innerText.replace('₹', '').replace('/kg', '')) : 2000;
+        let nextBid = (current + Math.floor(Math.random() * 5 + 1) * 20).toFixed(2);
+
+        document.getElementById('bidAmountInput').value = nextBid;
+        submitBid();
+      }
+
+      function updateLotPriceUI(lotId, newPrice) {
+        const elem = document.getElementById(`highest-price-${lotId}`);
+        if (elem) elem.innerText = `₹${parseFloat(newPrice).toFixed(2)}/kg`;
+      }
+
+      function appendBidStream(bidder, lotId, amount) {
+        const stream = document.getElementById('bidStream');
+        const timeStr = new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const item = document.createElement('div');
+        item.className = 'bid-log-item';
+        item.innerHTML = `
         <div>
           <strong style="color: var(--text-main);">${bidder || 'Simulated Buyer'}</strong> placed bid on Lot #${lotId}
           <div class="bid-time">${timeStr}</div>
         </div>
         <div class="bid-amount">₹${parseFloat(amount).toFixed(2)}/kg</div>
       `;
-      stream.insertBefore(item, stream.firstChild);
-    }
+        stream.insertBefore(item, stream.firstChild);
+      }
 
-    function showToast(msg, isSuccess) {
-      const toast = document.getElementById('toastMsg');
-      toast.innerText = msg;
-      toast.className = `toast-msg ${isSuccess ? 'toast-success' : 'toast-error'}`;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 4000);
-    }
+      function showToast(msg, isSuccess) {
+        const toast = document.getElementById('toastMsg');
+        toast.innerText = msg;
+        toast.className = `toast-msg ${isSuccess ? 'toast-success' : 'toast-error'}`;
+        toast.style.display = 'block';
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 4000);
+      }
 
-    function getCsrfToken() {
-      const tokenElem = document.querySelector('[name=csrfmiddlewaretoken]');
-      if (tokenElem && tokenElem.value) return tokenElem.value;
-      return getCookie('csrftoken') || '';
-    }
+      function getCsrfToken() {
+        const tokenElem = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenElem && tokenElem.value) return tokenElem.value;
+        return getCookie('csrftoken') || '';
+      }
 
-    function getCookie(name) {
-      let value = `; ${document.cookie}`;
-      let parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    }
+      function getCookie(name) {
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
 
-    function seedMockData() {
-      alert("To seed fresh simulation data, run:\npython manage.py seed_auction_data");
-    }
-  </script>
-</body>
+      function seedMockData() {
+        alert("To seed fresh simulation data, run:\npython manage.py seed_auction_data");
+      }
+    </script>
+  </body>
 </html>

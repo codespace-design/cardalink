@@ -2,9 +2,17 @@ from django.contrib.admin.views.decorators import staff_member_required
 from ninja import NinjaAPI
 from ninja.security import SessionAuth
 
+
+class CustomSessionAuth(SessionAuth):
+    def authenticate(self, request, key):
+        if request.user and request.user.is_authenticated:
+            return request.user
+        return None
+
+
 api = NinjaAPI(
     urls_namespace="api",
-    auth=SessionAuth(),
+    auth=CustomSessionAuth(),
     docs_decorator=staff_member_required,
 )
 

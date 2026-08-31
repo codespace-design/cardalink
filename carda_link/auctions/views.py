@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from carda_link.auctions.models import Auction, Lot
+
+from carda_link.auctions.models import Auction
 
 
 def simulation_view(request):

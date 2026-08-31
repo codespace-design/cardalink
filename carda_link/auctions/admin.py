@@ -8,7 +8,13 @@ from carda_link.auctions.models import Lot
 class LotInline(admin.TabularInline):
     model = Lot
     extra = 1
-    fields = ("lot_number", "harvest_batch", "base_price_per_kg", "highest_bid_per_kg", "is_sold")
+    fields = (
+        "lot_number",
+        "harvest_batch",
+        "base_price_per_kg",
+        "highest_bid_per_kg",
+        "is_sold",
+    )
     readonly_fields = ("highest_bid_per_kg",)
 
 
@@ -21,7 +27,15 @@ class BidInline(admin.TabularInline):
 
 @admin.register(Auction)
 class AuctionAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "status", "start_time", "end_time", "created_at", "is_active_now")
+    list_display = (
+        "id",
+        "title",
+        "status",
+        "start_time",
+        "end_time",
+        "created_at",
+        "is_active_now",
+    )
     list_filter = ("status", "start_time", "end_time")
     search_fields = ("title",)
     inlines = [LotInline]

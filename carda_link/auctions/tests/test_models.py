@@ -1,12 +1,14 @@
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from carda_link.auctions.models import Auction, Lot, Bid
-from carda_link.estates.models import Estate, HarvestBatch
+from carda_link.auctions.models import Auction
+from carda_link.auctions.models import Lot
+from carda_link.estates.models import Estate
+from carda_link.estates.models import HarvestBatch
 
 User = get_user_model()
 
@@ -98,7 +100,10 @@ class TestAuctionModels:
         lot = setup_auction_data["lot"]
         bidder = setup_auction_data["bidder1"]
 
-        with pytest.raises(ValueError, match="must be strictly greater than the base price"):
+        with pytest.raises(
+            ValueError,
+            match="must be strictly greater than the base price",
+        ):
             lot.place_bid(bidder=bidder, amount_per_kg=Decimal("900.00"))
 
     def test_place_bid_lower_than_highest_bid_raises_error(self, setup_auction_data):
@@ -108,12 +113,14 @@ class TestAuctionModels:
 
         lot.place_bid(bidder=bidder1, amount_per_kg=Decimal("1200.00"))
 
-        with pytest.raises(ValueError, match="must be strictly higher than the current highest bid"):
+        with pytest.raises(
+            ValueError,
+            match="must be strictly higher than the current highest bid",
+        ):
             lot.place_bid(bidder=bidder2, amount_per_kg=Decimal("1150.00"))
 
     def test_place_bid_inactive_auction_raises_error(self, setup_auction_data):
         auction = setup_auction_data["upcoming_auction"]
-        batch = setup_auction_data["batch"]
         bidder = setup_auction_data["bidder1"]
 
         # Create another harvest batch to avoid OneToOne duplication

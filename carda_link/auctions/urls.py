@@ -1,4 +1,5 @@
 from django.urls import path
+
 from carda_link.auctions import views
 
 app_name = "auctions"

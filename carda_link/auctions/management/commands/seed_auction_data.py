@@ -1,24 +1,31 @@
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
-from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from carda_link.estates.models import Estate, HarvestBatch
-from carda_link.auctions.models import Auction, Lot, Bid
+from carda_link.auctions.models import Auction
+from carda_link.auctions.models import Lot
+from carda_link.estates.models import Estate
+from carda_link.estates.models import HarvestBatch
 
 User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Seed mock cardamom estate, harvest batches, active/upcoming auctions, lots, and bids for simulation."
+    help = (
+        "Seed mock cardamom estate, harvest batches, active/upcoming auctions, "
+        "lots, and bids for simulation."
+    )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.MIGRATE_HEADING("Seeding CardaLink Auction Simulation Data..."))
+        self.stdout.write(
+            self.style.MIGRATE_HEADING("Seeding CardaLink Auction Simulation Data..."),
+        )
 
         # 1. Create Users
-        auctioneer, _ = User.objects.get_or_create(
+        _auctioneer, _ = User.objects.get_or_create(
             email="auctioneer@cardalink.com",
             defaults={
                 "name": "Idukki Auctioneer",
@@ -108,10 +115,14 @@ class Command(BaseCommand):
             defaults={"harvest_date": today - timedelta(days=1)},
         )
 
-        self.stdout.write(self.style.SUCCESS("[OK] 4 Harvest Batches (AGEB, AGB, AGS, UNGRADED) created."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                "[OK] 4 Harvest Batches (AGEB, AGB, AGS, UNGRADED) created.",
+            ),
+        )
 
         # 4. Create Active Auction
-        active_auction, created = Auction.objects.get_or_create(
+        active_auction, _ = Auction.objects.get_or_create(
             title="Idukki Spices Auction #101 (Live Bidding)",
             defaults={
                 "start_time": now - timedelta(hours=1),
@@ -130,7 +141,12 @@ class Command(BaseCommand):
             },
         )
 
-        self.stdout.write(self.style.SUCCESS(f"[OK] Active Auction #{active_auction.id} & Upcoming Auction #{upcoming_auction.id} created."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"[OK] Active Auction #{active_auction.id} & "
+                f"Upcoming Auction #{upcoming_auction.id} created.",
+            ),
+        )
 
         # 6. Assign Lots to Active Auction
         lot1, _ = Lot.objects.get_or_create(
@@ -151,7 +167,7 @@ class Command(BaseCommand):
             },
         )
 
-        lot3, _ = Lot.objects.get_or_create(
+        _lot3, _ = Lot.objects.get_or_create(
             auction=active_auction,
             harvest_batch=batch3,
             defaults={
@@ -161,7 +177,7 @@ class Command(BaseCommand):
         )
 
         # Assign Lot to Upcoming Auction
-        lot4, _ = Lot.objects.get_or_create(
+        _lot4, _ = Lot.objects.get_or_create(
             auction=upcoming_auction,
             harvest_batch=batch4,
             defaults={
@@ -170,7 +186,9 @@ class Command(BaseCommand):
             },
         )
 
-        self.stdout.write(self.style.SUCCESS("[OK] 4 Catalog Lots assigned across auctions."))
+        self.stdout.write(
+            self.style.SUCCESS("[OK] 4 Catalog Lots assigned across auctions."),
+        )
 
         # 7. Seed Initial Bids on Active Lots
         if not lot1.bids.exists():
@@ -181,5 +199,12 @@ class Command(BaseCommand):
         if not lot2.bids.exists():
             lot2.place_bid(bidder=buyer2, amount_per_kg=Decimal("1650.00"))
 
-        self.stdout.write(self.style.SUCCESS("[OK] Initial realistic bidding sequence created."))
-        self.stdout.write(self.style.SUCCESS("=== CardaLink Auction Simulation Data Seeding Completed Successfully! ==="))
+        self.stdout.write(
+            self.style.SUCCESS("[OK] Initial realistic bidding sequence created."),
+        )
+        self.stdout.write(
+            self.style.SUCCESS(
+                "=== CardaLink Auction Simulation Data Seeding "
+                "Completed Successfully! ===",
+            ),
+        )

@@ -1,12 +1,14 @@
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from carda_link.auctions.models import Auction, Lot
-from carda_link.estates.models import Estate, HarvestBatch
+from carda_link.auctions.models import Auction
+from carda_link.auctions.models import Lot
+from carda_link.estates.models import Estate
+from carda_link.estates.models import HarvestBatch
 
 User = get_user_model()
 
