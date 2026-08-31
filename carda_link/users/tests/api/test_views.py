@@ -16,9 +16,18 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
-def user():
-    return UserFactory.create()
+def _user_dict(user: User, name: str | None = None) -> dict:
+    return {
+        "id": user.pk,
+        "email": user.email,
+        "name": name if name is not None else user.name,
+        "role": user.role,
+        "phone_number": user.phone_number,
+        "address": user.address,
+        "license_number": user.license_number,
+        "is_verified": user.is_verified,
+        "url": f"/api/users/{user.pk}/",
+    }
 
 
 def test_list_users_as_anonymous_user(client: Client):
@@ -35,13 +44,7 @@ def test_list_users_as_authenticated_user(client: Client, user: User):
     response = client.get(reverse("api:list_users"))
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == [
-        {
-            "email": user.email,
-            "name": user.name,
-            "url": f"/api/users/{user.pk}/",
-        },
-    ]
+    assert response.json() == [_user_dict(user)]
 
 
 def test_retrieve_current_user(client: Client, user: User):
@@ -52,11 +55,7 @@ def test_retrieve_current_user(client: Client, user: User):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        "email": user.email,
-        "name": user.name,
-        "url": f"/api/users/{user.pk}/",
-    }
+    assert response.json() == _user_dict(user)
 
 
 def test_retrieve_user(client: Client, user: User):
@@ -67,11 +66,7 @@ def test_retrieve_user(client: Client, user: User):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        "email": user.email,
-        "name": user.name,
-        "url": f"/api/users/{user.pk}/",
-    }
+    assert response.json() == _user_dict(user)
 
 
 def test_retrieve_another_user(client: Client, user: User):
@@ -97,11 +92,7 @@ def test_update_current_user(client: Client):
     )
 
     assert response.status_code == HTTPStatus.OK, response.json()
-    assert response.json() == {
-        "email": user.email,
-        "name": "New Name",
-        "url": f"/api/users/{user.pk}/",
-    }
+    assert response.json() == _user_dict(user, name="New Name")
 
 
 def test_update_user(client: Client):
@@ -115,8 +106,4 @@ def test_update_user(client: Client):
     )
 
     assert response.status_code == HTTPStatus.OK, response.json()
-    assert response.json() == {
-        "email": user.email,
-        "name": "New Name",
-        "url": f"/api/users/{user.pk}/",
-    }
+    assert response.json() == _user_dict(user, name="New Name")

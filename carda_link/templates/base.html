@@ -63,6 +63,9 @@
                   <a class="nav-link" href="{% url 'home' %}">Home <span class="visually-hidden">(current)</span></a>
                 </li>
                 <li class="nav-item">
+                  <a class="nav-link" href="{% url 'auctions:simulation' %}">Auctions</a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link" href="{% url 'about' %}">About</a>
                 </li>
                 {% if request.user.is_authenticated %}

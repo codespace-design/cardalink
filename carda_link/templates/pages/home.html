@@ -1,1 +1,83 @@
 {% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %}
+  {% translate "Home" %} — CardaLink
+{% endblock title %}
+{% block content %}
+  <!-- Hero Section -->
+  <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border border-emerald">
+    <div class="container-fluid py-3">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <span class="badge bg-success mb-2 px-3 py-2 text-uppercase fs-6">Cardamom Auction & Estate Monitoring</span>
+          <h1 class="display-5 fw-bold text-dark mb-3">Welcome to CardaLink</h1>
+          <p class="col-md-10 fs-5 text-secondary mb-4">
+            Streamline your cardamom trade with real-time auction bidding, estate harvest tracking, and automated financial settlements.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'auctions:simulation' %}"
+               class="btn btn-success btn-lg px-4 fw-semibold shadow-sm">
+              <i class="bi bi-gavel me-2"></i>Go to Auctions Module &rarr;
+            </a>
+            <a href="{% url 'about' %}"
+               class="btn btn-outline-secondary btn-lg px-4">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Feature Cards Grid -->
+  <div class="row g-4 py-3">
+    <!-- Featured Auctions Module Card -->
+    <div class="col-md-4">
+      <div class="card h-100 border-success shadow-sm">
+        <div class="card-header bg-success text-white py-3">
+          <h5 class="card-title mb-0 fw-bold">
+            <i class="bi bi-broadcast me-2"></i>Auctions Module
+          </h5>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <p class="card-text text-secondary flex-grow-1">
+            Access the live bidding engine, view lot catalogs with quality grades (AGEB, AGB, AGS), submit bids via REST API, and simulate rival buyers in real time.
+          </p>
+          <a href="{% url 'auctions:simulation' %}"
+             class="btn btn-success w-100 mt-2 fw-semibold">Open Auctions Console &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <!-- Estate Management Card -->
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm bg-body rounded">
+        <div class="card-header bg-light py-3 border-0">
+          <h5 class="card-title mb-0 fw-bold text-dark">
+            <i class="bi bi-tree me-2"></i>Estate Monitoring
+          </h5>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <p class="card-text text-secondary flex-grow-1">
+            Track cardamom plantation yields, harvest batch weights, moisture content, and quality inspection metrics.
+          </p>
+          <button class="btn btn-outline-secondary w-100 mt-2" disabled>Estate Module</button>
+        </div>
+      </div>
+    </div>
+    <!-- Invoicing & Financials Card -->
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm bg-body rounded">
+        <div class="card-header bg-light py-3 border-0">
+          <h5 class="card-title mb-0 fw-bold text-dark">
+            <i class="bi bi-receipt me-2"></i>Invoicing & Trade
+          </h5>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <p class="card-text text-secondary flex-grow-1">
+            Generate transparent invoices for buyers and sellers post-auction, manage commission fees, and audit transactions.
+          </p>
+          <button class="btn btn-outline-secondary w-100 mt-2" disabled>Invoicing Module</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

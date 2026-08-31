@@ -10,8 +10,16 @@ class Estate(models.Model):
         related_name="estates",
     )
     name = models.CharField(_("Estate Name"), max_length=255)
-    location = models.CharField(_("Location / District"), max_length=255, default="Idukki, Kerala")
-    area_in_acres = models.DecimalField(_("Area (Acres)"), max_digits=8, decimal_places=2)
+    location = models.CharField(
+        _("Location / District"),
+        max_length=255,
+        default="Idukki, Kerala",
+    )
+    area_in_acres = models.DecimalField(
+        _("Area (Acres)"),
+        max_digits=8,
+        decimal_places=2,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -26,11 +34,28 @@ class HarvestBatch(models.Model):
         ("UNGRADED", "Ungraded / Mixed"),
     ]
 
-    estate = models.ForeignKey(Estate, on_delete=models.CASCADE, related_name="harvest_batches")
+    estate = models.ForeignKey(
+        Estate,
+        on_delete=models.CASCADE,
+        related_name="harvest_batches",
+    )
     harvest_date = models.DateField(_("Harvest Date"))
-    weight_kg = models.DecimalField(_("Weight (kg)"), max_digits=10, decimal_places=2)
-    grade = models.CharField(_("Cardamom Grade"), max_length=20, choices=GRADE_CHOICES, default="UNGRADED")
-    quality_certificate = models.FileField(upload_to="certificates/", null=True, blank=True)
+    weight_kg = models.DecimalField(
+        _("Weight (kg)"),
+        max_digits=10,
+        decimal_places=2,
+    )
+    grade = models.CharField(
+        _("Cardamom Grade"),
+        max_length=20,
+        choices=GRADE_CHOICES,
+        default="UNGRADED",
+    )
+    quality_certificate = models.FileField(
+        upload_to="certificates/",
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -24,6 +24,19 @@ class UserAdmin(auth_admin.UserAdmin):
         (_("Personal info"), {"fields": ("name", "phone_number")}),
         (_("Role & Status"), {"fields": ("role", "status")}),
         (
+            _("Personal info"),
+            {
+                "fields": (
+                    "name",
+                    "role",
+                    "phone_number",
+                    "address",
+                    "license_number",
+                    "is_verified",
+                ),
+            },
+        ),
+        (
             _("Permissions"),
             {
                 "fields": (
@@ -40,6 +53,16 @@ class UserAdmin(auth_admin.UserAdmin):
     list_display = ["email", "name", "role", "status", "is_superuser"]
     list_filter = ["role", "status", "is_superuser", "is_staff", "is_active"]
     search_fields = ["name", "email", "phone_number"]
+    list_display = [
+        "email",
+        "name",
+        "role",
+        "phone_number",
+        "is_verified",
+        "is_superuser",
+    ]
+    list_filter = ["role", "is_verified", "is_staff", "is_superuser"]
+    search_fields = ["name", "email", "phone_number", "license_number"]
     ordering = ["id"]
     add_fieldsets = (
         (

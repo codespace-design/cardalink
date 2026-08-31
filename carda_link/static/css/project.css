@@ -1,9 +1,84 @@
-/* These styles are generated from project.scss. */
+/* CardaLink Theme: White Background, Dark Black Text & Cardamom Emerald Green Elements */
 
+:root {
+  --primary-green: #10b981;
+  --primary-green-dark: #059669;
+  --primary-green-light: #ecfdf5;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+  --bg-light: #f8fafc;
+  --border-light: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+a {
+  color: var(--primary-green-dark);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+.btn-primary, .btn-success {
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark)) !important;
+  border-color: var(--primary-green-dark) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover, .btn-success:hover {
+  background: linear-gradient(135deg, var(--primary-green-dark), #047857) !important;
+  border-color: #047857 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-outline-primary, .btn-outline-success {
+  color: var(--primary-green-dark) !important;
+  border-color: var(--primary-green) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-primary:hover, .btn-outline-success:hover {
+  background-color: var(--primary-green) !important;
+  color: #ffffff !important;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-green) !important;
+  box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25) !important;
+}
+
+.badge-green, .badge-success {
+  background-color: var(--primary-green-light) !important;
+  color: var(--primary-green-dark) !important;
+  border: 1px solid var(--primary-green) !important;
+}
+
+.navbar-light .navbar-brand {
+  color: var(--primary-green-dark) !important;
+  font-weight: 800;
+}
+
+.card {
+  border-color: var(--border-light);
+  border-radius: 12px;
+}
+
+/* Alert styles */
 .alert-debug {
-  color: black;
-  background-color: white;
-  border-color: #d6e9c6;
+  color: var(--text-dark);
+  background-color: var(--primary-green-light);
+  border-color: var(--primary-green);
 }
 
 .alert-error {

@@ -19,6 +19,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("carda_link.users.urls", namespace="users")),
+    path("auctions/", include("carda_link.auctions.urls", namespace="auctions")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
     # ...
