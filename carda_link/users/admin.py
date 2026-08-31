@@ -23,17 +23,23 @@ class UserAdmin(auth_admin.UserAdmin):
     add_form = UserAdminCreationForm
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("name", "phone_number")}),
-        (_("Role & Status"), {"fields": ("role", "status")}),
         (
-            _("Personal info"),
+            _("Personal Info & Profile"),
             {
                 "fields": (
                     "name",
-                    "role",
                     "phone_number",
                     "address",
                     "license_number",
+                ),
+            },
+        ),
+        (
+            _("Role & Verification Status"),
+            {
+                "fields": (
+                    "role",
+                    "status",
                     "is_verified",
                 ),
             },
