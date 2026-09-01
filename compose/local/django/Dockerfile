@@ -1,5 +1,5 @@
 # define an alias for the specific python version used in this file.
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS python
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS python
 
 # Python build stage
 FROM python AS python-build-stage
@@ -15,6 +15,10 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
+  gfortran \
+  pkg-config \
+  libopenblas-dev \
+  liblapack-dev \
   # psycopg dependencies
   libpq-dev \
   gettext \
@@ -44,7 +48,7 @@ RUN groupadd --gid 1000 dev-user \
   && chmod 0440 /etc/sudoers.d/dev-user
 
 ENV PATH="/${APP_HOME}/.venv/bin:$PATH"
-ENV PYTHONPATH="${APP_HOME}/.venv/lib/python3.14/site-packages:$PYTHONPATH"
+ENV PYTHONPATH="${APP_HOME}/.venv/lib/python3.13/site-packages:$PYTHONPATH"
 
 COPY ./compose/production/django/entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint

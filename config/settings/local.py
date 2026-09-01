@@ -3,6 +3,7 @@ from .base import INSTALLED_APPS
 from .base import MIDDLEWARE
 from .base import env
 
+
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
@@ -78,3 +79,4 @@ INSTALLED_APPS += ["django_extensions"]
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+from .base import GEMINI_API_KEY

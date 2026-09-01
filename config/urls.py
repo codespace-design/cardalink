@@ -22,6 +22,7 @@ urlpatterns = [
     path("auctions/", include("carda_link.auctions.urls", namespace="auctions")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
+    path("assistant/", include("carda_link.assistant.urls")),
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

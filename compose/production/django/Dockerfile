@@ -1,6 +1,6 @@
 
 # define an alias for the specific python version used in this file.
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS python-build-stage
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS python-build-stage
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
 
@@ -12,6 +12,10 @@ WORKDIR ${APP_HOME}
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
+  gfortran \
+  pkg-config \
+  libopenblas-dev \
+  liblapack-dev \
   # psycopg dependencies
   libpq-dev
 
@@ -29,7 +33,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
 
 # Python 'run' stage
-FROM python:3.14-slim-bookworm AS python-run-stage
+FROM python:3.13-slim-bookworm AS python-run-stage
 
 ARG APP_HOME=/app
 
@@ -43,6 +47,10 @@ RUN addgroup --system django \
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # psycopg dependencies
   libpq-dev \
+  # math runtime dependencies
+  libopenblas0 \
+  liblapack3 \
+  libgfortran5 \
   # Translations dependencies
   gettext \
   # entrypoint

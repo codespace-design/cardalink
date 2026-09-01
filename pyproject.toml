@@ -7,10 +7,10 @@ license = { text = "MIT" }
 authors = [
   { name = "Gouri Nandhan P V", email = "gourinandhanpv@gmail.com" },
 ]
-requires-python = "==3.14.*"
+requires-python = "==3.13.*"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "argon2-cffi==25.1.0",
@@ -32,6 +32,8 @@ dependencies = [
   "python-slugify==8.0.4",
   "redis==8.0.1",
   "whitenoise==6.12.0",
+  "scikit-learn==1.7.1",
+  "google-genai>=1.0.0",
 ]
 
 [dependency-groups]
@@ -168,7 +170,7 @@ keep_full_version = true
 # ==== mypy ====
 [tool.mypy]
 ignore_missing_imports = true
-python_version = "3.14"
+python_version = "3.13"
 check_untyped_defs = true
 warn_redundant_casts = true
 warn_unused_ignores = true

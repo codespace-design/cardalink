@@ -12,6 +12,7 @@ class CustomSessionAuth(SessionAuth):
 
 api = NinjaAPI(
     urls_namespace="api",
+    auth=None,
     auth=CustomSessionAuth(),
     docs_decorator=staff_member_required,
 )

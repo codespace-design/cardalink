@@ -301,3 +301,4 @@ SOCIALACCOUNT_FORMS = {"signup": "carda_link.users.forms.UserSocialSignupForm"}
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
