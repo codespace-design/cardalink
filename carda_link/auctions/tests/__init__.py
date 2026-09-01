@@ -1,0 +1,1 @@
+# Auctions tests package init

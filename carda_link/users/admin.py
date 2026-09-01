@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 
 from .forms import UserAdminChangeForm
 from .forms import UserAdminCreationForm
+from .models import BuyerProfile
+from .models import SellerProfile
 from .models import User
 
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
@@ -22,14 +24,22 @@ class UserAdmin(auth_admin.UserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (
-            _("Personal info"),
+            _("Personal Info & Profile"),
             {
                 "fields": (
                     "name",
-                    "role",
                     "phone_number",
                     "address",
                     "license_number",
+                ),
+            },
+        ),
+        (
+            _("Role & Verification Status"),
+            {
+                "fields": (
+                    "role",
+                    "status",
                     "is_verified",
                 ),
             },
@@ -52,11 +62,12 @@ class UserAdmin(auth_admin.UserAdmin):
         "email",
         "name",
         "role",
+        "status",
         "phone_number",
         "is_verified",
         "is_superuser",
     ]
-    list_filter = ["role", "is_verified", "is_staff", "is_superuser"]
+    list_filter = ["role", "status", "is_verified", "is_staff", "is_superuser"]
     search_fields = ["name", "email", "phone_number", "license_number"]
     ordering = ["id"]
     add_fieldsets = (
@@ -64,7 +75,34 @@ class UserAdmin(auth_admin.UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "password1", "password2"),
+                "fields": (
+                    "email",
+                    "password1",
+                    "password2",
+                    "role",
+                    "status",
+                    "phone_number",
+                ),
             },
         ),
     )
+
+
+@admin.register(SellerProfile)
+class SellerProfileAdmin(admin.ModelAdmin):
+    list_display = [
+        "user",
+        "farm_name",
+        "farm_location",
+        "farm_area",
+        "area_unit",
+        "cardamom_plants",
+    ]
+    search_fields = ["user__email", "user__name", "farm_name", "farm_location"]
+    list_filter = ["area_unit"]
+
+
+@admin.register(BuyerProfile)
+class BuyerProfileAdmin(admin.ModelAdmin):
+    list_display = ["user", "company_name", "business_type", "business_address"]
+    search_fields = ["user__email", "user__name", "company_name", "business_type"]

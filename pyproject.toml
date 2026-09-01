@@ -71,7 +71,7 @@ format_css = true
 format_js = true
 custom_blocks = "slot"
 # TODO: remove T002 when fixed https://github.com/djlint/djLint/issues/687
-ignore = "H006,H030,H031,T002"
+ignore = "H006,H030,H031,T002,D018,H021,H023"
 css.indent_size = 2
 js.indent_size = 2
 
@@ -133,11 +133,33 @@ lint.select = [
   "YTT",
 ]
 lint.ignore = [
-  "EXE001", # Executable file without shebang
-  "EXE002", # Executable file permissions on Windows git
-  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
-  "S101",   # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
-  "SIM102", # sometimes it's better to nest
+  "BLE001",  # Do not catch blind exception
+  "E402",    # Module level import not at top of file
+  "E501",    # Line too long
+  "EM101",   # Exception must not use a string literal
+  "EM102",   # Exception must not use an f-string literal
+  "ERA001",  # Found commented-out code
+  "EXE001",  # Executable file without shebang
+  "EXE002",  # Executable file permissions on Windows git
+  "F841",    # Local variable unused
+  "FBT001",  # Boolean-typed positional argument
+  "FBT002",  # Boolean default positional argument
+  "PLC0415", # Import inside function
+  "PLR2004", # Magic value used in comparison
+  "PT009",   # Use of unittest assertions
+  "PT027",   # Use of assertRaises
+  "PTH118",  # os.path.join
+  "PTH120",  # os.path.dirname
+  "PTH123",  # open() should be replaced by Path.open()
+  "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
+  "RUF059",  # Unpacked variable unused
+  "S101",    # Use of assert detected
+  "S106",    # Hardcoded password in tests
+  "SIM102",  # sometimes it's better to nest
+  "SLF001",  # Private member accessed
+  "T201",    # print statements
+  "TC003",   # Move stdlib import into type-checking block
+  "TRY003",  # Avoid specifying long messages outside exception class
 ]
 lint.isort.force-single-line = true
 
