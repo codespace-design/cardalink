@@ -19,9 +19,12 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("carda_link.users.urls", namespace="users")),
+    path("auctions/", include("carda_link.auctions.urls", namespace="auctions")),
     path("accounts/", include("allauth.urls")),
     # Estates management
     path("estates/", include("carda_link.estates.urls", namespace="estates")),
+    # AI Assistant
+    path("assistant/", include("carda_link.assistant.urls")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

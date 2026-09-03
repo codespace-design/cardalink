@@ -1,1 +1,1 @@
-# Assistant app package
+"""AI Agricultural Assistant app package for CardaLink."""

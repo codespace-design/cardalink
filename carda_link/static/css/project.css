@@ -3,6 +3,10 @@
    ========================================================================== */
 
 :root {
+  --primary-green: #10b981;
+  --primary-green-dark: #059669;
+  --primary-green-light: #ecfdf5;
+  --text-dark: #0f172a;
   --primary-emerald: #064e3b;
   --emerald-medium: #047857;
   --emerald-accent: #10b981;
@@ -17,10 +21,49 @@
   --text-muted: #6b7280;
   --border-color: #e5e7eb;
   --border-emerald-light: rgba(16, 185, 129, 0.2);
+  --border-light: #e2e8f0;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 14px rgba(6, 78, 59, 0.08);
   --shadow-lg: 0 10px 25px -3px rgba(6, 78, 59, 0.12), 0 4px 6px -2px rgba(6, 78, 59, 0.05);
   --shadow-hover: 0 20px 25px -5px rgba(6, 78, 59, 0.15), 0 10px 10px -5px rgba(6, 78, 59, 0.04);
+}
+
+.btn-primary, .btn-success {
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark)) !important;
+  border-color: var(--primary-green-dark) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover, .btn-success:hover {
+  background: linear-gradient(135deg, var(--primary-green-dark), #047857) !important;
+  border-color: #047857 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-outline-primary, .btn-outline-success {
+  color: var(--primary-green-dark) !important;
+  border-color: var(--primary-green) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-primary:hover, .btn-outline-success:hover {
+  background-color: var(--primary-green) !important;
+  color: #ffffff !important;
+}
+
+.badge-green, .badge-success {
+  background-color: var(--primary-green-light) !important;
+  color: var(--primary-green-dark) !important;
+  border: 1px solid var(--primary-green) !important;
+}
+
+.card {
+  border-color: var(--border-light);
+  border-radius: 12px;
 }
 
 body {

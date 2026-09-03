@@ -16,28 +16,32 @@
           Empowering Cardamom Growers & Premium Spice Auctions
         </h1>
         <p class="lead text-white-50 mb-4" style="font-size: 1.15rem; line-height: 1.7;">
-          Register your plantation, upload high-resolution estate photos, track harvest grades (AGEB, AGB, AGS), and connect directly with certified auction houses across Idukki, Bodinayakanur, and worldwide spice exporters.
+          Register your plantation, upload high-resolution estate photos, track harvest grades (AGEB, AGB, AGS), bid in real-time auctions, and interact with our AI spice assistant.
         </p>
         <div class="d-flex flex-wrap gap-3">
           <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white px-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
             <i class="bi bi-plus-circle-fill fs-5"></i>
-            <span>Register Your Estate Now</span>
+            <span>Register Your Estate</span>
+          </a>
+          <a href="{% url 'auctions:simulation' %}" class="btn btn-light text-emerald px-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
+            <i class="bi bi-hammer fs-5"></i>
+            <span>Live Auctions Console</span>
           </a>
           <a href="{% url 'estates:list' %}" class="btn btn-outline-light px-4 py-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
             <i class="bi bi-geo-alt-fill"></i>
-            <span>Explore Estates Directory</span>
+            <span>Explore Estates</span>
           </a>
         </div>
       </div>
       <div class="col-lg-4 text-center mt-4 mt-lg-0">
         <div class="p-4 bg-white-10 rounded-4 border border-white-10 shadow-lg text-white">
           <div class="upload-icon-circle mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
-            <i class="bi bi-tree-fill text-emerald"></i>
+            <i class="bi bi-robot text-emerald"></i>
           </div>
-          <h4 class="fw-bold mb-1">Grower Gateway</h4>
-          <p class="small text-white-50 mb-3">Manage plantation acreage, soil certificates, and live auction lots.</p>
-          <a href="{% url 'estates:register' %}" class="btn btn-sm btn-light rounded-pill px-3 py-2 w-100 fw-bold text-emerald">
-            <i class="bi bi-camera-fill me-1"></i> Register & Upload Photos
+          <h4 class="fw-bold mb-1">AI Spice Assistant</h4>
+          <p class="small text-white-50 mb-3">Instant answers for growers and buyers regarding lots, market trends, and regulations.</p>
+          <a href="{% url 'assistant:chatbot' %}" class="btn btn-sm btn-light rounded-pill px-3 py-2 w-100 fw-bold text-emerald">
+            <i class="bi bi-chat-dots-fill me-1"></i> Launch Assistant
           </a>
         </div>
       </div>
@@ -46,21 +50,39 @@
 
   <!-- Key Highlights Cards -->
   <div class="row g-4 mb-5">
+    <!-- Estates Card -->
     <div class="col-md-4">
       <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
         <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
-          <i class="bi bi-images text-emerald"></i>
+          <i class="bi bi-tree-fill text-emerald"></i>
         </div>
         <h4 class="fw-bold text-dark font-heading mb-2">Estate Profiles & Photos</h4>
         <p class="text-muted mb-3">
-          Showcase your plantation with primary cover banners and multiple high-resolution photos of pods, curing chambers, and washing yards.
+          Showcase your plantation with primary cover banners, acreage details, and high-resolution photo galleries.
         </p>
-        <a href="{% url 'estates:register' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
-          Register Estate Details <i class="bi bi-arrow-right"></i>
+        <a href="{% url 'estates:list' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
+          Explore Estates <i class="bi bi-arrow-right"></i>
         </a>
       </div>
     </div>
 
+    <!-- Live Auctions Card -->
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+          <i class="bi bi-hammer text-emerald"></i>
+        </div>
+        <h4 class="fw-bold text-dark font-heading mb-2">Live Spice Auctions</h4>
+        <p class="text-muted mb-3">
+          Participate in real-time auction bidding, view lot catalogs with quality grades (AGEB, AGB, AGS), and simulate buyer competition.
+        </p>
+        <a href="{% url 'auctions:simulation' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
+          Open Live Console <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Harvest Grading & Provenance Card -->
     <div class="col-md-4">
       <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
         <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
@@ -68,25 +90,10 @@
         </div>
         <h4 class="fw-bold text-dark font-heading mb-2">Harvest Quality Grading</h4>
         <p class="text-muted mb-3">
-          Categorize cardamom harvests into Alleppey Green Extra Bold (AGEB), Bold (AGB), Superior (AGS), or custom cured lots with digital certificates.
+          Categorize cardamom harvests into Alleppey Green Extra Bold, Bold, and Superior lots with digital quality certificates.
         </p>
-        <a href="{% url 'estates:list' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
-          Browse Registered Lots <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
-        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
-          <i class="bi bi-graph-up-arrow text-emerald"></i>
-        </div>
-        <h4 class="fw-bold text-dark font-heading mb-2">Direct Buyer Connect</h4>
-        <p class="text-muted mb-3">
-          Allow verified spice merchants and auctioneers to reach out directly via phone or WhatsApp with transparent farm-level provenance.
-        </p>
-        <a href="{% url 'estates:list' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
-          Contact Plantation Owners <i class="bi bi-arrow-right"></i>
+        <a href="{% url 'estates:register' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
+          Register Harvest Batch <i class="bi bi-arrow-right"></i>
         </a>
       </div>
     </div>

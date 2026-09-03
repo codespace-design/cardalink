@@ -3,6 +3,7 @@ from .base import INSTALLED_APPS
 from .base import MIDDLEWARE
 from .base import env
 
+
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
@@ -56,8 +57,7 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TEMPLATE_CONTEXT": True,
 }
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
-INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
-if env("USE_DOCKER", default="no") == "yes":
+if env.str("USE_DOCKER", default="no") == "yes":
     import socket
 
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
@@ -81,3 +81,6 @@ INSTALLED_APPS += ["django_extensions"]
 # https://docs.allauth.org/en/latest/account/configuration.html
 # Bypass email verification for local development
 ACCOUNT_EMAIL_VERIFICATION = "none"
+
+from .base import GEMINI_API_KEY
+
