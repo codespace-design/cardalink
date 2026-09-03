@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Cardamom Estates Directory - CardaLink{% endblock title %}
+
+{% block content %}
+<div class="py-4">
+  <!-- Top Hero Banner -->
+  <div class="page-hero-card mb-4">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-8">
+        <span class="badge bg-white-10 text-emerald-light px-3 py-2 rounded-pill mb-2 fw-semibold">
+          <i class="bi bi-geo-alt-fill me-1"></i> Plantation Network
+        </span>
+        <h1 class="display-6 fw-bold mb-2">Cardamom Estates Directory</h1>
+        <p class="lead text-white-50 mb-0">
+          Discover verified cardamom plantations across Idukki and the Western Ghats. View harvest records, plantation acreage, and photo galleries.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-lg rounded-pill px-4 py-2 fw-semibold">
+          <i class="bi bi-plus-circle-fill me-1"></i> Register New Estate
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-7">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ search_query }}" class="form-control border-start-0 ps-0" placeholder="Search by estate name, owner, location, or address...">
+          {% if search_query %}
+            <a href="{% url 'estates:list' %}" class="btn btn-light border text-muted"><i class="bi bi-x-circle"></i> Clear</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="d-flex gap-1">
+          <a href="{% url 'estates:list' %}" class="btn btn-sm rounded-pill flex-fill {% if not filter_my %}btn-emerald-register text-white fw-bold{% else %}btn-light border text-muted{% endif %}">
+            All Estates
+          </a>
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'estates:list' %}?filter=mine" class="btn btn-sm rounded-pill flex-fill {% if filter_my == 'mine' %}btn-emerald-register text-white fw-bold{% else %}btn-light border text-muted{% endif %}">
+              My Estates ({{ my_estates_count }})
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-2 text-end">
+        <button type="submit" class="btn btn-dark w-100 rounded-pill">
+          <i class="bi bi-filter me-1"></i> Search
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Estates Grid -->
+  {% if estates %}
+    <div class="row g-4">
+      {% for estate in estates %}
+        <div class="col-md-6 col-lg-4">
+          <div class="estate-card">
+            <!-- Image Wrap -->
+            <div class="estate-card-img-wrap">
+              {% if estate.primary_photo %}
+                <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}">
+              {% elif estate.photos.first %}
+                <img src="{{ estate.photos.first.image.url }}" alt="{{ estate.name }}">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center h-100 text-white-50">
+                  <div class="text-center">
+                    <i class="bi bi-tree-fill display-4 text-emerald-light"></i>
+                    <div class="small fw-semibold mt-1">CardaLink Plantation</div>
+                  </div>
+                </div>
+              {% endif %}
+
+              <span class="estate-card-badge">
+                <i class="bi bi-bounding-box-circles me-1"></i>{{ estate.area_in_acres }} Acres
+              </span>
+
+              {% if estate.photos.count %}
+                <span class="estate-card-photos-badge">
+                  <i class="bi bi-camera-fill me-1"></i>{{ estate.photos.count }} photo{{ estate.photos.count|pluralize }}
+                </span>
+              {% endif %}
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                <h5 class="fw-bold mb-0 text-truncate font-heading">
+                  <a href="{% url 'estates:detail' estate.pk %}" class="text-decoration-none text-dark hover-text-emerald">
+                    {{ estate.name }}
+                  </a>
+                </h5>
+              </div>
+
+              <!-- Owner and Phone -->
+              <div class="text-muted small mb-2 d-flex flex-column gap-1">
+                <div class="d-flex align-items-center gap-1 text-truncate">
+                  <i class="bi bi-person-fill text-emerald"></i>
+                  <span class="fw-semibold text-dark">{{ estate.owner_name|default:estate.owner.name|default:"Verified Grower" }}</span>
+                </div>
+                {% if estate.phone_number %}
+                  <div class="d-flex align-items-center gap-1">
+                    <i class="bi bi-telephone-fill text-emerald"></i>
+                    <a href="tel:{{ estate.phone_number }}" class="text-decoration-none text-muted">
+                      {{ estate.phone_number }}
+                    </a>
+                  </div>
+                {% endif %}
+                <div class="d-flex align-items-center gap-1 text-truncate">
+                  <i class="bi bi-geo-alt-fill text-danger"></i>
+                  <span>{{ estate.location }}</span>
+                </div>
+              </div>
+
+              {% if estate.description %}
+                <p class="text-muted small mb-3 text-truncate-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ estate.description }}
+                </p>
+              {% endif %}
+
+              <!-- Card Footer Actions -->
+              <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between gap-2">
+                <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold flex-fill">
+                  <i class="bi bi-eye me-1"></i> View Profile
+                </a>
+                {% if request.user == estate.owner or request.user.is_staff %}
+                  <a href="{% url 'estates:update' estate.pk %}" class="btn btn-sm btn-light border rounded-pill px-3" title="Edit Estate">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <nav class="mt-5" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link rounded-pill px-3 me-2" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">&laquo; Previous</a></li>
+          {% endif %}
+          <li class="page-item active"><span class="page-link rounded-pill px-3">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link rounded-pill px-3 ms-2" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next &raquo;</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5 form-card p-5">
+      <div class="upload-icon-circle mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+        <i class="bi bi-tree text-emerald"></i>
+      </div>
+      <h3 class="fw-bold mb-2">No Estates Found</h3>
+      <p class="text-muted max-w-md mx-auto mb-4" style="max-width: 500px;">
+        {% if search_query %}
+          No cardamom estates match your search query "{{ search_query }}". Try clearing your search or register a new one.
+        {% else %}
+          Be the first grower to register your cardamom plantation and start showcasing harvests to certified buyers!
+        {% endif %}
+      </p>
+      <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow">
+        <i class="bi bi-plus-circle-fill me-1"></i> Register Cardamom Estate
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}

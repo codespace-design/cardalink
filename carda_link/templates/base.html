@@ -17,14 +17,19 @@
     <meta name="author" content="Gouri Nandhan P V" />
     <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" />
     {% block css %}
-      <!-- Latest compiled and minified Bootstrap CSS -->
+      <!-- Google Fonts -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <!-- Bootstrap 5 CSS -->
       <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css"
             integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer" />
-      <!-- Your stuff: Third-party CSS libraries go here -->
-      <!-- This file stores project-specific CSS -->
+      <!-- Bootstrap Icons -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+      <!-- Project CSS -->
       <link href="{% static 'css/project.css' %}" rel="stylesheet" />
     {% endblock css %}
     <!-- Le javascript
@@ -44,10 +49,14 @@
   </head>
   <body class="{% block bodyclass %}{% endblock bodyclass %}">
     {% block body %}
-      <div class="mb-1">
-        <nav class="navbar navbar-expand-md navbar-light bg-light">
-          <div class="container-fluid">
-            <button class="navbar-toggler navbar-toggler-right"
+      <header class="carda-header sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark-emerald py-2 shadow-sm">
+          <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-white fs-4" href="{% url 'home' %}">
+              <span class="brand-badge"><i class="bi bi-tree-fill text-emerald-light"></i></span>
+              <span>Carda<span class="text-emerald-gold">Link</span></span>
+            </a>
+            <button class="navbar-toggler border-0"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent"
@@ -56,40 +65,65 @@
                     aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
-            <a class="navbar-brand" href="{% url 'home' %}">CardaLink</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                  <a class="nav-link" href="{% url 'home' %}">Home <span class="visually-hidden">(current)</span></a>
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-lg-1">
+                <li class="nav-item">
+                  <a class="nav-link px-3" href="{% url 'home' %}"><i class="bi bi-house-door me-1"></i>Home</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'about' %}">About</a>
+                  <a class="nav-link px-3" href="{% url 'estates:list' %}"><i class="bi bi-geo-alt-fill me-1"></i>Estates</a>
                 </li>
-                {% if request.user.is_authenticated %}
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'users:detail' request.user.pk %}">{% translate "My Profile" %}</a>
-                  </li>
-                  <li class="nav-item">
-                    {# URL provided by django-allauth/account/urls.py #}
-                    <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-                  </li>
-                {% else %}
-                  {% if ACCOUNT_ALLOW_REGISTRATION %}
+                <li class="nav-item">
+                  <a class="nav-link px-3" href="{% url 'about' %}"><i class="bi bi-info-circle me-1"></i>About</a>
+                </li>
+              </ul>
+              <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
+                  <i class="bi bi-plus-circle-fill"></i>
+                  <span>Register Estate</span>
+                </a>
+                <ul class="navbar-nav ms-2 align-items-center">
+                  {% if request.user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2 py-1 px-3 rounded-pill bg-white-10" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="user-avatar-circle"><i class="bi bi-person-fill"></i></span>
+                        <span class="fw-medium">{{ request.user.name|default:request.user.email }}</span>
+                      </a>
+                      <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="navbarUserDropdown">
+                        <li>
+                          <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'users:detail' request.user.pk %}">
+                            <i class="bi bi-person-badge text-emerald"></i> {% translate "My Profile" %}
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'estates:list' %}?filter=mine">
+                            <i class="bi bi-flower1 text-emerald"></i> {% translate "My Estates" %}
+                          </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                          <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="{% url 'account_logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> {% translate "Sign Out" %}
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  {% else %}
+                    {% if ACCOUNT_ALLOW_REGISTRATION %}
+                      <li class="nav-item">
+                        <a id="sign-up-link" class="nav-link text-white-50 hover-text-white" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
+                      </li>
+                    {% endif %}
                     <li class="nav-item">
-                      {# URL provided by django-allauth/account/urls.py #}
-                      <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
+                      <a id="log-in-link" class="btn btn-outline-light btn-sm rounded-pill px-3 ms-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
                     </li>
                   {% endif %}
-                  <li class="nav-item">
-                    {# URL provided by django-allauth/account/urls.py #}
-                    <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-                  </li>
-                {% endif %}
-              </ul>
+                </ul>
+              </div>
             </div>
           </div>
         </nav>
-      </div>
+      </header>
       <div class="container">
         {% if messages %}
           {% for message in messages %}
