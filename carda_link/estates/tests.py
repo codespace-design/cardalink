@@ -35,11 +35,15 @@ class EstateTests(TestCase):
             name="John Grower",
             phone_number="+91 98765 43210",
             address="Vandanmedu, Idukki",
+            status="ACTIVE",
+            role="SELLER",
         )
         self.other_user = User.objects.create_user(
             email="other@example.com",
             password="testpassword123",
             name="Other Grower",
+            status="ACTIVE",
+            role="SELLER",
         )
         self.client = Client()
         self.client.force_login(self.user)
