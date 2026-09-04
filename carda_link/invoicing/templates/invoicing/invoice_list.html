@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Invoicing & Settlement - CardaLink{% endblock title %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+    <div>
+      <h1 class="h2 fw-bold text-dark mb-1">Invoices & Billing Management</h1>
+      <p class="text-muted mb-0">View, confirm bidding settlement, and manage official auction invoices.</p>
+    </div>
+    <div class="mt-3 mt-md-0 d-flex gap-2">
+      <a href="{% url 'invoicing:confirm' %}" class="btn btn-success fw-semibold shadow-sm">
+        Confirm Bidding & Generate Invoice
+      </a>
+    </div>
+  </div>
+
+  <!-- Available Lots for Bidding Confirmation section -->
+  {% if available_lots %}
+    <div class="card border-0 shadow-sm mb-4 bg-light">
+      <div class="card-header bg-white py-3 border-bottom-0">
+        <h5 class="card-title fw-bold mb-0 text-dark">
+          Bids Awaiting Invoice Settlement
+        </h5>
+      </div>
+      <div class="card-body pt-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Lot #</th>
+                <th>Auction</th>
+                <th>Grade</th>
+                <th>Weight (kg)</th>
+                <th>Highest Bid (₹/kg)</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lot in available_lots %}
+                <tr>
+                  <td class="fw-bold">Lot #{{ lot.lot_number }}</td>
+                  <td>{{ lot.auction.title }}</td>
+                  <td><span class="badge bg-secondary">{{ lot.harvest_batch.grade }}</span></td>
+                  <td>{{ lot.harvest_batch.weight_kg }} kg</td>
+                  <td class="text-success fw-bold">
+                    {% if lot.highest_bid_per_kg %}
+                      ₹{{ lot.highest_bid_per_kg }}/kg
+                    {% else %}
+                      ₹{{ lot.base_price_per_kg }}/kg (Base)
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    <a href="{% url 'invoicing:confirm_lot' lot.id %}" class="btn btn-sm btn-outline-success">
+                      Confirm Bid & Invoice
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Invoices Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="card-title fw-bold mb-0 text-dark">All Invoices</h5>
+      <span class="badge bg-secondary">{{ invoices|length }} Total</span>
+    </div>
+    <div class="card-body p-0">
+      {% if invoices %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Invoice ID</th>
+                <th>Lot & Auction</th>
+                <th>Buyer</th>
+                <th>Grade / Qty</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Issued Date</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for invoice in invoices %}
+                <tr>
+                  <td class="fw-bold">
+                    <a href="{% url 'invoicing:detail' invoice.pk %}" class="text-decoration-none text-primary">
+                      #INV-{{ invoice.id|stringformat:"04d" }}
+                    </a>
+                  </td>
+                  <td>
+                    <div class="fw-semibold">Lot #{{ invoice.lot.lot_number }}</div>
+                    <small class="text-muted">{{ invoice.lot.auction.title|truncatechars:30 }}</small>
+                  </td>
+                  <td>
+                    <div>{{ invoice.buyer.name|default:invoice.buyer.email }}</div>
+                    <small class="text-muted">{{ invoice.buyer.email }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-outline-dark border text-dark me-1">{{ invoice.lot.harvest_batch.grade }}</span>
+                    <small class="text-muted">{{ invoice.lot.harvest_batch.weight_kg }} kg</small>
+                  </td>
+                  <td class="fw-bold text-dark">₹{{ invoice.total_amount|floatformat:2 }}</td>
+                  <td>
+                    {% if invoice.status == "PAID" %}
+                      <span class="badge bg-success text-white px-2 py-1">PAID</span>
+                    {% elif invoice.status == "PENDING" %}
+                      <span class="badge bg-warning text-dark px-2 py-1">PENDING PAYMENT</span>
+                    {% elif invoice.status == "REFUNDED" %}
+                      <span class="badge bg-info text-white px-2 py-1">REFUNDED</span>
+                    {% else %}
+                      <span class="badge bg-danger text-white px-2 py-1">FAILED</span>
+                    {% endif %}
+                  </td>
+                  <td><small class="text-muted">{{ invoice.issued_at|date:"M d, Y H:i" }}</small></td>
+                  <td class="text-end">
+                    <a href="{% url 'invoicing:detail' invoice.pk %}" class="btn btn-sm btn-primary">
+                      View Full Details
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <h5 class="fw-bold">No Invoices Found</h5>
+          <p class="text-muted">No bidding settlement invoices have been generated yet.</p>
+          <a href="{% url 'invoicing:confirm' %}" class="btn btn-primary mt-2">
+            Confirm Bidding Now
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
