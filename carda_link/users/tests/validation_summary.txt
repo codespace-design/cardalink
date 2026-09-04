@@ -5,20 +5,323 @@ CARDLINK PHASE 4 VALIDATION
 Seller Login                   PASS
 Buyer Login                    PASS
 OTP Removed                    PASS
-Pending Account Handling       PASS
-Rejected Account Handling      PASS
-Suspended Account Handling     PASS
-Seller Dashboard Redirect      PASS
-Buyer Dashboard Redirect       PASS
-Admin Dashboard Redirect       PASS
-Role Protection                PASS
-Admin Authentication           PASS
+Pending Account Handling       FAIL
+Rejected Account Handling      FAIL
+Suspended Account Handling     FAIL
+Seller Dashboard Redirect      FAIL
+Buyer Dashboard Redirect       FAIL
+Admin Dashboard Redirect       FAIL
+Role Protection                FAIL
+Admin Authentication           FAIL
 Phase 1 Regression             PASS
 Phase 2 Regression             PASS
-Phase 3 Regression             PASS
+Phase 3 Regression             FAIL
 Phase 4 Tests                  PASS
 Django System Check            PASS
 
 ----------------------------------------
-PHASE 4 STATUS: PASSED
+PHASE 4 STATUS: FAILED
 ----------------------------------------
+
+FAILED REQUIREMENTS:
+FAILED REQUIREMENT: TestAdminAuthentication.test_active_admin_can_login
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 252, in test_active_admin_can_login
+    reverse("admin_login"),
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_login' not found. 'admin_login' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestAdminAuthentication.test_admin_redirected_to_admin_dashboard
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 260, in test_admin_redirected_to_admin_dashboard
+    reverse("admin_login"),
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_login' not found. 'admin_login' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestAdminAuthentication.test_seller_cannot_use_admin_login
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 268, in test_seller_cannot_use_admin_login
+    reverse("admin_login"),
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_login' not found. 'admin_login' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestLoginStatusHandling.test_pending_user_cannot_login_and_gets_msg
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 166, in test_pending_user_cannot_login_and_gets_msg
+    self.assertEqual(response.status_code, 200)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 885, in assertEqual
+    assertion_func(first, second, msg=msg)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 878, in _baseAssertEqual
+    raise self.failureException(msg)
+AssertionError: 302 != 200
+
+
+FAILED REQUIREMENT: TestLoginStatusHandling.test_rejected_user_cannot_login_and_gets_msg
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 179, in test_rejected_user_cannot_login_and_gets_msg
+    self.assertEqual(response.status_code, 200)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 885, in assertEqual
+    assertion_func(first, second, msg=msg)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 878, in _baseAssertEqual
+    raise self.failureException(msg)
+AssertionError: 302 != 200
+
+
+FAILED REQUIREMENT: TestLoginStatusHandling.test_suspended_user_cannot_login_and_gets_msg
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 192, in test_suspended_user_cannot_login_and_gets_msg
+    self.assertEqual(response.status_code, 200)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 885, in assertEqual
+    assertion_func(first, second, msg=msg)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 878, in _baseAssertEqual
+    raise self.failureException(msg)
+AssertionError: 302 != 200
+
+
+FAILED REQUIREMENT: TestRegressionCheck.test_phase3_regression_approval_views
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 332, in test_phase3_regression_approval_views
+    reverse("admin_user_approve", kwargs={"pk": seller.pk}),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_user_approve' not found. 'admin_user_approve' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestRoleProtection.test_buyer_cannot_access_seller_dashboard
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 224, in test_buyer_cannot_access_seller_dashboard
+    response = self.client.get(reverse("seller_dashboard"))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'seller_dashboard' not found. 'seller_dashboard' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestRoleProtection.test_seller_cannot_access_admin_dashboard
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 230, in test_seller_cannot_access_admin_dashboard
+    response = self.client.get(reverse("admin_dashboard"))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_dashboard' not found. 'admin_dashboard' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestRoleProtection.test_seller_cannot_access_buyer_dashboard
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 218, in test_seller_cannot_access_buyer_dashboard
+    response = self.client.get(reverse("buyer_dashboard"))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'buyer_dashboard' not found. 'buyer_dashboard' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestSellerBuyerLogin.test_active_buyer_redirected_to_buyer_dashboard
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 117, in test_active_buyer_redirected_to_buyer_dashboard
+    response = self.client.post(
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1167, in post
+    response = self._handle_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1388, in _handle_redirects
+    response = self._follow_redirect(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1006, in _follow_redirect
+    return request_method(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1128, in get
+    response = super().get(
+               ^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 475, in get
+    return self.generic(
+           ^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 671, in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1091, in request
+    self.check_exception(response)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 805, in check_exception
+    raise exc_value
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 56, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\mixins.py", line 74, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\generic\base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\generic\base.py", line 262, in get
+    url = self.get_redirect_url(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\views.py", line 70, in get_redirect_url
+    return reverse("buyer_dashboard")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'buyer_dashboard' not found. 'buyer_dashboard' is not a valid view function or pattern name.
+
+
+FAILED REQUIREMENT: TestSellerBuyerLogin.test_active_seller_redirected_to_seller_dashboard
+
+ERROR:
+Traceback (most recent call last):
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 44, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\tests\test_phase4.py", line 86, in test_active_seller_redirected_to_seller_dashboard
+    response = self.client.post(
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1167, in post
+    response = self._handle_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1388, in _handle_redirects
+    response = self._follow_redirect(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1006, in _follow_redirect
+    return request_method(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1128, in get
+    response = super().get(
+               ^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 475, in get
+    return self.generic(
+           ^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 671, in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 1091, in request
+    self.check_exception(response)
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\client.py", line 805, in check_exception
+    raise exc_value
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 56, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\mixins.py", line 74, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\generic\base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\generic\base.py", line 262, in get
+    url = self.get_redirect_url(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\OneDrive\Desktop\New folder (2)\cardalink\carda_link\users\views.py", line 68, in get_redirect_url
+    return reverse("seller_dashboard")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sreed\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'seller_dashboard' not found. 'seller_dashboard' is not a valid view function or pattern name.
+

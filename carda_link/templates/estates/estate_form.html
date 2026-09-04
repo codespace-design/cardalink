@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    {% translate "Edit Estate" %}: {{ form.instance.name }}
+  {% else %}
+    {% translate "Register New Estate" %}
+  {% endif %} - CardaLink
+{% endblock title %}
+
+{% block content %}
+<div class="py-4">
+  <!-- Breadcrumb & Top Bar -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-emerald"><i class="bi bi-house-door me-1"></i>Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'estates:list' %}" class="text-decoration-none text-emerald">Estates</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {% if form.instance.pk %}Edit Estate{% else %}Register Estate{% endif %}
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Hero Header Banner -->
+  <div class="page-hero-card mb-4">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-8">
+        <span class="badge bg-white-10 text-emerald-light px-3 py-2 rounded-pill mb-2 fw-semibold">
+          <i class="bi bi-patch-check-fill me-1"></i> Estate Registration
+        </span>
+        <h1 class="display-6 fw-bold mb-2">
+          {% if form.instance.pk %}
+            Update Estate: {{ form.instance.name }}
+          {% else %}
+            Register Your Cardamom Estate
+          {% endif %}
+        </h1>
+        <p class="lead text-white-50 mb-0">
+          List your plantation details, owner contacts, verified acreage, and upload high-resolution photos for auctioneers and premium spice traders.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="{% url 'estates:list' %}" class="btn btn-outline-light rounded-pill px-3 py-2">
+          <i class="bi bi-arrow-left me-1"></i> Back to Estates Directory
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registration Form Card -->
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="form-card p-4 p-md-5">
+        <form method="post" enctype="multipart/form-data" id="estateRegisterForm" novalidate>
+          {% csrf_token %}
+
+          {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <h6 class="mb-0 fw-bold">Please correct the errors in the form below:</h6>
+              </div>
+              <ul class="mb-0 mt-2">
+                {% for field in form %}
+                  {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endif %}
+
+          <!-- Section 1: Basic Information -->
+          <div class="mb-5">
+            <div class="form-section-header">
+              <span class="section-number-pill">1</span>
+              <div>
+                <h4 class="mb-0 text-emerald fw-bold">Estate & Owner Profile</h4>
+                <p class="text-muted small mb-0">Identity and primary contact credentials</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label for="{{ form.name.id_for_label }}" class="form-label">
+                  {{ form.name.label }} <span class="text-danger">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.help_text %}
+                  <div class="form-text">{{ form.name.help_text }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.owner_name.id_for_label }}" class="form-label">
+                  {{ form.owner_name.label }} <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                  {{ form.owner_name }}
+                </div>
+                <div class="form-text">Full legal name of the estate owner or managing partner.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                  {{ form.phone_number.label }} <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light text-muted"><i class="bi bi-telephone"></i></span>
+                  {{ form.phone_number }}
+                </div>
+                <div class="form-text">Active phone or WhatsApp number for auction verification.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Location & Acreage -->
+          <div class="mb-5">
+            <div class="form-section-header">
+              <span class="section-number-pill">2</span>
+              <div>
+                <h4 class="mb-0 text-emerald fw-bold">Location & Plantation Acreage</h4>
+                <p class="text-muted small mb-0">Geographical details and surveyed plantation dimensions</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label for="{{ form.location.id_for_label }}" class="form-label">
+                  {{ form.location.label }} <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light text-muted"><i class="bi bi-geo-alt"></i></span>
+                  {{ form.location }}
+                </div>
+                <div class="form-text">District, Taluk, or Region (e.g. Nedumkandam / Vandanmedu, Idukki).</div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="{{ form.area_in_acres.id_for_label }}" class="form-label">
+                  {{ form.area_in_acres.label }} <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  {{ form.area_in_acres }}
+                  <span class="input-group-text bg-light text-muted">Acres</span>
+                </div>
+                <div class="form-text">Total cultivated cardamom acreage.</div>
+              </div>
+
+              <div class="col-12">
+                <label for="{{ form.address.id_for_label }}" class="form-label">
+                  {{ form.address.label }} <span class="text-danger">*</span>
+                </label>
+                {{ form.address }}
+                <div class="form-text">Full postal address including survey plot number, village, and PIN code.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Photography & Media Assets -->
+          <div class="mb-5">
+            <div class="form-section-header">
+              <span class="section-number-pill">3</span>
+              <div>
+                <h4 class="mb-0 text-emerald fw-bold">Estate Photography & Visual Assets</h4>
+                <p class="text-muted small mb-0">Upload high-quality cover photo and multi-image gallery</p>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <!-- Primary Cover Photo -->
+              <div class="col-md-6">
+                <label for="{{ form.primary_photo.id_for_label }}" class="form-label fw-bold text-dark">
+                  <i class="bi bi-image-fill text-emerald me-1"></i> {{ form.primary_photo.label }}
+                </label>
+                {{ form.primary_photo }}
+                <div class="form-text">Main banner/cover photo showcased on estate listing cards.</div>
+
+                <div id="primaryPreviewContainer" class="mt-3 {% if not form.instance.primary_photo %}d-none{% endif %}">
+                  <div class="preview-thumb-card position-relative" style="height: 180px;">
+                    <img id="primaryPreviewImg" src="{% if form.instance.primary_photo %}{{ form.instance.primary_photo.url }}{% endif %}" alt="Primary Cover Preview" class="rounded">
+                    <span class="preview-badge-primary"><i class="bi bi-star-fill me-1"></i>Primary Cover</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Multiple Gallery Photos -->
+              <div class="col-md-6">
+                <label for="{{ form.photos.id_for_label }}" class="form-label fw-bold text-dark">
+                  <i class="bi bi-images text-emerald me-1"></i> {{ form.photos.label }}
+                </label>
+                
+                <div class="photo-upload-zone" id="dropzoneBox" onclick="document.getElementById('id_photos').click();">
+                  <div class="upload-icon-circle">
+                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                  </div>
+                  <h6 class="fw-bold mb-1 text-emerald">Click to browse or Drag & Drop Photos</h6>
+                  <p class="small text-muted mb-0">Supports JPG, PNG, WEBP (Multiple selection enabled)</p>
+                  <div class="mt-2 text-emerald-gold fw-semibold small">
+                    <i class="bi bi-plus-circle me-1"></i> Select multiple images at once
+                  </div>
+                </div>
+                <div class="d-none">
+                  {{ form.photos }}
+                </div>
+
+                <!-- Live Gallery Preview Grid -->
+                <div id="galleryPreviewContainer" class="image-preview-grid mt-3"></div>
+              </div>
+            </div>
+
+            <!-- Existing photos if editing -->
+            {% if form.instance.pk and form.instance.photos.all %}
+              <div class="mt-4 pt-3 border-top">
+                <h6 class="fw-bold text-muted mb-3"><i class="bi bi-collection-fill me-1"></i> Current Gallery Photos ({{ form.instance.photos.count }}):</h6>
+                <div class="image-preview-grid">
+                  {% for photo in form.instance.photos.all %}
+                    <div class="preview-thumb-card position-relative">
+                      <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:'Estate photo' }}">
+                      <form action="{% url 'estates:photo-delete' form.instance.pk photo.pk %}" method="post" onsubmit="return confirm('Delete this gallery photo?');" class="position-absolute top-0 end-0 m-1">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'estates:update' form.instance.pk %}">
+                        <button type="submit" class="btn btn-sm btn-danger rounded-circle p-1" style="width: 26px; height: 26px; line-height: 1;" title="Delete photo">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </form>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Section 4: Description & Cultivation Notes -->
+          <div class="mb-5">
+            <div class="form-section-header">
+              <span class="section-number-pill">4</span>
+              <div>
+                <h4 class="mb-0 text-emerald fw-bold">Overview & Farming Specifications</h4>
+                <p class="text-muted small mb-0">Highlight shade canopy, cardamom varieties, soil enrichment, and drying technology</p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12">
+                <label for="{{ form.description.id_for_label }}" class="form-label">
+                  {{ form.description.label }}
+                </label>
+                {{ form.description }}
+                <div class="form-text">Share cardamom varieties (Njallani, Palakkudi), organic certifications, elevation above sea level, etc.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3 pt-4 border-top">
+            <a href="{% url 'estates:list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2 w-100 w-sm-auto">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <div class="d-flex gap-2 w-100 w-sm-auto justify-content-end">
+              <button type="reset" class="btn btn-light rounded-pill px-4 py-2 border">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              </button>
+              <button type="submit" class="btn btn-emerald-register text-white rounded-pill px-5 py-2 fw-bold shadow">
+                <i class="bi bi-check2-circle me-1"></i>
+                {% if form.instance.pk %}Save Changes{% else %}Register Estate{% endif %}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block inline_javascript %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Primary photo preview
+    const primaryInput = document.getElementById('id_primary_photo');
+    const primaryPreviewContainer = document.getElementById('primaryPreviewContainer');
+    const primaryPreviewImg = document.getElementById('primaryPreviewImg');
+
+    if (primaryInput) {
+      primaryInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            primaryPreviewImg.src = e.target.result;
+            primaryPreviewContainer.classList.remove('d-none');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Gallery multiple photos preview & drag-and-drop
+    const galleryInput = document.getElementById('id_photos');
+    const galleryContainer = document.getElementById('galleryPreviewContainer');
+    const dropzoneBox = document.getElementById('dropzoneBox');
+
+    if (galleryInput && dropzoneBox) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzoneBox.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzoneBox.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzoneBox.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzoneBox.classList.remove('dragover');
+        });
+      });
+
+      dropzoneBox.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt.files && dt.files.length > 0) {
+          galleryInput.files = dt.files;
+          renderGalleryPreviews(dt.files);
+        }
+      });
+
+      galleryInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+          renderGalleryPreviews(this.files);
+        }
+      });
+    }
+
+    function renderGalleryPreviews(fileList) {
+      galleryContainer.innerHTML = '';
+      Array.from(fileList).forEach((file, index) => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const thumb = document.createElement('div');
+          thumb.className = 'preview-thumb-card';
+          thumb.innerHTML = `
+            <img src="${e.target.result}" alt="Preview ${index + 1}">
+            <span class="preview-badge-primary" style="background: rgba(4,120,87,0.85);">#${index + 1}</span>
+          `;
+          galleryContainer.appendChild(thumb);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+</script>
+{% endblock inline_javascript %}

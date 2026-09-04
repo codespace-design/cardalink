@@ -1,29 +1,31 @@
-/* CardaLink Theme: White Background, Dark Black Text & Cardamom Emerald Green Elements */
+/* ==========================================================================
+   CardaLink - Premium Cardamom Estate & Auction Design System
+   ========================================================================== */
 
 :root {
   --primary-green: #10b981;
   --primary-green-dark: #059669;
   --primary-green-light: #ecfdf5;
   --text-dark: #0f172a;
-  --text-muted: #64748b;
-  --bg-light: #f8fafc;
+  --primary-emerald: #064e3b;
+  --emerald-medium: #047857;
+  --emerald-accent: #10b981;
+  --emerald-light: #34d399;
+  --emerald-ultra-light: #ecfdf5;
+  --emerald-gold: #fbbf24;
+  --emerald-gold-dark: #d97706;
+  --dark-bg: #0b1e16;
+  --dark-surface: #112d22;
+  --card-bg: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --border-emerald-light: rgba(16, 185, 129, 0.2);
   --border-light: #e2e8f0;
-}
-
-body {
-  background-color: var(--bg-light);
-  color: var(--text-dark);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-}
-
-a {
-  color: var(--primary-green-dark);
-  text-decoration: none;
-}
-
-a:hover {
-  color: #047857;
-  text-decoration: underline;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 14px rgba(6, 78, 59, 0.08);
+  --shadow-lg: 0 10px 25px -3px rgba(6, 78, 59, 0.12), 0 4px 6px -2px rgba(6, 78, 59, 0.05);
+  --shadow-hover: 0 20px 25px -5px rgba(6, 78, 59, 0.15), 0 10px 10px -5px rgba(6, 78, 59, 0.04);
 }
 
 .btn-primary, .btn-success {
@@ -53,20 +55,10 @@ a:hover {
   color: #ffffff !important;
 }
 
-.form-control:focus, .form-select:focus {
-  border-color: var(--primary-green) !important;
-  box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25) !important;
-}
-
 .badge-green, .badge-success {
   background-color: var(--primary-green-light) !important;
   color: var(--primary-green-dark) !important;
   border: 1px solid var(--primary-green) !important;
-}
-
-.navbar-light .navbar-brand {
-  color: var(--primary-green-dark) !important;
-  font-weight: 800;
 }
 
 .card {
@@ -74,15 +66,442 @@ a:hover {
   border-radius: 12px;
 }
 
-/* Alert styles */
-.alert-debug {
-  color: var(--text-dark);
-  background-color: var(--primary-green-light);
-  border-color: var(--primary-green);
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
+  background-color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.alert-error {
-  color: #b94a48;
-  background-color: #f2dede;
-  border-color: #eed3d7;
+h1, h2, h3, h4, h5, h6, .navbar-brand, .font-heading {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Header & Navigation */
+.bg-dark-emerald {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+}
+
+.text-emerald {
+  color: var(--emerald-medium) !important;
+}
+
+.text-emerald-light {
+  color: var(--emerald-light) !important;
+}
+
+.text-emerald-gold {
+  color: var(--emerald-gold) !important;
+}
+
+.bg-white-10 {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  font-size: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--emerald-accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.85rem;
+}
+
+.btn-emerald-register {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-emerald-register:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+/* Page Headers & Hero */
+.page-hero-card {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+  color: #ffffff;
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.page-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Form Styles */
+.form-card {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid var(--border-emerald-light);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--emerald-ultra-light);
+}
+
+.section-number-pill {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--emerald-ultra-light);
+  color: var(--emerald-medium);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  border: 1px solid var(--emerald-accent);
+}
+
+.form-control, .form-select {
+  border-radius: 0.75rem;
+  border: 1.5px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--emerald-accent);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  font-size: 0.925rem;
+}
+
+.form-text {
+  color: #6b7280;
+  font-size: 0.825rem;
+}
+
+/* Photo Upload Dropzone */
+.photo-upload-zone {
+  border: 2px dashed #10b981;
+  background: #f0fdf4;
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.photo-upload-zone:hover, .photo-upload-zone.dragover {
+  background: #dcfce7;
+  border-color: #059669;
+  transform: scale(1.005);
+}
+
+.upload-icon-circle {
+  width: 56px;
+  height: 56px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--emerald-medium);
+  font-size: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.75rem;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.preview-thumb-card {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--border-emerald-light);
+  background: #f3f4f6;
+}
+
+.preview-thumb-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.preview-thumb-card:hover img {
+  transform: scale(1.05);
+}
+
+.preview-badge-primary {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(6, 78, 59, 0.85);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+/* Estate Cards */
+.estate-card {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.estate-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.estate-card-img-wrap {
+  position: relative;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+}
+
+.estate-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.estate-card:hover .estate-card-img-wrap img {
+  transform: scale(1.08);
+}
+
+.estate-card-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(6, 78, 59, 0.85);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+
+.estate-card-photos-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+.badge-acreage {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.badge-location {
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+/* Detail Page Hero & Gallery */
+.estate-detail-hero {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-emerald-light);
+}
+
+.estate-hero-banner {
+  position: relative;
+  height: 380px;
+  background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+  overflow: hidden;
+}
+
+.estate-hero-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.estate-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6, 78, 59, 0.9) 0%, rgba(6, 78, 59, 0.4) 40%, rgba(0,0,0,0) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 2.5rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.gallery-card {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  background: #f3f4f6;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.gallery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.gallery-card:hover img {
+  transform: scale(1.08);
+}
+
+.gallery-overlay-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.gallery-card:hover .gallery-overlay-caption {
+  opacity: 1;
+}
+
+/* Quick Spec Cards */
+.spec-box {
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.spec-box:hover {
+  background: #f0fdf4;
+  border-color: #a7f3d0;
+  transform: translateY(-2px);
+}
+
+.spec-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #047857;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  background: #064e3b;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 2.5rem 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Alert styling overrides */
+.alert-success {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+  border-radius: 0.75rem;
+}
+
+.alert-danger, .alert-error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+  border-radius: 0.75rem;
 }

@@ -57,7 +57,6 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TEMPLATE_CONTEXT": True,
 }
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
-INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 if env.str("USE_DOCKER", default="no") == "yes":
     import socket
 
@@ -77,6 +76,11 @@ if env.str("USE_DOCKER", default="no") == "yes":
 # https://django-extensions.readthedocs.io/en/latest/installation_instructions.html#configuration
 INSTALLED_APPS += ["django_extensions"]
 
-# Your stuff...
+# django-allauth development settings
 # ------------------------------------------------------------------------------
+# https://docs.allauth.org/en/latest/account/configuration.html
+# Bypass email verification for local development
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
 from .base import GEMINI_API_KEY
+

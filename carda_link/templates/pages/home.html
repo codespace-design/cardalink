@@ -1,83 +1,102 @@
 {% extends "base.html" %}
+{% load static i18n %}
 
-{% load i18n %}
+{% block title %}CardaLink - Next-Gen Cardamom Auction & Estate Monitoring System{% endblock title %}
 
-{% block title %}
-  {% translate "Home" %} — CardaLink
-{% endblock title %}
 {% block content %}
+<div class="py-4">
   <!-- Hero Section -->
-  <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border border-emerald">
-    <div class="container-fluid py-3">
-      <div class="row align-items-center">
-        <div class="col-lg-8">
-          <span class="badge bg-success mb-2 px-3 py-2 text-uppercase fs-6">Cardamom Auction & Estate Monitoring</span>
-          <h1 class="display-5 fw-bold text-dark mb-3">Welcome to CardaLink</h1>
-          <p class="col-md-10 fs-5 text-secondary mb-4">
-            Streamline your cardamom trade with real-time auction bidding, estate harvest tracking, and automated financial settlements.
-          </p>
-          <div class="d-flex flex-wrap gap-3">
-            <a href="{% url 'auctions:simulation' %}"
-               class="btn btn-success btn-lg px-4 fw-semibold shadow-sm">
-              <i class="bi bi-gavel me-2"></i>Go to Auctions Module &rarr;
-            </a>
-            <a href="{% url 'about' %}"
-               class="btn btn-outline-secondary btn-lg px-4">Learn More</a>
+  <div class="page-hero-card mb-5 p-5">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-8">
+        <span class="badge bg-white-10 text-emerald-light px-3 py-2 rounded-pill mb-3 fw-semibold fs-6">
+          <i class="bi bi-patch-check-fill me-2 text-emerald-gold"></i> Spices Board & Farm Intelligence Ecosystem
+        </span>
+        <h1 class="display-4 fw-extrabold text-white mb-3">
+          Empowering Cardamom Growers & Premium Spice Auctions
+        </h1>
+        <p class="lead text-white-50 mb-4" style="font-size: 1.15rem; line-height: 1.7;">
+          Register your plantation, upload high-resolution estate photos, track harvest grades (AGEB, AGB, AGS), bid in real-time auctions, and interact with our AI spice assistant.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white px-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle-fill fs-5"></i>
+            <span>Register Your Estate</span>
+          </a>
+          <a href="{% url 'auctions:simulation' %}" class="btn btn-light text-emerald px-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
+            <i class="bi bi-hammer fs-5"></i>
+            <span>Live Auctions Console</span>
+          </a>
+          <a href="{% url 'estates:list' %}" class="btn btn-outline-light px-4 py-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Explore Estates</span>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center mt-4 mt-lg-0">
+        <div class="p-4 bg-white-10 rounded-4 border border-white-10 shadow-lg text-white">
+          <div class="upload-icon-circle mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
+            <i class="bi bi-robot text-emerald"></i>
           </div>
+          <h4 class="fw-bold mb-1">AI Spice Assistant</h4>
+          <p class="small text-white-50 mb-3">Instant answers for growers and buyers regarding lots, market trends, and regulations.</p>
+          <a href="{% url 'assistant:chatbot' %}" class="btn btn-sm btn-light rounded-pill px-3 py-2 w-100 fw-bold text-emerald">
+            <i class="bi bi-chat-dots-fill me-1"></i> Launch Assistant
+          </a>
         </div>
       </div>
     </div>
   </div>
-  <!-- Feature Cards Grid -->
-  <div class="row g-4 py-3">
-    <!-- Featured Auctions Module Card -->
+
+  <!-- Key Highlights Cards -->
+  <div class="row g-4 mb-5">
+    <!-- Estates Card -->
     <div class="col-md-4">
-      <div class="card h-100 border-success shadow-sm">
-        <div class="card-header bg-success text-white py-3">
-          <h5 class="card-title mb-0 fw-bold">
-            <i class="bi bi-broadcast me-2"></i>Auctions Module
-          </h5>
+      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+          <i class="bi bi-tree-fill text-emerald"></i>
         </div>
-        <div class="card-body d-flex flex-column">
-          <p class="card-text text-secondary flex-grow-1">
-            Access the live bidding engine, view lot catalogs with quality grades (AGEB, AGB, AGS), submit bids via REST API, and simulate rival buyers in real time.
-          </p>
-          <a href="{% url 'auctions:simulation' %}"
-             class="btn btn-success w-100 mt-2 fw-semibold">Open Auctions Console &rarr;</a>
-        </div>
+        <h4 class="fw-bold text-dark font-heading mb-2">Estate Profiles & Photos</h4>
+        <p class="text-muted mb-3">
+          Showcase your plantation with primary cover banners, acreage details, and high-resolution photo galleries.
+        </p>
+        <a href="{% url 'estates:list' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
+          Explore Estates <i class="bi bi-arrow-right"></i>
+        </a>
       </div>
     </div>
-    <!-- Estate Management Card -->
+
+    <!-- Live Auctions Card -->
     <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm bg-body rounded">
-        <div class="card-header bg-light py-3 border-0">
-          <h5 class="card-title mb-0 fw-bold text-dark">
-            <i class="bi bi-tree me-2"></i>Estate Monitoring
-          </h5>
+      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+          <i class="bi bi-hammer text-emerald"></i>
         </div>
-        <div class="card-body d-flex flex-column">
-          <p class="card-text text-secondary flex-grow-1">
-            Track cardamom plantation yields, harvest batch weights, moisture content, and quality inspection metrics.
-          </p>
-          <button class="btn btn-outline-secondary w-100 mt-2" disabled>Estate Module</button>
-        </div>
+        <h4 class="fw-bold text-dark font-heading mb-2">Live Spice Auctions</h4>
+        <p class="text-muted mb-3">
+          Participate in real-time auction bidding, view lot catalogs with quality grades (AGEB, AGB, AGS), and simulate buyer competition.
+        </p>
+        <a href="{% url 'auctions:simulation' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
+          Open Live Console <i class="bi bi-arrow-right"></i>
+        </a>
       </div>
     </div>
-    <!-- Invoicing & Financials Card -->
+
+    <!-- Harvest Grading & Provenance Card -->
     <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm bg-body rounded">
-        <div class="card-header bg-light py-3 border-0">
-          <h5 class="card-title mb-0 fw-bold text-dark">
-            <i class="bi bi-receipt me-2"></i>Invoicing & Trade
-          </h5>
+      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+          <i class="bi bi-award-fill text-emerald"></i>
         </div>
-        <div class="card-body d-flex flex-column">
-          <p class="card-text text-secondary flex-grow-1">
-            Generate transparent invoices for buyers and sellers post-auction, manage commission fees, and audit transactions.
-          </p>
-          <button class="btn btn-outline-secondary w-100 mt-2" disabled>Invoicing Module</button>
-        </div>
+        <h4 class="fw-bold text-dark font-heading mb-2">Harvest Quality Grading</h4>
+        <p class="text-muted mb-3">
+          Categorize cardamom harvests into Alleppey Green Extra Bold, Bold, and Superior lots with digital quality certificates.
+        </p>
+        <a href="{% url 'estates:register' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
+          Register Harvest Batch <i class="bi bi-arrow-right"></i>
+        </a>
       </div>
     </div>
   </div>
+</div>
 {% endblock content %}
