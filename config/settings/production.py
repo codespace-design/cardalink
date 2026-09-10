@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 from .base import *  # noqa: F403
 from .base import DATABASES
 from .base import INSTALLED_APPS
@@ -180,5 +179,7 @@ LOGGING = {
 }
 
 
-# Your stuff...
+# django-allauth
 # ------------------------------------------------------------------------------
+# https://docs.allauth.org/en/latest/account/configuration.html
+ACCOUNT_EMAIL_VERIFICATION = env("DJANGO_ACCOUNT_EMAIL_VERIFICATION", default="mandatory")

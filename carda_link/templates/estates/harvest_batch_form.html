@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    {% translate "Edit Harvest Batch" %} - {{ estate.name }}
+  {% else %}
+    {% translate "Log New Harvest Batch" %} - {{ estate.name }}
+  {% endif %} - CardaLink
+{% endblock title %}
+
+{% block content %}
+<div class="py-4">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'estates:list' %}" class="text-decoration-none">Estates</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'estates:detail' estate.pk %}" class="text-decoration-none">{{ estate.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {% if form.instance.pk %}{% translate "Edit Harvest Batch" %}{% else %}{% translate "Log Harvest Batch" %}{% endif %}
+      </li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+          <div>
+            <h2 class="h3 fw-bold text-dark mb-1">
+              {% if form.instance.pk %}
+                {% translate "Edit Harvest Batch Record" %}
+              {% else %}
+                {% translate "Log New Harvest Batch" %}
+              {% endif %}
+            </h2>
+            <p class="text-muted small mb-0">
+              Estate: <strong>{{ estate.name }}</strong> ({{ estate.location }})
+            </p>
+          </div>
+          <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill">
+            <i class="bi bi-box-seam me-1"></i> Yield Tracking
+          </span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <h6 class="mb-0 fw-bold">Please correct the errors below:</h6>
+              </div>
+              <ul class="mb-0">
+                {% for field in form %}
+                  {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endif %}
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="{{ form.harvest_date.id_for_label }}" class="form-label fw-semibold">
+                {{ form.harvest_date.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.harvest_date }}
+              <div class="form-text">Date when cardamom pods were harvested.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="{{ form.weight_kg.id_for_label }}" class="form-label fw-semibold">
+                {{ form.weight_kg.label }} <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                {{ form.weight_kg }}
+                <span class="input-group-text bg-light">kg</span>
+              </div>
+              <div class="form-text">Dry / cured lot weight in kilograms.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="{{ form.grade.id_for_label }}" class="form-label fw-semibold">
+                {{ form.grade.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.grade }}
+              <div class="form-text">Grading standard (AGEB, AGB, AGS, or Mixed).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="{{ form.quality_certificate.id_for_label }}" class="form-label fw-semibold">
+                {{ form.quality_certificate.label }}
+              </label>
+              {{ form.quality_certificate }}
+              <div class="form-text">Upload Spices Board testing or moisture lab report (PDF/Image).</div>
+              {% if form.instance.quality_certificate %}
+                <div class="mt-2 small text-muted">
+                  Current file: <a href="{{ form.instance.quality_certificate.url }}" target="_blank">{{ form.instance.quality_certificate.name }}</a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-outline-secondary rounded-pill px-4">
+              {% translate "Cancel" %}
+            </a>
+            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+              <i class="bi bi-check-circle me-1"></i>
+              {% if form.instance.pk %}{% translate "Update Batch" %}{% else %}{% translate "Save Harvest Batch" %}{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

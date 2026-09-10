@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.chat-container {
+    display: flex;
+    height: 90vh;
+    background: #f5f7fb;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #ffffff;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    padding: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #15803d;
+}
+
+.logo span {
+    display: block;
+    margin-top: 6px;
+    color: #666;
+    font-size: 16px;
+}
+
+.new-chat {
+    margin: 20px;
+    padding: 15px;
+    text-align: center;
+    background: #15803d;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .3s;
+}
+
+.new-chat:hover {
+    background: #166534;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    line-height: 2;
+}
+
+/* Chat */
+.chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background: white;
+    padding: 14px 24px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h2 {
+    margin-bottom: 2px;
+}
+
+.online {
+    color: green;
+    font-size: 14px;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    background: #f5f7fb;
+}
+
+.user,
+.bot {
+    display: flex;
+    margin-bottom: 18px;
+    flex-direction: column;
+}
+
+.user {
+    align-items: flex-end;
+}
+
+.bot {
+    align-items: flex-start;
+}
+
+.bubble {
+    max-width: 75%;
+    padding: 18px;
+    border-radius: 16px;
+    line-height: 1.7;
+}
+
+.user .bubble {
+    background: #dcfce7;
+}
+
+.bot .bubble {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.category-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #15803d;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+/* Markdown Styling */
+.bot .bubble h1,
+.bot .bubble h2,
+.bot .bubble h3,
+.bot .bubble h4 {
+    margin: 10px 0;
+    color: #166534;
+}
+
+.bot .bubble p {
+    margin: 10px 0;
+}
+
+.bot .bubble ul,
+.bot .bubble ol {
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.bot .bubble li {
+    margin: 6px 0;
+}
+
+.bot .bubble strong {
+    color: #14532d;
+}
+
+.bot .bubble code {
+    background: #eef2f7;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+.bot .bubble pre {
+    background: #f4f4f4;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+/* Input & Suggestions */
+.suggestions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.suggestion-chip {
+    padding: 6px 14px;
+    font-size: 13px;
+    border-radius: 16px;
+    border: 1px solid #15803d;
+    background: #f0fdf4;
+    color: #15803d;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.suggestion-chip:hover {
+    background: #15803d;
+    color: white;
+}
+
+.input-area {
+    display: flex;
+    background: white;
+    border-top: 1px solid #ddd;
+    padding: 20px;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 16px;
+}
+
+.input-area button {
+    margin-left: 15px;
+    padding: 14px 24px;
+    min-width: 110px;
+    border: none;
+    border-radius: 30px;
+    background: #15803d;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.input-area button:hover {
+    background: #166534;
+}
+
+.thinking {
+    color: #666;
+    font-style: italic;
+}
+</style>
+
+<div class="chat-container">
+
+    <div class="sidebar">
+        <div class="logo">
+            🌿 CardaLink
+            <span>AI Assistant</span>
+        </div>
+
+        <div class="new-chat" onclick="newChat()">
+            + New Chat
+        </div>
+
+        <div class="sidebar-footer">
+            Ask me about
+            <br><br>
+            🌱 Cardamom Farming
+            <br>
+            📖 Website Guidance
+            <br>
+            📈 Auction Details
+        </div>
+    </div>
+
+    <div class="chat">
+        <div class="header">
+            <h2>CardaLink AI Assistant</h2>
+            <div class="online">● Online</div>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="bot">
+                <div class="bubble">
+                    <h3>👋 Welcome!</h3>
+                    <p>I am <strong>CardaLink AI Assistant</strong>.</p>
+                    <p>I can help you with:</p>
+                    <ul>
+                        <li>🌱 Cardamom Farming</li>
+                        <li>📖 Website Guidance</li>
+                        <li>📈 Auction Details</li>
+                    </ul>
+                    <p>How can I assist you today?</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="suggestions-container" class="suggestions-container" style="display: none;"></div>
+
+        <div class="input-area">
+            <input
+                id="message"
+                placeholder="Type your question..."
+                autocomplete="off"
+                onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">
+                Send
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Markdown Library -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+function welcomeMessage() {
+    document.getElementById("messages").innerHTML = `
+        <div class="bot">
+            <div class="bubble">
+                <h3>👋 Welcome!</h3>
+                <p>I am <strong>CardaLink AI Assistant</strong>.</p>
+                <p>I can help you with:</p>
+                <ul>
+                    <li>🌱 Cardamom Farming</li>
+                    <li>📖 Website Guidance</li>
+                    <li>📈 Auction Details</li>
+                </ul>
+                <p>How can I assist you today?</p>
+            </div>
+        </div>
+    `;
+    renderSuggestions([
+        "Seller Registration",
+        "Buyer Registration",
+        "Login",
+        "Auction Token",
+        "Upload Cardamom Lot",
+        "View Live Auctions",
+        "Place Bid",
+        "Payment",
+        "Download Invoice",
+        "Purchase History"
+    ]);
+}
+
+function newChat() {
+    welcomeMessage();
+    document.getElementById("message").value = "";
+    document.getElementById("message").focus();
+}
+
+function askSuggestion(text) {
+    document.getElementById("message").value = text;
+    sendMessage();
+}
+
+function renderSuggestions(suggestions) {
+    const container = document.getElementById("suggestions-container");
+    if (!suggestions || suggestions.length === 0) {
+        container.style.display = "none";
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = suggestions
+        .map(s => `<button class="suggestion-chip" onclick="askSuggestion('${s.replace(/'/g, "\\'")}')">${s}</button>`)
+        .join("");
+    container.style.display = "flex";
+}
+
+async function sendMessage() {
+    let input = document.getElementById("message");
+    let message = input.value.trim();
+    if (message === "") return;
+
+    let messages = document.getElementById("messages");
+
+    messages.innerHTML += `
+        <div class="user">
+            <div class="bubble">
+                ${escapeHtml(message)}
+            </div>
+        </div>
+    `;
+
+    input.value = "";
+    messages.scrollTop = messages.scrollHeight;
+
+    let loadingId = "loading-" + Date.now();
+    messages.innerHTML += `
+        <div class="bot" id="${loadingId}">
+            <div class="bubble thinking">
+                Thinking...
+            </div>
+        </div>
+    `;
+
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        const response = await fetch(
+            "/api/assistant/chat?message=" + encodeURIComponent(message)
+        );
+        const data = await response.json();
+
+        let loadingElem = document.getElementById(loadingId);
+        if (loadingElem) loadingElem.remove();
+
+        let categoryTag = data.category ? `<div class="category-tag">${escapeHtml(data.category)}</div>` : "";
+        let formattedAnswer = marked.parse(data.answer || "");
+
+        messages.innerHTML += `
+            <div class="bot">
+                <div class="bubble">
+                    ${categoryTag}
+                    ${formattedAnswer}
+                </div>
+            </div>
+        `;
+
+        if (data.suggestions && data.suggestions.length > 0) {
+            renderSuggestions(data.suggestions);
+        }
+
+    } catch (err) {
+        let loadingElem = document.getElementById(loadingId);
+        if (loadingElem) loadingElem.remove();
+
+        messages.innerHTML += `
+            <div class="bot">
+                <div class="bubble">
+                    Sorry! Something went wrong while communicating with the assistant.
+                </div>
+            </div>
+        `;
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+    input.focus();
+}
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+welcomeMessage();
+</script>
+
+{% endblock %}

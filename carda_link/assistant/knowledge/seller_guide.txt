@@ -1,0 +1,106 @@
+SELLER REGISTRATION
+To participate in CardoLink as a seller, you must first register for a seller account.
+Steps:
+1. Open the CardoLink homepage.
+2. Click the "Register" button.
+3. Select "Seller" as your account type.
+4. Enter your personal information, including:
+   - Full Name
+   - Email Address
+   - Mobile Number
+   - Address
+   - Password
+5. Upload the required identification documents if requested.
+6. Read and accept the terms and conditions.
+7. Click the "Register" button.
+8. After successful registration, you can log in using your email and password.
+
+------------------------------------------------------------------
+
+REQUEST AUCTION TOKEN
+Every seller must obtain an auction token before participating in an auction.
+Steps:
+1. Login to your CardoLink seller account.
+2. Open the Seller Dashboard.
+3. Click "Request Auction Token".
+4. Enter the lot details:
+   - Cardamom Variety
+   - Estimated Weight
+   - Grade
+   - Harvest Date
+5. Upload the required quality certificate if applicable.
+6. Click "Submit".
+7. The request will be sent to the administrator for verification.
+8. After approval, an auction token number will be generated and displayed in your dashboard.
+
+------------------------------------------------------------------
+
+UPLOAD CARDAMOM LOT
+Once your auction token is approved, you can upload your cardamom lot.
+Steps:
+1. Login to CardoLink.
+2. Go to Seller Dashboard.
+3. Click "Add New Lot".
+4. Enter the following information:
+   - Auction Token Number
+   - Lot Name
+   - Cardamom Variety
+   - Weight (kg)
+   - Grade
+   - Expected Price
+5. Upload clear images of the cardamom.
+6. Add an optional description about the product quality.
+7. Click "Submit".
+8. Your lot will be available for admin verification before it appears in the auction.
+
+------------------------------------------------------------------
+
+TRACK LOT STATUS
+You can monitor the status of every cardamom lot you upload.
+Steps:
+1. Login to CardoLink.
+2. Open Seller Dashboard.
+3. Click "My Lots".
+4. Select a lot to view its details.
+5. You can check:
+   - Pending Approval
+   - Approved
+   - Live Auction
+   - Sold
+   - Unsold
+6. You can also view:
+   - Current Highest Bid
+   - Number of Bids
+   - Auction End Time
+   - Winning Buyer (after auction completion)
+
+------------------------------------------------------------------
+
+VIEW AUCTION RESULTS
+After the auction ends, sellers can view the auction results.
+Steps:
+1. Login to CardoLink.
+2. Go to Seller Dashboard.
+3. Open "Auction Results".
+4. Select your lot.
+5. View:
+   - Final Selling Price
+   - Highest Bid
+   - Winning Buyer
+   - Auction Date
+   - Payment Status
+
+------------------------------------------------------------------
+
+PAYMENT STATUS
+After your lot is sold, you can check the payment details.
+Steps:
+1. Login to CardoLink.
+2. Open Seller Dashboard.
+3. Click "Payments".
+4. View:
+   - Payment Amount
+   - Payment Date
+   - Transaction ID
+   - Payment Status
+5. Download the payment receipt if required.

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Delete Harvest Batch" %} #{{ object.id }} - CardaLink{% endblock title %}
+
+{% block content %}
+<div class="py-4">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'estates:list' %}" class="text-decoration-none">Estates</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'estates:detail' object.estate.pk %}" class="text-decoration-none">{{ object.estate.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% translate "Delete Harvest Batch" %}</li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+          <div class="text-danger mb-2">
+            <i class="bi bi-trash3-fill" style="font-size: 3rem;"></i>
+          </div>
+          <h2 class="h3 fw-bold text-danger">{% translate "Delete Harvest Batch?" %}</h2>
+          <p class="text-muted">
+            {% blocktranslate with id=object.id name=object.estate.name %}
+              Are you sure you want to delete harvest batch #{{ id }} from <strong>{{ name }}</strong>?
+            {% endblocktranslate %}
+          </p>
+        </div>
+
+        <div class="bg-light p-3 rounded-3 mb-4">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Harvest Date:</span>
+            <strong class="text-dark">{{ object.harvest_date }}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Weight:</span>
+            <strong class="text-dark">{{ object.weight_kg }} kg</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Grade:</span>
+            <span>{{ object.get_grade_display }}</span>
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex gap-2 justify-content-between">
+            <a href="{% url 'estates:detail' object.estate.pk %}" class="btn btn-outline-secondary rounded-pill px-4">
+              {% translate "Cancel" %}
+            </a>
+            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
+              <i class="bi bi-trash-fill me-1"></i> {% translate "Confirm Delete" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

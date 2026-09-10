@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ estate.name }} - CardaLink{% endblock title %}
+
+{% block content %}
+<div class="py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-emerald"><i class="bi bi-house-door me-1"></i>Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'estates:list' %}" class="text-decoration-none text-emerald">Estates</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ estate.name }}</li>
+    </ol>
+  </nav>
+
+  <!-- Hero Header Banner -->
+  <div class="estate-detail-hero mb-4">
+    <div class="estate-hero-banner">
+      {% if estate.primary_photo %}
+        <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}">
+      {% elif estate.photos.first %}
+        <img src="{{ estate.photos.first.image.url }}" alt="{{ estate.name }}">
+      {% endif %}
+      <div class="estate-hero-overlay">
+        <div class="w-100">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="badge bg-emerald-gold text-dark fw-bold px-3 py-1 rounded-pill">
+              <i class="bi bi-patch-check-fill me-1"></i> Verified Estate
+            </span>
+            <span class="badge bg-white-10 text-white px-3 py-1 rounded-pill">
+              <i class="bi bi-bounding-box me-1"></i> {{ estate.area_in_acres }} Acres
+            </span>
+            <span class="badge bg-white-10 text-white px-3 py-1 rounded-pill">
+              <i class="bi bi-geo-alt-fill me-1"></i> {{ estate.location }}
+            </span>
+          </div>
+          <h1 class="display-5 fw-bold text-white mb-1 font-heading">{{ estate.name }}</h1>
+          <p class="text-white-50 lead mb-0">
+            Owned & Managed by <strong class="text-white">{{ estate.owner_name|default:estate.owner.name|default:"Verified Cardamom Grower" }}</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Action Bar -->
+    <div class="p-3 bg-white border-top d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        {% if estate.phone_number %}
+          <a href="tel:{{ estate.phone_number }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-telephone-fill me-1"></i> Call: {{ estate.phone_number }}
+          </a>
+          <a href="https://wa.me/{{ estate.phone_number|cut:' '|cut:'+'|cut:'-' }}" target="_blank" class="btn btn-success rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        {% if request.user == estate.owner or request.user.is_staff %}
+          <a href="{% url 'estates:harvest-create' estate.pk %}" class="btn btn-success rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Log Harvest Batch
+          </a>
+          <a href="{% url 'estates:update' estate.pk %}" class="btn btn-emerald-register text-white rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-pencil-square me-1"></i> Edit Estate
+          </a>
+          <a href="{% url 'estates:delete' estate.pk %}" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-trash me-1"></i> Delete
+          </a>
+        {% endif %}
+        <a href="{% url 'estates:list' %}" class="btn btn-outline-secondary rounded-pill px-3 py-2">
+          <i class="bi bi-arrow-left me-1"></i> All Estates
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Specs Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="spec-box">
+        <div class="spec-icon"><i class="bi bi-bounding-box-circles"></i></div>
+        <div class="text-muted small">Total Plantation Area</div>
+        <h4 class="fw-bold mb-0 text-emerald">{{ estate.area_in_acres }} <span class="fs-6 text-muted">Acres</span></h4>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="spec-box">
+        <div class="spec-icon"><i class="bi bi-geo-alt"></i></div>
+        <div class="text-muted small">Region / District</div>
+        <h4 class="fw-bold mb-0 text-emerald fs-5 text-truncate">{{ estate.location }}</h4>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="spec-box">
+        <div class="spec-icon"><i class="bi bi-camera"></i></div>
+        <div class="text-muted small">Photo Gallery</div>
+        <h4 class="fw-bold mb-0 text-emerald">{{ estate.photos.count|add:1 }} <span class="fs-6 text-muted">Photos</span></h4>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="spec-box">
+        <div class="spec-icon"><i class="bi bi-box-seam"></i></div>
+        <div class="text-muted small">Harvest Batches</div>
+        <h4 class="fw-bold mb-0 text-emerald">{{ estate.harvest_batches.count }} <span class="fs-6 text-muted">Lots</span></h4>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Details & Photo Gallery -->
+    <div class="col-lg-8">
+      <!-- Photo Gallery Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <h4 class="fw-bold mb-0 text-emerald font-heading">
+            <i class="bi bi-images me-2"></i> Plantation Photo Gallery
+          </h4>
+          <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">
+            {{ estate.photos.count|add:1 }} High-Res Photo{{ estate.photos.count|pluralize }}
+          </span>
+        </div>
+
+        <div class="gallery-grid">
+          <!-- Primary Photo if exists -->
+          {% if estate.primary_photo %}
+            <div class="gallery-card" onclick="openPhotoModal('{{ estate.primary_photo.url }}', 'Primary Cover Photo - {{ estate.name }}')">
+              <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}">
+              <span class="preview-badge-primary"><i class="bi bi-star-fill me-1"></i>Primary Cover</span>
+              <div class="gallery-overlay-caption">
+                <i class="bi bi-arrows-fullscreen me-1"></i> Click to enlarge
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Additional Gallery Photos -->
+          {% for photo in estate.photos.all %}
+            <div class="gallery-card" onclick="openPhotoModal('{{ photo.image.url }}', '{{ photo.caption|default:estate.name }}')">
+              <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:estate.name }}">
+              <div class="gallery-overlay-caption">
+                <i class="bi bi-arrows-fullscreen me-1"></i> {{ photo.caption|default:"Click to enlarge" }}
+              </div>
+            </div>
+          {% empty %}
+            {% if not estate.primary_photo %}
+              <div class="col-12 text-center py-4 text-muted">
+                <i class="bi bi-camera display-4 text-emerald-light"></i>
+                <p class="mt-2 mb-0">No gallery photos uploaded yet.</p>
+                {% if request.user == estate.owner %}
+                  <a href="{% url 'estates:update' estate.pk %}" class="btn btn-sm btn-outline-success mt-2 rounded-pill">
+                    <i class="bi bi-upload me-1"></i> Upload Photos
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Description & Cultivation Information -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <h4 class="fw-bold mb-3 text-emerald font-heading">
+          <i class="bi bi-file-earmark-text me-2"></i> Estate Overview & Cultivation Practices
+        </h4>
+        {% if estate.description %}
+          <div class="text-dark leading-relaxed" style="white-space: pre-line; line-height: 1.7;">
+            {{ estate.description }}
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No specific cultivation notes added for this estate yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- Harvest Batches -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
+          <div>
+            <h4 class="fw-bold mb-0 text-emerald font-heading">
+              <i class="bi bi-box-seam-fill me-2"></i> Harvest Batches & Curing Lots
+            </h4>
+            <span class="text-muted small">Total Yield: <strong class="text-emerald">{{ estate.total_harvest_kg }} kg</strong> across {{ estate.harvest_batches.count }} lot{{ estate.harvest_batches.count|pluralize }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            {% if request.user == estate.owner or request.user.is_staff %}
+              <a href="{% url 'estates:harvest-create' estate.pk %}" class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Log Harvest Batch
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if estate.harvest_batches.all %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Harvest Date</th>
+                  <th>Grade</th>
+                  <th>Weight</th>
+                  <th>Certificate</th>
+                  {% if request.user == estate.owner or request.user.is_staff %}
+                    <th class="text-end">Actions</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for batch in estate.harvest_batches.all %}
+                  <tr>
+                    <td class="text-muted small">#{{ batch.id }}</td>
+                    <td class="fw-semibold">{{ batch.harvest_date }}</td>
+                    <td>
+                      <span class="badge bg-emerald-medium text-white px-2 py-1 rounded-pill">
+                        {{ batch.get_grade_display }}
+                      </span>
+                    </td>
+                    <td class="fw-bold text-emerald">{{ batch.weight_kg }} kg</td>
+                    <td>
+                      {% if batch.quality_certificate %}
+                        <a href="{{ batch.quality_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2">
+                          <i class="bi bi-file-earmark-pdf me-1"></i> View Lab PDF
+                        </a>
+                      {% else %}
+                        <span class="text-muted small">Standard Assortment</span>
+                      {% endif %}
+                    </td>
+                    {% if request.user == estate.owner or request.user.is_staff %}
+                      <td class="text-end">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <a href="{% url 'estates:harvest-update' batch.pk %}" class="btn btn-light border" title="Edit Batch">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                          <a href="{% url 'estates:harvest-delete' batch.pk %}" class="btn btn-light border text-danger" title="Delete Batch">
+                            <i class="bi bi-trash"></i>
+                          </a>
+                        </div>
+                      </td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-box-seam display-4 text-emerald-light"></i>
+            <p class="mt-2 mb-2">No harvest batches logged for this estate yet.</p>
+            {% if request.user == estate.owner or request.user.is_staff %}
+              <a href="{% url 'estates:harvest-create' estate.pk %}" class="btn btn-sm btn-success rounded-pill px-3">
+                <i class="bi bi-plus-circle me-1"></i> Log First Harvest Batch
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Owner Contact & Verified Details -->
+    <div class="col-lg-4">
+      <!-- Owner Contact Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <h5 class="fw-bold text-emerald mb-3 font-heading">
+          <i class="bi bi-person-lines-fill me-2"></i> Owner & Contact Info
+        </h5>
+        
+        <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded-3">
+          <div class="user-avatar-circle" style="width: 48px; height: 48px; font-size: 1.25rem;">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 text-dark">{{ estate.owner_name|default:estate.owner.name|default:"Estate Proprietor" }}</h6>
+            <span class="text-muted small">Registered Plantation Owner</span>
+          </div>
+        </div>
+
+        <ul class="list-unstyled d-flex flex-column gap-3 mb-4">
+          {% if estate.phone_number %}
+            <li class="d-flex align-items-start gap-2">
+              <i class="bi bi-telephone-fill text-emerald mt-1"></i>
+              <div>
+                <div class="small text-muted">Contact Phone</div>
+                <a href="tel:{{ estate.phone_number }}" class="fw-bold text-dark text-decoration-none">
+                  {{ estate.phone_number }}
+                </a>
+              </div>
+            </li>
+          {% endif %}
+
+          <li class="d-flex align-items-start gap-2">
+            <i class="bi bi-envelope-fill text-emerald mt-1"></i>
+            <div>
+              <div class="small text-muted">Owner Email</div>
+              <span class="fw-medium text-dark">{{ estate.owner.email }}</span>
+            </div>
+          </li>
+
+          <li class="d-flex align-items-start gap-2">
+            <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
+            <div>
+              <div class="small text-muted">Full Address & Survey Details</div>
+              <div class="fw-medium text-dark">{{ estate.address|default:estate.location }}</div>
+            </div>
+          </li>
+
+          <li class="d-flex align-items-start gap-2">
+            <i class="bi bi-calendar-check-fill text-primary mt-1"></i>
+            <div>
+              <div class="small text-muted">Registered On</div>
+              <span class="fw-medium text-dark">{{ estate.created_at|date:"F d, Y" }}</span>
+            </div>
+          </li>
+        </ul>
+
+        {% if estate.phone_number %}
+          <div class="d-grid gap-2">
+            <a href="tel:{{ estate.phone_number }}" class="btn btn-emerald-register text-white rounded-pill py-2 fw-semibold">
+              <i class="bi bi-telephone-outbound-fill me-1"></i> Call Now
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Spices Board & Quality Assurance Badge -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-emerald-ultra-light border-emerald-light">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="bi bi-shield-check text-emerald fs-4"></i>
+          <h6 class="fw-bold text-emerald mb-0">CardaLink Quality Certified</h6>
+        </div>
+        <p class="small text-muted mb-0">
+          This plantation profile is verified under CardaLink digital cardamom registry standards for auction lot traceability.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox Modal for Photo Zoom -->
+<div class="modal fade" id="photoLightboxModal" tabindex="-1" aria-labelledby="photoLightboxModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
+      <div class="modal-header border-0 bg-dark text-white py-2">
+        <h6 class="modal-title" id="photoModalCaption">Photo View</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0 bg-black text-center">
+        <img id="photoModalImg" src="" alt="Zoomed Photo" style="max-height: 80vh; width: 100%; object-fit: contain;">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block inline_javascript %}
+<script>
+  function openPhotoModal(imgUrl, caption) {
+    const modalImg = document.getElementById('photoModalImg');
+    const modalCaption = document.getElementById('photoModalCaption');
+    if (modalImg && modalCaption) {
+      modalImg.src = imgUrl;
+      modalCaption.textContent = caption || 'Estate Photo';
+      const myModal = new bootstrap.Modal(document.getElementById('photoLightboxModal'));
+      myModal.show();
+    }
+  }
+</script>
+{% endblock inline_javascript %}

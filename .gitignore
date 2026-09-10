@@ -267,8 +267,9 @@ tags
 # Redis dump file
 dump.rdb
 
-### Project template
 carda_link/media/
+*.sqlite3
+db.sqlite3
 
 .pytest_cache/
 .ipython/

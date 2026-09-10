@@ -1,0 +1,319 @@
+BUYER REGISTRATION
+
+Keywords:
+buyer registration
+register buyer
+register as buyer
+create buyer account
+new buyer
+buyer account
+join as buyer
+become a buyer
+
+Frequently Asked Questions:
+How do I register as a buyer?
+How can I create a buyer account?
+How do I become a buyer?
+Where can I register as a buyer?
+I want to register as buyer.
+Buyer registration process.
+
+Description:
+To participate in CardaLink auctions, you must first register as a buyer account.
+
+Steps:
+1. Click the Register button on the homepage.
+2. Select Buyer as the account type.
+3. Enter your personal details.
+4. Verify the information.
+5. Submit the registration form.
+6. Login using your registered email and password.
+
+------------------------------------------------------------------
+
+LOGIN
+
+Keywords:
+login
+sign in
+buyer login
+log into account
+access account
+
+Frequently Asked Questions:
+How do I login?
+How can I sign in?
+I cannot login.
+Where do I login?
+How to access my account?
+
+Description:
+Login is required before participating in auctions.
+
+Steps:
+1. Click Sign In.
+2. Enter your email.
+3. Enter your password.
+4. Click Login.
+
+------------------------------------------------------------------
+
+VIEW LIVE AUCTIONS
+
+Keywords:
+live auction
+view auction
+auction list
+current auctions
+active auctions
+running auctions
+auction page
+auction details
+live bidding
+
+Frequently Asked Questions:
+How can I view live auctions?
+Can I see live auctions?
+Where are active auctions?
+Show available auctions.
+Open live auction page.
+How do I see current auctions?
+
+Description:
+This page displays all active cardamom auctions.
+
+Steps:
+1. Login.
+2. Open Live Auctions.
+3. Select a lot.
+4. View lot number, seller, grade, quantity, highest bid and closing time.
+
+------------------------------------------------------------------
+
+PLACE A BID
+
+Keywords:
+bid
+place bid
+submit bid
+auction bid
+offer price
+highest bid
+
+Frequently Asked Questions:
+How do I place a bid?
+How can I bid?
+Where do I submit a bid?
+Can I participate in auction?
+How do I bid for a lot?
+
+Description:
+You can place a bid on any active auction.
+
+Steps:
+1. Login.
+2. Open Live Auctions.
+3. Select a lot.
+4. Enter your bid amount.
+5. Click Submit Bid.
+
+------------------------------------------------------------------
+
+UPDATE YOUR BID
+
+Keywords:
+update bid
+change bid
+increase bid
+modify bid
+edit bid
+
+Frequently Asked Questions:
+How do I update my bid?
+Can I change my bid?
+How can I increase my bid?
+Edit my bid.
+
+Description:
+You can increase your bid before the auction closes.
+
+Steps:
+1. Open the auction.
+2. Enter a higher amount.
+3. Submit.
+
+------------------------------------------------------------------
+
+VIEW MY BIDS
+
+Keywords:
+my bids
+bid history
+placed bids
+current bids
+
+Frequently Asked Questions:
+How do I see my bids?
+Where are my bids?
+Show my bidding history.
+View bids.
+
+Description:
+Displays all bids placed by you.
+
+Steps:
+1. Login.
+2. Open My Bids.
+3. View auction details and bid status.
+
+------------------------------------------------------------------
+
+VIEW WINNING BIDS
+
+Keywords:
+winner
+winning bid
+won auction
+auction result
+winning history
+
+Frequently Asked Questions:
+Did I win the auction?
+How do I check winning bids?
+Show winners.
+View auction result.
+
+Description:
+Shows completed auctions and winning information.
+
+Steps:
+1. Login.
+2. Open Auction History.
+3. View winning status.
+
+------------------------------------------------------------------
+
+PAYMENT
+
+Keywords:
+payment
+pay
+payment status
+pay now
+transaction
+
+Frequently Asked Questions:
+How do I pay?
+Where can I make payment?
+Payment process.
+Complete payment.
+
+Description:
+Payment is required after winning an auction.
+
+Steps:
+1. Open Payments.
+2. Select auction.
+3. Pay.
+4. Download receipt.
+
+------------------------------------------------------------------
+
+DOWNLOAD INVOICE
+
+Keywords:
+invoice
+download invoice
+receipt
+payment receipt
+bill
+
+Frequently Asked Questions:
+How do I download invoice?
+Where is my invoice?
+Download receipt.
+Get payment bill.
+
+Description:
+Download the invoice after successful payment.
+
+Steps:
+1. Open Invoices.
+2. Select transaction.
+3. Download PDF.
+
+------------------------------------------------------------------
+
+VIEW PURCHASE HISTORY
+
+Keywords:
+purchase history
+previous purchases
+my purchases
+purchase details
+completed purchases
+history
+purchase record
+
+Frequently Asked Questions:
+How can I see purchase history?
+Show my purchase history.
+Where are my previous purchases?
+How do I view purchased lots?
+Show completed purchases.
+Purchase details.
+
+Description:
+Displays all completed purchases.
+
+Steps:
+1. Open Purchase History.
+2. View purchased lots.
+3. Check quantity, amount, payment status and purchase date.
+
+------------------------------------------------------------------
+
+PROFILE MANAGEMENT
+
+Keywords:
+profile
+edit profile
+update profile
+change profile
+change password
+
+Frequently Asked Questions:
+How do I update my profile?
+How can I edit my account?
+Change password.
+Update email.
+
+Description:
+Manage your account information.
+
+Steps:
+1. Open My Profile.
+2. Edit details.
+3. Save.
+
+------------------------------------------------------------------
+
+LOGOUT
+
+Keywords:
+logout
+sign out
+exit account
+log out
+
+Frequently Asked Questions:
+How do I logout?
+Sign out.
+Exit my account.
+
+Description:
+Logout securely from your account.
+
+Steps:
+1. Click Profile.
+2. Select Logout.
