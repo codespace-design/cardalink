@@ -143,8 +143,12 @@ def create_estate(request, payload: EstateCreateSchema):
     user = request.user if request.user.is_authenticated else None
     if not user:
         from django.contrib.auth import get_user_model
-        User = get_user_model()
-        user = User.objects.first()
+
+        user_model = get_user_model()
+        if not user_model.objects.exists():
+            user = None
+        else:
+            user = user_model.objects.first()
     owner_name = payload.owner_name or (user.name if user and getattr(user, "name", None) else "Estate Owner")
 
     estate = Estate.objects.create(
