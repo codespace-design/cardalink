@@ -145,7 +145,9 @@ def create_estate(request, payload: EstateCreateSchema):
         from django.contrib.auth import get_user_model
 
         user_model = get_user_model()
-        if not user_model.objects.exists():
+        if (
+            not user_model.objects.exists()
+        ):
             user = None
         else:
             user = user_model.objects.first()
