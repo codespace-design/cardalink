@@ -188,7 +188,7 @@ class WebsiteService:
                         headings_list.append(section.formatted_title)
 
             except Exception as e:
-                logger.error("Failed to read guide file %s: %s", filename, e)
+                logger.exception("Failed to read guide file %s", filename)
 
         self.suggested_questions = headings_list
 
@@ -334,7 +334,7 @@ class WebsiteService:
                         "matched": True,
                     }
             except Exception as e:
-                logger.error("TF-IDF website search error: %s", e)
+                logger.exception("TF-IDF website search error")
 
         # Dynamic fallback when confidence threshold is not met
         return self.get_dynamic_unknown_response()

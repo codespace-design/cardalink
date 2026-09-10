@@ -27,7 +27,7 @@ class FarmService:
 
                 self._client = genai.Client(api_key=api_key)
             except Exception as e:
-                logger.error("Failed to initialize Gemini client: %s", e)
+                logger.exception("Failed to initialize Gemini client")
                 return None
         return self._client
 
@@ -75,10 +75,14 @@ Instructions:
             except Exception as e:
                 err_str = str(e)
                 logger.warning(
-                    "Gemini API attempt %d/%d failed: %s", attempt, max_retries, err_str
+                    "Gemini API attempt %d/%d failed: %s",
+                    attempt,
+                    max_retries,
+                    err_str,
                 )
                 if attempt < max_retries:
                     import time
+
                     time.sleep(1)
                     continue
 
