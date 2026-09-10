@@ -191,6 +191,6 @@ class IntentClassifier:
                 return self.doc_categories[best_idx]
 
         except Exception as e:
-            logger.error("Error during intent classification: %s", e)
+            logger.exception("Error during intent classification")
 
         return "Unknown"
