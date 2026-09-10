@@ -96,3 +96,4 @@ Instructions:
                     "An error occurred while fetching information from the AI Farm Assistant.\n\n"
                     f"Details: {err_str}"
                 )
+        return "An unexpected error occurred."
