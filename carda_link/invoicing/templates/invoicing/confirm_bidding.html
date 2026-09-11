@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Bidding & Generate Invoice - CardaLink{% endblock title %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      
+      <!-- Back navigation -->
+      <div class="mb-3">
+        <a href="{% url 'invoicing:list' %}" class="text-decoration-none text-muted">
+          ← Back to Invoices List
+        </a>
+      </div>
+
+      <div class="card border-0 shadow-lg">
+        <div class="card-header bg-primary text-white py-3">
+          <h4 class="mb-0 fw-bold">
+            Confirm Bidding & Issue Invoice
+          </h4>
+          <p class="mb-0 text-white-50 small mt-1">
+            Finalize winning auction bid for a cardamom lot to automatically calculate total cost & generate detailed invoice.
+          </p>
+        </div>
+
+        <div class="card-body p-4">
+          <form method="post" id="bidding-confirm-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                  <div>{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- Lot Selection -->
+            <div class="mb-4">
+              <label for="{{ form.lot.id_for_label }}" class="form-label fw-bold">1. Select Auction Lot</label>
+              {{ form.lot }}
+              {% if form.lot.errors %}
+                <div class="text-danger small mt-1">{{ form.lot.errors.0 }}</div>
+              {% endif %}
+              <small class="form-text text-muted">Choose the lot that completed bidding.</small>
+            </div>
+
+            <!-- Buyer Selection -->
+            <div class="mb-4">
+              <label for="{{ form.buyer.id_for_label }}" class="form-label fw-bold">2. Winning Bidder / Buyer</label>
+              {{ form.buyer }}
+              {% if form.buyer.errors %}
+                <div class="text-danger small mt-1">{{ form.buyer.errors.0 }}</div>
+              {% endif %}
+              <small class="form-text text-muted">{{ form.buyer.help_text }}</small>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <!-- Winning Bid Rate -->
+              <div class="col-12 col-md-6">
+                <label for="{{ form.winning_bid_per_kg.id_for_label }}" class="form-label fw-bold">3. Winning Bid Rate (₹ / kg)</label>
+                {{ form.winning_bid_per_kg }}
+                {% if form.winning_bid_per_kg.errors %}
+                  <div class="text-danger small mt-1">{{ form.winning_bid_per_kg.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Commission Fee % -->
+              <div class="col-12 col-md-6">
+                <label for="{{ form.commission_percentage.id_for_label }}" class="form-label fw-bold">4. Platform Commission (%)</label>
+                {{ form.commission_percentage }}
+                {% if form.commission_percentage.errors %}
+                  <div class="text-danger small mt-1">{{ form.commission_percentage.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Settlement Preview Box -->
+            <div class="card bg-light border-primary-subtle mb-4">
+              <div class="card-body">
+                <h6 class="fw-bold text-primary mb-3">Invoice Settlement Estimate</h6>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Estimated Weight:</span>
+                  <span id="preview-weight" class="fw-semibold">-- kg</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Bid Rate:</span>
+                  <span id="preview-rate" class="fw-semibold">₹ 0.00 / kg</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Subtotal (Qty × Rate):</span>
+                  <span id="preview-subtotal" class="fw-semibold">₹ 0.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Commission Fee:</span>
+                  <span id="preview-commission" class="fw-semibold">₹ 0.00</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
+                  <span>Grand Total Payable:</span>
+                  <span id="preview-total" class="text-success">₹ 0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm">
+                Confirm Bidding & Display Full Invoice
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const lotSelect = document.getElementById('id_lot');
+    const bidInput = document.getElementById('id_winning_bid_per_kg');
+    const commInput = document.getElementById('id_commission_percentage');
+
+    const previewWeight = document.getElementById('preview-weight');
+    const previewRate = document.getElementById('preview-rate');
+    const previewSubtotal = document.getElementById('preview-subtotal');
+    const previewCommission = document.getElementById('preview-commission');
+    const previewTotal = document.getElementById('preview-total');
+
+    function updateCalculations() {
+      const rate = parseFloat(bidInput.value) || 0;
+      const commPct = parseFloat(commInput.value) || 0;
+
+      let weight = 250;
+      const selectedOptionText = lotSelect.options[lotSelect.selectedIndex]?.text || '';
+      
+      const match = selectedOptionText.match(/(\d+(\.\d+)?)\s*kg/i);
+      if (match) {
+        weight = parseFloat(match[1]);
+      }
+
+      const subtotal = weight * rate;
+      const commission = subtotal * (commPct / 100);
+      const total = subtotal + commission;
+
+      previewWeight.textContent = weight.toFixed(2) + ' kg';
+      previewRate.textContent = '₹ ' + rate.toFixed(2) + ' / kg';
+      previewSubtotal.textContent = '₹ ' + subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      previewCommission.textContent = '₹ ' + commission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      previewTotal.textContent = '₹ ' + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    if (lotSelect) lotSelect.addEventListener('change', updateCalculations);
+    if (bidInput) bidInput.addEventListener('input', updateCalculations);
+    if (commInput) commInput.addEventListener('input', updateCalculations);
+
+    updateCalculations();
+  });
+</script>
+{% endblock content %}

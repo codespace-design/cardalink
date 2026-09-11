@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice #INV-{{ invoice.id|stringformat:"04d" }} - CardaLink{% endblock title %}
+
+{% block content %}
+<style>
+  @media print {
+    body { background-color: #fff !important; }
+    .no-print { display: none !important; }
+    .card { border: none !important; shadow: none !important; }
+    .container { max-width: 100% !important; padding: 0 !important; }
+  }
+</style>
+
+<div class="container py-4">
+  <!-- Top Navigation & Action Controls -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 no-print gap-2">
+    <div>
+      <a href="{% url 'invoicing:list' %}" class="text-decoration-none text-muted">
+        ← Back to Invoices List
+      </a>
+    </div>
+    <div class="d-flex gap-2">
+      <button onclick="window.print()" class="btn btn-outline-secondary shadow-sm">
+        Print Invoice
+      </button>
+      {% if invoice.status == "PENDING" %}
+        <form method="post" action="{% url 'invoicing:pay' invoice.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success fw-bold shadow-sm">
+            Mark as Paid
+          </button>
+        </form>
+      {% endif %}
+      <a href="{% url 'invoicing:confirm' %}" class="btn btn-primary shadow-sm">
+        + Confirm New Bidding
+      </a>
+    </div>
+  </div>
+
+  <!-- Invoice Main Container -->
+  <div class="card border-0 shadow-lg p-4 p-md-5 bg-white">
+    <!-- Invoice Header -->
+    <div class="row pb-4 mb-4 border-bottom align-items-center">
+      <div class="col-12 col-md-6 mb-3 mb-md-0">
+        <h2 class="fw-bold text-success mb-1">CardaLink</h2>
+        <p class="text-muted mb-0 small">Official Cardamom Auction & Estate Settlement Invoice</p>
+      </div>
+      <div class="col-12 col-md-6 text-md-end">
+        <h3 class="fw-bold text-dark mb-1">INVOICE</h3>
+        <div class="fs-5 text-primary fw-bold">#INV-{{ invoice.id|stringformat:"04d" }}</div>
+        <div class="mt-2">
+          {% if invoice.status == "PAID" %}
+            <span class="badge bg-success fs-6 px-3 py-2">PAID</span>
+          {% elif invoice.status == "PENDING" %}
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">PENDING PAYMENT</span>
+          {% elif invoice.status == "REFUNDED" %}
+            <span class="badge bg-info text-white fs-6 px-3 py-2">REFUNDED</span>
+          {% else %}
+            <span class="badge bg-danger text-white fs-6 px-3 py-2">FAILED</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Dates & Reference -->
+    <div class="row bg-light rounded p-3 mb-4 g-3">
+      <div class="col-6 col-md-3">
+        <small class="text-uppercase text-muted fw-bold d-block">Issued Date</small>
+        <span class="fw-semibold text-dark">{{ invoice.issued_at|date:"F d, Y" }}</span>
+      </div>
+      <div class="col-6 col-md-3">
+        <small class="text-uppercase text-muted fw-bold d-block">Payment Date</small>
+        <span class="fw-semibold text-dark">
+          {% if invoice.paid_at %}
+            {{ invoice.paid_at|date:"F d, Y H:i" }}
+          {% else %}
+            Pending
+          {% endif %}
+        </span>
+      </div>
+      <div class="col-6 col-md-3">
+        <small class="text-uppercase text-muted fw-bold d-block">Auction</small>
+        <span class="fw-semibold text-dark">{{ invoice.lot.auction.title }}</span>
+      </div>
+      <div class="col-6 col-md-3">
+        <small class="text-uppercase text-muted fw-bold d-block">Lot Number</small>
+        <span class="fw-semibold text-dark">Lot #{{ invoice.lot.lot_number }}</span>
+      </div>
+    </div>
+
+    <!-- Buyer and Seller / Estate Info -->
+    <div class="row mb-4 g-4">
+      <div class="col-12 col-md-6">
+        <div class="border rounded p-3 h-100">
+          <h6 class="fw-bold text-uppercase text-primary mb-3">Billed To (Buyer)</h6>
+          <div class="fw-bold fs-5 text-dark">
+            {{ invoice.buyer.name|default:invoice.buyer.email }}
+          </div>
+          <div class="text-muted small mb-1">Email: {{ invoice.buyer.email }}</div>
+          <div class="text-muted small">Status: Verified Auction Participant</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="border rounded p-3 h-100">
+          <h6 class="fw-bold text-uppercase text-primary mb-3">Producer / Estate Details</h6>
+          <div class="fw-bold fs-5 text-dark">{{ estate.name }}</div>
+          <div class="text-muted small mb-1">Location: {{ estate.location }}</div>
+          <div class="text-muted small">Estate Owner: {{ estate.owner.name|default:estate.owner.email }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lot & Quality Details Bar -->
+    <div class="alert alert-success border-0 bg-success-subtle mb-4">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <strong>Cardamom Grade:</strong> <span class="badge bg-success fs-6">{{ harvest_batch.grade }}</span>
+        </div>
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <strong>Harvest Date:</strong> {{ harvest_batch.harvest_date|date:"M d, Y" }}
+        </div>
+        <div class="col-12 col-md-4">
+          <strong>Batch Total Weight:</strong> {{ weight_kg }} kg
+        </div>
+      </div>
+    </div>
+
+    <!-- Itemized Breakdown Table -->
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Description</th>
+            <th class="text-center">Quantity (kg)</th>
+            <th class="text-end">Rate (₹ / kg)</th>
+            <th class="text-end">Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="fw-bold">Cardamom Batch Lot #{{ lot.lot_number }}</div>
+              <small class="text-muted">Grade: {{ harvest_batch.get_grade_display }} ({{ harvest_batch.grade }})</small>
+            </td>
+            <td class="text-center fw-semibold">{{ weight_kg }} kg</td>
+            <td class="text-end">₹ {{ rate_per_kg|floatformat:2 }}</td>
+            <td class="text-end fw-bold">₹ {{ subtotal|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals & Payment Summary -->
+    <div class="row justify-content-end mb-4">
+      <div class="col-12 col-md-6 col-lg-5">
+        <div class="card bg-light border">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Subtotal:</span>
+              <span class="fw-semibold">₹ {{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Platform Commission Fee:</span>
+              <span class="fw-semibold">₹ {{ invoice.commission_fee|floatformat:2 }}</span>
+            </div>
+            <hr class="my-2">
+            <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
+              <span>Total Payable Amount:</span>
+              <span class="text-success">₹ {{ invoice.total_amount|floatformat:2 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="border-top pt-4 text-center text-muted small">
+      <p class="mb-1">Thank you for participating in the CardaLink Cardamom Auction platform.</p>
+      <p class="mb-0">For support or billing inquiries, please contact invoicing@cardalink.com</p>
+    </div>
+  </div>
+</div>
+{% endblock content %}
