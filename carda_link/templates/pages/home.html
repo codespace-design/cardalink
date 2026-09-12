@@ -1,102 +1,160 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}CardaLink - Next-Gen Cardamom Auction & Estate Monitoring System{% endblock title %}
+{% block title %}CardaLink - Cardamom Auction & Estate Platform{% endblock title %}
 
-{% block content %}
-<div class="py-4">
-  <!-- Hero Section -->
-  <div class="page-hero-card mb-5 p-5">
-    <div class="row align-items-center position-relative" style="z-index: 2;">
-      <div class="col-lg-8">
-        <span class="badge bg-white-10 text-emerald-light px-3 py-2 rounded-pill mb-3 fw-semibold fs-6">
-          <i class="bi bi-patch-check-fill me-2 text-emerald-gold"></i> Spices Board & Farm Intelligence Ecosystem
-        </span>
-        <h1 class="display-4 fw-extrabold text-white mb-3">
-          Empowering Cardamom Growers & Premium Spice Auctions
-        </h1>
-        <p class="lead text-white-50 mb-4" style="font-size: 1.15rem; line-height: 1.7;">
-          Register your plantation, upload high-resolution estate photos, track harvest grades (AGEB, AGB, AGS), bid in real-time auctions, and interact with our AI spice assistant.
-        </p>
-        <div class="d-flex flex-wrap gap-3">
-          <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white px-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
-            <i class="bi bi-plus-circle-fill fs-5"></i>
-            <span>Register Your Estate</span>
-          </a>
-          <a href="{% url 'auctions:simulation' %}" class="btn btn-light text-emerald px-4 py-3 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
-            <i class="bi bi-hammer fs-5"></i>
-            <span>Live Auctions Console</span>
-          </a>
-          <a href="{% url 'estates:list' %}" class="btn btn-outline-light px-4 py-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
-            <i class="bi bi-geo-alt-fill"></i>
-            <span>Explore Estates</span>
-          </a>
-        </div>
-      </div>
-      <div class="col-lg-4 text-center mt-4 mt-lg-0">
-        <div class="p-4 bg-white-10 rounded-4 border border-white-10 shadow-lg text-white">
-          <div class="upload-icon-circle mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
-            <i class="bi bi-robot text-emerald"></i>
+{% block bodyclass %}landing-offwhite-body{% endblock bodyclass %}
+
+{# Suppress navbar on the landing page per requirements #}
+{% block header %}{% endblock header %}
+
+{% block main_container %}
+<div class="landing-page-container">
+  <div class="container py-4 py-lg-5">
+    <div class="row align-items-center min-vh-100 g-5">
+      
+      <!-- Brand & Information Column -->
+      <div class="col-lg-6 col-xl-7">
+        <div class="landing-brand-panel pe-lg-4">
+          <h1 class="landing-brand-title mb-3">
+            <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+          </h1>
+          <p class="landing-brand-subtitle mb-4">
+            Direct Cardamom Trading &amp; Plantation Management Platform
+          </p>
+         
+
+          <div class="landing-value-points">
+            
           </div>
-          <h4 class="fw-bold mb-1">AI Spice Assistant</h4>
-          <p class="small text-white-50 mb-3">Instant answers for growers and buyers regarding lots, market trends, and regulations.</p>
-          <a href="{% url 'assistant:chatbot' %}" class="btn btn-sm btn-light rounded-pill px-3 py-2 w-100 fw-bold text-emerald">
-            <i class="bi bi-chat-dots-fill me-1"></i> Launch Assistant
-          </a>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Key Highlights Cards -->
-  <div class="row g-4 mb-5">
-    <!-- Estates Card -->
-    <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
-        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
-          <i class="bi bi-tree-fill text-emerald"></i>
-        </div>
-        <h4 class="fw-bold text-dark font-heading mb-2">Estate Profiles & Photos</h4>
-        <p class="text-muted mb-3">
-          Showcase your plantation with primary cover banners, acreage details, and high-resolution photo galleries.
-        </p>
-        <a href="{% url 'estates:list' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
-          Explore Estates <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-    </div>
+      <!-- Side Login & Sign-Up Card -->
+      <div class="col-lg-6 col-xl-5">
+        <div class="side-login-card">
+          {% if request.user.is_authenticated %}
+            <!-- Authenticated User State -->
+            <div class="text-center py-3">
+              <div class="user-status-pill mb-3">
+                <span class="status-indicator"></span>
+                <span>Signed in as <strong>{{ request.user.name|default:request.user.email }}</strong></span>
+              </div>
+              <div class="mb-4">
+                <span class="badge bg-emerald-subtle text-emerald text-uppercase px-3 py-2 fw-semibold">
+                  Role: {{ request.user.role }}
+                </span>
+              </div>
 
-    <!-- Live Auctions Card -->
-    <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
-        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
-          <i class="bi bi-hammer text-emerald"></i>
-        </div>
-        <h4 class="fw-bold text-dark font-heading mb-2">Live Spice Auctions</h4>
-        <p class="text-muted mb-3">
-          Participate in real-time auction bidding, view lot catalogs with quality grades (AGEB, AGB, AGS), and simulate buyer competition.
-        </p>
-        <a href="{% url 'auctions:simulation' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
-          Open Live Console <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-    </div>
+              <div class="d-grid gap-2 mb-3">
+                {% if request.user.role == 'SELLER' %}
+                  <a href="{% url 'seller_dashboard' %}" class="btn btn-emerald-primary py-3 fw-bold">
+                    Go to Seller Dashboard
+                  </a>
+                  <a href="{% url 'estates:list' %}?filter=mine" class="btn btn-outline-secondary py-2">
+                    Manage My Estates
+                  </a>
+                {% elif request.user.role == 'BUYER' %}
+                  <a href="{% url 'buyer_dashboard' %}" class="btn btn-emerald-primary py-3 fw-bold">
+                    Go to Buyer Dashboard
+                  </a>
+                  <a href="{% url 'auctions:simulation' %}" class="btn btn-outline-secondary py-2">
+                    Live Auction Room
+                  </a>
+                {% elif request.user.role == 'ADMIN' or request.user.is_staff or request.user.is_superuser %}
+                  <a href="{% url 'admin_dashboard' %}" class="btn btn-emerald-primary py-3 fw-bold">
+                    Go to Admin Portal
+                  </a>
+                {% else %}
+                  <a href="{% url 'users:redirect' %}" class="btn btn-emerald-primary py-3 fw-bold">
+                    Enter Portal
+                  </a>
+                {% endif %}
+              </div>
 
-    <!-- Harvest Grading & Provenance Card -->
-    <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
-        <div class="spec-icon mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
-          <i class="bi bi-award-fill text-emerald"></i>
+              <a href="{% url 'account_logout' %}" class="text-muted small text-decoration-none">
+                Sign Out
+              </a>
+            </div>
+          {% else %}
+            <!-- Unauthenticated Login Form -->
+            <div class="login-card-header mb-3">
+              <h2 class="login-card-title h4 fw-bold mb-1">Sign In</h2>
+              <p class="text-muted small mb-0">Access your CardaLink account</p>
+            </div>
+
+            {% if login_error %}
+              <div class="alert alert-danger py-2 px-3 small mb-3 border-0 rounded-3 shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+                <span>{{ login_error }}</span>
+              </div>
+            {% elif messages %}
+              {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} py-2 px-3 small mb-3 border-0 rounded-3 shadow-sm d-flex align-items-center gap-2">
+                  <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+                  <span>{{ message }}</span>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <!-- Sign In Form (Username / Password first) -->
+            <form method="post" action="" class="mb-3" autocomplete="off">
+              {% csrf_token %}
+              
+              <div class="mb-3">
+                <label for="id_login" class="form-label small fw-semibold text-secondary">Username or Email</label>
+                <input type="text" name="login" id="id_login" class="form-control form-control-lg form-input-clean" placeholder="Username or email address" value="{{ login_email|default:'' }}" required autocomplete="username">
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <label for="id_password" class="form-label small fw-semibold text-secondary mb-0">Password</label>
+                  <a href="{% url 'account_reset_password' %}" class="small text-emerald text-decoration-none fw-medium">Forgot password?</a>
+                </div>
+                <input type="password" name="password" id="id_password" class="form-control form-control-lg form-input-clean" placeholder="••••••••" required autocomplete="new-password" value="">
+              </div>
+
+              <div class="mb-3 form-check">
+                <input type="checkbox" name="remember" id="id_remember" class="form-check-input">
+                <label class="form-check-label text-muted small" for="id_remember">Remember this device</label>
+              </div>
+
+              <button type="submit" class="btn btn-emerald-primary w-100 py-3 fw-bold">
+                Sign In
+              </button>
+            </form>
+
+            <!-- Register Option (Directly under Sign In) -->
+            <div class="mb-3 text-center">
+              <a href="{% url 'register' %}" class="btn btn-register-action w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Register</span>
+              </a>
+            </div>
+          {% endif %}
         </div>
-        <h4 class="fw-bold text-dark font-heading mb-2">Harvest Quality Grading</h4>
-        <p class="text-muted mb-3">
-          Categorize cardamom harvests into Alleppey Green Extra Bold, Bold, and Superior lots with digital quality certificates.
-        </p>
-        <a href="{% url 'estates:register' %}" class="text-emerald fw-semibold text-decoration-none mt-auto">
-          Register Harvest Batch <i class="bi bi-arrow-right"></i>
-        </a>
       </div>
+
     </div>
   </div>
 </div>
-{% endblock content %}
+
+<script>
+  // Ensure password field is never pre-filled by browser password manager
+  (function() {
+    function resetPassword() {
+      const pwd = document.getElementById('id_password');
+      if (pwd) {
+        pwd.value = '';
+      }
+    }
+    resetPassword();
+    window.addEventListener('load', resetPassword);
+    window.addEventListener('pageshow', resetPassword);
+    document.addEventListener('DOMContentLoaded', resetPassword);
+    [30, 100, 250, 500, 1000].forEach(function(delay) {
+      setTimeout(resetPassword, delay);
+    });
+  })();
+</script>
+{% endblock main_container %}

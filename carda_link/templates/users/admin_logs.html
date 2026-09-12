@@ -1,0 +1,115 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Platform Audit Logs{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold font-heading mb-0">
+      <i class="bi bi-journal-text text-emerald me-2"></i>Administrator Audit Trail
+    </h4>
+    <div class="text-muted small">Comprehensive log of administrative interventions, approvals, quality ratings, and overrides</div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="admin-card mb-4 p-3">
+  <form method="get" class="row g-2 align-items-center">
+    <div class="col-md-5">
+      <select name="admin_user" class="form-select">
+        <option value="">All Administrators</option>
+        {% for admin_obj in admins %}
+          <option value="{{ admin_obj.pk }}" {% if selected_admin == admin_obj.pk|stringformat:"s" %}selected{% endif %}>
+            {{ admin_obj.email }} ({{ admin_obj.name|default:"Admin" }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <select name="action" class="form-select">
+        <option value="">All Action Types</option>
+        {% for act in distinct_actions %}
+          <option value="{{ act }}" {% if selected_action == act %}selected{% endif %}>{{ act }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-outline-emerald w-100">Filter</button>
+      {% if selected_admin or selected_action %}
+        <a href="{% url 'admin_audit_logs' %}" class="btn btn-outline-secondary" title="Reset Filters"><i class="bi bi-x-circle"></i></a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="admin-card">
+  {% if logs %}
+  <div class="table-responsive">
+    <table class="data-table align-middle">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Admin User</th>
+          <th>Action Type</th>
+          <th>Target Entity</th>
+          <th>Reason / Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="text-muted small font-monospace" style="white-space: nowrap;">
+            {{ log.timestamp|date:"Y-m-d H:i:s" }}
+          </td>
+          <td>
+            <div class="fw-semibold text-dark">{{ log.admin_user.email }}</div>
+            <div class="text-muted small">{{ log.admin_user.name|default:"Administrator" }}</div>
+          </td>
+          <td>
+            <span class="badge bg-secondary font-monospace">{{ log.action }}</span>
+          </td>
+          <td>
+            <div class="fw-bold">{{ log.target_model }} #{{ log.target_id }}</div>
+          </td>
+          <td class="small">
+            {{ log.reason|default:"—" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="small text-muted">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} audit log records</div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&admin_user={{ selected_admin }}&action={{ selected_action }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&admin_user={{ selected_admin }}&action={{ selected_action }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&admin_user={{ selected_admin }}&action={{ selected_action }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state text-center py-5">
+    <i class="bi bi-journal display-4 text-muted"></i>
+    <h5 class="mt-3">No Audit Logs Recorded</h5>
+    <p class="text-muted">No administrative action events match your filter criteria.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

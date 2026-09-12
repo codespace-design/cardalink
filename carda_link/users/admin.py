@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .forms import UserAdminChangeForm
 from .forms import UserAdminCreationForm
+from .models import AdminActionLog
 from .models import BuyerProfile
 from .models import SellerProfile
 from .models import User
@@ -41,6 +42,9 @@ class UserAdmin(auth_admin.UserAdmin):
                     "role",
                     "status",
                     "is_verified",
+                    "created_by_admin",
+                    "rejection_reason",
+                    "suspension_reason",
                 ),
             },
         ),
@@ -106,3 +110,11 @@ class SellerProfileAdmin(admin.ModelAdmin):
 class BuyerProfileAdmin(admin.ModelAdmin):
     list_display = ["user", "company_name", "business_type", "business_address"]
     search_fields = ["user__email", "user__name", "company_name", "business_type"]
+
+
+@admin.register(AdminActionLog)
+class AdminActionLogAdmin(admin.ModelAdmin):
+    list_display = ["timestamp", "admin_user", "action", "target_model", "target_id", "reason"]
+    list_filter = ["action", "target_model", "timestamp"]
+    search_fields = ["admin_user__email", "action", "target_model", "target_id", "reason"]
+    readonly_fields = ["admin_user", "action", "target_model", "target_id", "reason", "timestamp"]

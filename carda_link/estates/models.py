@@ -96,6 +96,8 @@ class HarvestBatch(models.Model):
         ("AGEB", "Alleppey Green Extra Bold"),
         ("AGB", "Alleppey Green Bold"),
         ("AGS", "Alleppey Green Superior"),
+        ("AGS1", "Alleppey Green Superior 1"),
+        ("AGS2", "Alleppey Green Superior 2"),
         ("UNGRADED", "Ungraded / Mixed"),
     ]
 
@@ -121,6 +123,8 @@ class HarvestBatch(models.Model):
         null=True,
         blank=True,
     )
+    is_rejected = models.BooleanField(_("Is Rejected"), default=False)
+    rejection_reason = models.TextField(_("Rejection Reason"), blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

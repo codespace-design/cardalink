@@ -7,7 +7,7 @@ from carda_link.assistant.services.farm_service import FarmService
 from carda_link.assistant.services.intent_service import IntentClassifier
 from carda_link.assistant.services.website_service import WebsiteService
 from carda_link.auctions.models import Auction, Bid, Lot
-from carda_link.estates.models import HarvestBatch
+from carda_link.estates.models import Estate, HarvestBatch
 from carda_link.users.models import User
 
 
@@ -91,9 +91,16 @@ class TestAssistantServices:
             email="buyer@test.com", password="password", role=User.Role.BUYER
         )
 
+        estate = Estate.objects.create(
+            owner=seller,
+            name="Assistant Test Plantation",
+            location="Idukki",
+            area_in_acres=5.0,
+        )
         batch = HarvestBatch.objects.create(
-            farmer=seller,
-            grade="AGE",
+            estate=estate,
+            harvest_date="2026-08-01",
+            grade="AGEB",
             weight_kg=100.0,
         )
 

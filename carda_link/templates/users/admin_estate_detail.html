@@ -1,0 +1,139 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Estate Details — {{ estate.name }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'admin_estates' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
+    <h4 class="fw-bold font-heading mb-0">Estate: {{ estate.name }}</h4>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-outline-primary btn-sm" target="_blank">
+      <i class="bi bi-box-arrow-up-right"></i> View Public Listing
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="admin-card h-100">
+      <h6 class="fw-bold text-muted text-uppercase mb-3">Plantation Overview</h6>
+      <table class="table table-borderless mb-0">
+        <tbody>
+          <tr><th class="ps-0 text-muted" style="width: 35%;">Estate Name</th><td class="fw-semibold">{{ estate.name }}</td></tr>
+          <tr><th class="ps-0 text-muted">Location</th><td><i class="bi bi-geo-alt text-danger me-1"></i>{{ estate.location }}</td></tr>
+          <tr><th class="ps-0 text-muted">Address</th><td>{{ estate.address|default:"—" }}</td></tr>
+          <tr><th class="ps-0 text-muted">Acreage</th><td>{{ estate.area_in_acres }} Acres</td></tr>
+          <tr><th class="ps-0 text-muted">Total Harvest</th><td class="fw-bold text-emerald">{{ estate.total_harvest_kg }} kg</td></tr>
+          <tr><th class="ps-0 text-muted">Registered On</th><td class="text-muted">{{ estate.created_at|date:"F d, Y" }}</td></tr>
+        </tbody>
+      </table>
+      {% if estate.description %}
+      <div class="border-top pt-3 mt-3">
+        <h6 class="fw-bold text-muted small text-uppercase mb-1">Description</h6>
+        <p class="text-muted small mb-0">{{ estate.description }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="admin-card h-100">
+      <h6 class="fw-bold text-muted text-uppercase mb-3">Owner / Contact Information</h6>
+      <table class="table table-borderless mb-0">
+        <tbody>
+          <tr><th class="ps-0 text-muted" style="width: 35%;">Owner Account</th><td>
+            {% if estate.owner %}
+              <a href="{% url 'admin_user_detail' estate.owner.pk %}" class="fw-semibold text-decoration-none">
+                {{ estate.owner.name|default:estate.owner.email }}
+              </a>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td></tr>
+          <tr><th class="ps-0 text-muted">Contact Name</th><td>{{ estate.owner_name|default:"—" }}</td></tr>
+          <tr><th class="ps-0 text-muted">Contact Phone</th><td>{{ estate.phone_number|default:"—" }}</td></tr>
+          <tr><th class="ps-0 text-muted">Owner Email</th><td>{{ estate.owner.email }}</td></tr>
+          <tr><th class="ps-0 text-muted">Account Status</th><td><span class="status-badge status-{{ estate.owner.status|lower }}">{{ estate.owner.get_status_display }}</span></td></tr>
+        </tbody>
+      </table>
+
+      {% if estate.primary_photo %}
+      <div class="mt-3 pt-3 border-top">
+        <h6 class="fw-bold text-muted small text-uppercase mb-2">Cover Photo</h6>
+        <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}" class="img-fluid rounded-3 border" style="max-height: 180px; width: 100%; object-fit: cover;">
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Harvest Batches & Grading Section -->
+<div class="admin-card">
+  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-award-fill text-emerald me-2"></i>Harvest Batches & Spices Board Quality Grading</h5>
+  </div>
+
+  {% if harvest_batches %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Batch #</th>
+          <th>Harvest Date</th>
+          <th>Weight (kg)</th>
+          <th>Current Grade</th>
+          <th>Auction Lot</th>
+          <th>Spices Board Grade Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for batch in harvest_batches %}
+        <tr>
+          <td class="fw-semibold">#{{ batch.id }}</td>
+          <td>{{ batch.harvest_date|date:"d M Y" }}</td>
+          <td>{{ batch.weight_kg }} kg</td>
+          <td>
+            {% if batch.grade == 'AGEB' %}
+              <span class="badge bg-success-subtle text-success border border-success fw-bold px-2 py-1">Alleppey Green Extra Bold (AGEB)</span>
+            {% elif batch.grade == 'AGB' %}
+              <span class="badge bg-primary-subtle text-primary border border-primary fw-bold px-2 py-1">Alleppey Green Bold (AGB)</span>
+            {% elif batch.grade == 'AGS' %}
+              <span class="badge bg-info-subtle text-info border border-info fw-bold px-2 py-1">Alleppey Green Superior (AGS)</span>
+            {% else %}
+              <span class="badge bg-warning-subtle text-warning border border-warning fw-bold px-2 py-1">Ungraded</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if batch.auction_lot %}
+              <span class="badge bg-dark">Lot #{{ batch.auction_lot.lot_number }}</span>
+            {% else %}
+              <span class="text-muted small">Not Cataloged</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'admin_harvest_grade_update' batch.pk %}" class="d-flex align-items-center gap-2">
+              {% csrf_token %}
+              <select name="grade" class="form-select form-select-sm" style="min-width: 140px;">
+                <option value="AGEB" {% if batch.grade == 'AGEB' %}selected{% endif %}>AGEB (Extra Bold)</option>
+                <option value="AGB" {% if batch.grade == 'AGB' %}selected{% endif %}>AGB (Bold)</option>
+                <option value="AGS" {% if batch.grade == 'AGS' %}selected{% endif %}>AGS (Superior)</option>
+                <option value="UNGRADED" {% if batch.grade == 'UNGRADED' %}selected{% endif %}>Ungraded</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-action btn-approve"><i class="bi bi-check2"></i> Set Grade</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-3">
+    <i class="bi bi-box-seam text-secondary fs-2"></i>
+    <h6 class="mt-2">No Harvest Batches Recorded for this Estate</h6>
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Verify Security Code - CardaLink{% endblock title %}
+
+{% block bodyclass %}landing-offwhite-body{% endblock bodyclass %}
+
+{# Suppress navbar #}
+{% block header %}{% endblock header %}
+
+{% block main_container %}
+<div class="landing-page-container d-flex align-items-center justify-content-center py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+        
+        <div class="auth-card text-center">
+          <!-- Brand Header -->
+          <h1 class="landing-brand-title justify-content-center mb-3" style="font-size: 2.25rem;">
+            <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+          </h1>
+
+          <div class="recovery-icon-circle mx-auto mb-3">
+            <i class="bi bi-shield-lock-fill text-emerald fs-2"></i>
+          </div>
+
+          <h2 class="h5 fw-bold text-dark mb-1">Verify Your Phone</h2>
+          <p class="text-muted small mb-3">
+            Enter the 6-digit security code sent to <strong>{{ masked_phone }}</strong>
+          </p>
+
+          <!-- Demo / Debug notification banner if running locally -->
+          {% if demo_otp %}
+            <div class="alert alert-success py-2 px-3 small rounded-3 mb-3 border-0 text-start shadow-sm d-flex align-items-center justify-content-between">
+              <div>
+                <i class="bi bi-broadcast me-1"></i>
+                <span>SMS Dispatched:</span>
+              </div>
+              <span class="badge bg-success fs-6 fw-bold px-2 py-1">{{ demo_otp }}</span>
+            </div>
+          {% endif %}
+
+          {% if error %}
+            <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3 border-0 text-start shadow-sm d-flex align-items-center gap-2">
+              <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+              <span>{{ error }}</span>
+            </div>
+          {% endif %}
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} py-2 px-3 small mb-3 text-start">
+                {{ message }}
+                <button type="button" class="btn-close py-2 px-3" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <!-- OTP Form -->
+          <form method="post" action="{% url 'account_verify_otp' %}">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label for="id_otp" class="form-label small fw-semibold text-secondary text-start w-100 mb-2">
+                6-Digit Verification Code
+              </label>
+              <input type="text" name="otp" id="id_otp" 
+                     class="form-control form-control-lg form-input-clean text-center fw-bold fs-3 letter-spacing-wide {% if error %}is-invalid{% endif %}" 
+                     placeholder="······" 
+                     maxlength="6"
+                     pattern="\d{6}"
+                     inputmode="numeric"
+                     autocomplete="one-time-code"
+                     required autofocus>
+            </div>
+
+            <button type="submit" class="btn btn-emerald-primary w-100 py-3 fw-bold mb-3">
+              Verify &amp; Continue &rarr;
+            </button>
+          </form>
+
+          <!-- Resend Code -->
+          <form method="post" action="{% url 'account_verify_otp' %}" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="resend">
+            <p class="text-muted small mb-0">
+              Didn't receive the SMS? 
+              <button type="submit" class="btn btn-link p-0 text-emerald fw-bold text-decoration-none small">
+                Resend Code
+              </button>
+            </p>
+          </form>
+
+          <div class="text-center pt-3 mt-3 border-top">
+            <a href="{% url 'account_reset_password' %}" class="small text-muted text-decoration-none">
+              &larr; Use another number or email
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock main_container %}

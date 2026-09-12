@@ -1,0 +1,37 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Rejected Registrations{% endblock %}
+
+{% block dashboard_content %}
+<h4 class="fw-bold font-heading mb-4"><i class="bi bi-person-x-fill text-emerald me-2"></i>Rejected Registrations</h4>
+
+<div class="admin-card">
+  {% if users %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Date</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="fw-semibold">{{ u.name|default:"—" }}</td>
+          <td>{{ u.email }}</td>
+          <td><span class="role-badge role-{{ u.role|lower }}">{{ u.get_role_display }}</span></td>
+          <td>{{ u.phone_number|default:"—" }}</td>
+          <td class="text-muted small">{{ u.created_at|date:"d M Y" }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'admin_user_detail' u.pk %}" class="btn-action btn-view"><i class="bi bi-eye"></i> View</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="bi bi-inbox"></i><h6>No Rejected Registrations</h6></div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

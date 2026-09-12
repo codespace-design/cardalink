@@ -49,12 +49,14 @@
   </head>
   <body class="{% block bodyclass %}{% endblock bodyclass %}">
     {% block body %}
+      {% block header %}
       <header class="carda-header sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark-emerald py-2 shadow-sm">
           <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-white fs-4" href="{% url 'home' %}">
-              <span class="brand-badge"><i class="bi bi-tree-fill text-emerald-light"></i></span>
-              <span>Carda<span class="text-emerald-gold">Link</span></span>
+            <a class="navbar-brand d-flex align-items-center text-decoration-none py-0" href="{% url 'home' %}" aria-label="CardaLink Home">
+              <span class="brand-capsule-nav">
+                <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+              </span>
             </a>
             <button class="navbar-toggler border-0"
                     type="button"
@@ -84,28 +86,93 @@
                 </li>
               </ul>
               <div class="d-flex align-items-center gap-2">
-                <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
-                  <i class="bi bi-plus-circle-fill"></i>
-                  <span>Register Estate</span>
-                </a>
+                {% if request.user.is_authenticated %}
+                  {% if request.user.role == 'SELLER' %}
+                    <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
+                      <i class="bi bi-plus-circle-fill"></i>
+                      <span>Register Estate</span>
+                    </a>
+                  {% elif request.user.role == 'BUYER' %}
+                    <a href="{% url 'auctions:simulation' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
+                      <i class="bi bi-hammer"></i>
+                      <span>Live Auctions</span>
+                    </a>
+                  {% elif request.user.role == 'ADMIN' %}
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
+                      <i class="bi bi-shield-lock-fill"></i>
+                      <span>Admin Portal</span>
+                    </a>
+                  {% endif %}
+                {% else %}
+                  <a href="{% url 'register' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Register</span>
+                  </a>
+                {% endif %}
+
                 <ul class="navbar-nav ms-2 align-items-center">
                   {% if request.user.is_authenticated %}
                     <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2 py-1 px-3 rounded-pill bg-white-10" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="user-avatar-circle"><i class="bi bi-person-fill"></i></span>
                         <span class="fw-medium">{{ request.user.name|default:request.user.email }}</span>
+                        <span class="role-badge role-{{ request.user.role|lower }} ms-1" style="font-size: 0.7rem; padding: 2px 6px;">{{ request.user.role }}</span>
                       </a>
                       <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="navbarUserDropdown">
-                        <li>
-                          <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'users:detail' request.user.pk %}">
-                            <i class="bi bi-person-badge text-emerald"></i> {% translate "My Profile" %}
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'estates:list' %}?filter=mine">
-                            <i class="bi bi-flower1 text-emerald"></i> {% translate "My Estates" %}
-                          </a>
-                        </li>
+                        {% if request.user.role == 'ADMIN' %}
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'admin_dashboard' %}">
+                              <i class="bi bi-shield-lock-fill text-emerald"></i> Admin Portal
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'admin_pending_registrations' %}">
+                              <i class="bi bi-person-plus-fill text-emerald"></i> Review Users
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'admin_estates' %}">
+                              <i class="bi bi-tree-fill text-emerald"></i> Manage Estates
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'admin_auctions' %}">
+                              <i class="bi bi-hammer text-emerald"></i> Manage Auctions
+                            </a>
+                          </li>
+                        {% elif request.user.role == 'SELLER' %}
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'seller_dashboard' %}">
+                              <i class="bi bi-grid-1x2-fill text-emerald"></i> Seller Dashboard
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'seller_profile' %}">
+                              <i class="bi bi-person-badge text-emerald"></i> Farm Profile
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'estates:list' %}?filter=mine">
+                              <i class="bi bi-flower1 text-emerald"></i> My Estates
+                            </a>
+                          </li>
+                        {% elif request.user.role == 'BUYER' %}
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'buyer_dashboard' %}">
+                              <i class="bi bi-grid-1x2-fill text-emerald"></i> Buyer Dashboard
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'buyer_profile' %}">
+                              <i class="bi bi-building text-emerald"></i> Business Profile
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'auctions:simulation' %}">
+                              <i class="bi bi-hammer text-emerald"></i> Live Auctions
+                            </a>
+                          </li>
+                        {% endif %}
                         <li><hr class="dropdown-divider"></li>
                         <li>
                           <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="{% url 'account_logout' %}">
@@ -115,11 +182,6 @@
                       </ul>
                     </li>
                   {% else %}
-                    {% if ACCOUNT_ALLOW_REGISTRATION %}
-                      <li class="nav-item">
-                        <a id="sign-up-link" class="nav-link text-white-50 hover-text-white" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-                      </li>
-                    {% endif %}
                     <li class="nav-item">
                       <a id="log-in-link" class="btn btn-outline-light btn-sm rounded-pill px-3 ms-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
                     </li>
@@ -130,6 +192,8 @@
           </div>
         </nav>
       </header>
+      {% endblock header %}
+      {% block main_container %}
       <div class="container">
         {% if messages %}
           {% for message in messages %}
@@ -148,6 +212,7 @@
           {% endblock content %}
         {% endblock main %}
       </div>
+      {% endblock main_container %}
     {% endblock body %}
     <!-- /container -->
     {% block modal %}

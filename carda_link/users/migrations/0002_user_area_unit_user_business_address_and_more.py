@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0001_initial'),
+        ('users', '0002_user_address_user_is_verified_user_license_number_and_more'),
     ]
 
     operations = [
@@ -56,17 +56,6 @@ class Migration(migrations.Migration):
             model_name='user',
             name='farm_name',
             field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Farm Name'),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='phone_number',
-            field=models.CharField(blank=True, max_length=20, null=True, unique=True, verbose_name='Phone Number'),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='role',
-            field=models.CharField(choices=[('ADMIN', 'Admin'), ('SELLER', 'Seller'), ('BUYER', 'Buyer')], default='BUYER', max_length=10, verbose_name='Role'),
-            preserve_default=False,
         ),
         migrations.AddField(
             model_name='user',

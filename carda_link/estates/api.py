@@ -117,7 +117,7 @@ class EstateUpdateSchema(Schema):
     description: Optional[str] = None
 
 
-@router.get("/health-check")
+@router.get("/health-check", auth=None)
 def estates_health_check(request):
     return {"status": "ok", "module": "Estates & Farm Intelligence"}
 

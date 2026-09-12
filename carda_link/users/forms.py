@@ -1,13 +1,51 @@
+from allauth.account.forms import LoginForm
+from allauth.account.forms import ResetPasswordForm
 from allauth.account.forms import SignupForm
 from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from django import forms
 from django.contrib.auth import forms as admin_forms
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from .models import BuyerProfile
 from .models import SellerProfile
 from .models import User
+
+
+class CustomLoginForm(LoginForm):
+    """Custom login form supporting admin, seller, and buyer authentication."""
+    pass
+
+
+class CustomResetPasswordForm(ResetPasswordForm):
+    """Password reset form verifying user existence with professional feedback."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "email" in self.fields:
+            self.fields["email"].widget.attrs.update(
+                {
+                    "class": "form-control form-control-lg form-input-clean",
+                    "placeholder": "name@example.com",
+                    "autocomplete": "email",
+                    "autofocus": "autofocus",
+                }
+            )
+
+    def clean_email(self) -> str:
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if not email:
+            raise ValidationError(_("Please enter your registered email address."))
+
+        if not User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(
+                _("No CardaLink account is registered with this email address. Please verify your email or create a new account.")
+            )
+
+        return super().clean_email()
+
+
 
 
 class UserAdminChangeForm(admin_forms.UserChangeForm):
@@ -137,8 +175,14 @@ class SellerSignupForm(forms.ModelForm):
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
 
+        if password:
+            try:
+                validate_password(password)
+            except ValidationError as error:
+                self.add_error("password", error)
+
         if password and confirm_password and password != confirm_password:
-            self.add_error("confirm_password", _("Passwords do not match."))
+            self.add_error("confirm_password", _("Passwords do not match. Please verify and try again."))
 
         farm_area = cleaned_data.get("farm_area")
         if farm_area is not None and farm_area <= 0:
@@ -230,8 +274,14 @@ class BuyerSignupForm(forms.ModelForm):
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
 
+        if password:
+            try:
+                validate_password(password)
+            except ValidationError as error:
+                self.add_error("password", error)
+
         if password and confirm_password and password != confirm_password:
-            self.add_error("confirm_password", _("Passwords do not match."))
+            self.add_error("confirm_password", _("Passwords do not match. Please verify and try again."))
 
         return cleaned_data
 

@@ -1,0 +1,264 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Auction Details — {{ auction.title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'admin_auctions' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Auctions</a>
+    <h4 class="fw-bold font-heading mb-0">{{ auction.title }}</h4>
+  </div>
+
+  <div class="d-flex gap-2 align-items-center flex-wrap">
+    {% if auction.status == "UPCOMING" %}
+      <a href="{% url 'admin_auction_lots_add' auction.pk %}" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Add Lots
+      </a>
+      <a href="{% url 'admin_auction_edit' auction.pk %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-pencil me-1"></i>Edit
+      </a>
+      <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelAuctionModal">
+        <i class="bi bi-x-circle me-1"></i>Cancel Auction
+      </button>
+    {% elif auction.status == "ACTIVE" %}
+      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#forceCloseAuctionModal">
+        <i class="bi bi-stop-circle me-1"></i>Force Close
+      </button>
+      <a href="{% url 'auctions:simulation' %}" class="btn btn-outline-primary btn-sm shadow-sm">
+        <i class="bi bi-broadcast me-1"></i>Live Console
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Cancellation Alert if Cancelled -->
+{% if auction.status == "CANCELLED" and auction.cancellation_reason %}
+  <div class="alert alert-danger d-flex align-items-center mb-4">
+    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+    <div>
+      <div class="fw-bold">This auction session was CANCELLED.</div>
+      <div><strong>Reason:</strong> {{ auction.cancellation_reason }}</div>
+    </div>
+  </div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="admin-card h-100">
+      <h6 class="fw-bold text-muted text-uppercase mb-3 border-bottom pb-2">
+        <i class="bi bi-calendar-event me-2 text-emerald"></i>Auction Schedule & Status
+      </h6>
+      <table class="table table-borderless mb-0">
+        <tbody>
+          <tr><th class="ps-0 text-muted" style="width: 35%;">Status</th><td>
+            <span class="status-badge {% if auction.status == 'ACTIVE' %}status-active{% elif auction.status == 'UPCOMING' %}status-pending{% elif auction.status == 'COMPLETED' %}bg-success text-white{% else %}status-suspended{% endif %}">
+              {{ auction.get_status_display }}
+            </span>
+          </td></tr>
+          <tr><th class="ps-0 text-muted">Start Time</th><td>{{ auction.start_time|date:"F d, Y H:i" }}</td></tr>
+          <tr><th class="ps-0 text-muted">End Time</th><td>{{ auction.end_time|date:"F d, Y H:i" }}</td></tr>
+          <tr><th class="ps-0 text-muted">Description</th><td>{{ auction.description|default:"—" }}</td></tr>
+          <tr><th class="ps-0 text-muted">Created At</th><td class="text-muted">{{ auction.created_at|date:"F d, Y" }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="admin-card h-100">
+      <h6 class="fw-bold text-muted text-uppercase mb-3 border-bottom pb-2">
+        <i class="bi bi-bar-chart-fill me-2 text-emerald"></i>Session Summary
+      </h6>
+      <div class="row g-3 text-center mt-1">
+        <div class="col-6">
+          <div class="p-3 bg-light rounded-3 border">
+            <h3 class="fw-bold text-emerald mb-1">{{ lots|length }}</h3>
+            <small class="text-muted text-uppercase fw-semibold">Lots Cataloged</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-3 bg-light rounded-3 border">
+            <h3 class="fw-bold text-success mb-1">
+              {% with sold_count=0 %}
+                {% for lot in lots %}{% if lot.is_sold %}{% with sold_count=sold_count|add:1 %}{% endwith %}{% endif %}{% endfor %}
+                {{ sold_count }}
+              {% endwith %}
+            </h3>
+            <small class="text-muted text-uppercase fw-semibold">Lots Sold</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cataloged Lots -->
+<div class="admin-card mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-card-list text-emerald me-2"></i>Cataloged Spice Lots</h5>
+    {% if auction.status == "UPCOMING" %}
+      <a href="{% url 'admin_auction_lots_add' auction.pk %}" class="btn btn-sm btn-outline-emerald">
+        <i class="bi bi-plus-lg me-1"></i>Add Harvest Batches to Auction
+      </a>
+    {% endif %}
+  </div>
+
+  {% if lots %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Lot #</th>
+          <th>Estate Origin</th>
+          <th>Farmer</th>
+          <th>Grade</th>
+          <th>Quantity</th>
+          <th>Base Price (₹/kg)</th>
+          <th>Highest Bid (₹/kg)</th>
+          <th>Status</th>
+          <th>Bids</th>
+          {% if auction.status == "UPCOMING" %}<th>Action</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for lot in lots %}
+        <tr>
+          <td class="fw-bold">Lot #{{ lot.lot_number }}</td>
+          <td>{{ lot.harvest_batch.estate.name }}</td>
+          <td class="small">{{ lot.harvest_batch.estate.owner.name|default:lot.harvest_batch.estate.owner.email }}</td>
+          <td>
+            <span class="badge bg-secondary">{{ lot.harvest_batch.grade }}</span>
+          </td>
+          <td>{{ lot.harvest_batch.weight_kg }} kg</td>
+          <td class="text-muted">₹{{ lot.base_price_per_kg }}</td>
+          <td class="fw-bold text-emerald">
+            {% if lot.highest_bid_per_kg %}
+              ₹{{ lot.highest_bid_per_kg }}
+            {% else %}
+              <span class="text-muted font-monospace">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if lot.is_sold %}
+              <span class="badge bg-success">Sold</span>
+            {% elif auction.status == 'ACTIVE' %}
+              <span class="badge bg-primary">Bidding Open</span>
+            {% else %}
+              <span class="badge bg-light text-dark border">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-light text-dark border">{{ lot.bids.count }} bids</span>
+          </td>
+          {% if auction.status == "UPCOMING" %}
+          <td>
+            {% if lot.bids.count == 0 %}
+              <form method="post" action="{% url 'admin_lot_remove' lot.pk %}" onsubmit="return confirm('Remove Lot #{{ lot.lot_number }} from this auction?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove lot">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            {% else %}
+              <span class="text-muted small" title="Cannot remove lot with bids">Locked</span>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-4 text-center">
+    <i class="bi bi-box text-secondary display-5"></i>
+    <h6 class="mt-2">No Lots Cataloged Yet</h6>
+    <p class="text-muted small">Select eligible harvest batches to create lots for this auction.</p>
+    {% if auction.status == "UPCOMING" %}
+      <a href="{% url 'admin_auction_lots_add' auction.pk %}" class="btn btn-emerald btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Catalog First Lots
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Audit Trail for Auction -->
+{% if action_logs %}
+<div class="admin-card">
+  <h6 class="fw-bold text-muted text-uppercase mb-3 border-bottom pb-2">
+    <i class="bi bi-clock-history me-1 text-emerald"></i>Auction Operations History
+  </h6>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead>
+        <tr><th>Timestamp</th><th>Admin User</th><th>Action</th><th>Remarks</th></tr>
+      </thead>
+      <tbody>
+        {% for log in action_logs %}
+        <tr>
+          <td class="small text-muted">{{ log.timestamp|date:"d M Y, H:i" }}</td>
+          <td>{{ log.admin_user.email }}</td>
+          <td><span class="badge bg-secondary">{{ log.action }}</span></td>
+          <td class="small">{{ log.reason|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Cancel Auction Modal -->
+<div class="modal fade" id="cancelAuctionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'admin_auction_cancel' auction.pk %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title text-danger"><i class="bi bi-x-circle me-2"></i>Cancel Auction Session</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>You are about to cancel <strong>{{ auction.title }}</strong>.</p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Cancellation Reason <span class="text-danger">*</span></label>
+            <textarea name="reason" class="form-control" rows="3" required placeholder="Specify reason for cancellation..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Force Close Modal -->
+<div class="modal fade" id="forceCloseAuctionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'admin_auction_force_close' auction.pk %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Emergency Force-Close</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Terminate <strong>{{ auction.title }}</strong> immediately?</p>
+          <ul class="text-muted small">
+            <li>Status changes to COMPLETED.</li>
+            <li>Current highest bids meeting base price will be locked as winners.</li>
+            <li>Invoices with platform commission will be generated.</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abort</button>
+          <button type="submit" class="btn btn-danger">Execute Force Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock dashboard_content %}

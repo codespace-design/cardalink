@@ -1,0 +1,167 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Manual User Registration{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <a href="{% url 'admin_all_users' %}" class="btn btn-sm btn-outline-secondary mb-2">
+      <i class="bi bi-arrow-left me-1"></i>Back to User Directory
+    </a>
+    <h4 class="fw-bold font-heading mb-0">
+      <i class="bi bi-person-badge-fill text-emerald me-2"></i>Manual User Registration
+    </h4>
+  </div>
+  <span class="badge bg-success text-white px-3 py-2 rounded-pill">
+    <i class="bi bi-lightning-charge-fill me-1"></i>Instant Active Setup (No OTP)
+  </span>
+</div>
+
+<div class="admin-card">
+  <form method="post" id="adminUserCreateForm" novalidate>
+    {% csrf_token %}
+
+    {% if form.errors %}
+      <div class="alert alert-danger mb-4">
+        <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please resolve the following errors:</div>
+        <ul class="mb-0 small">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- Account Details -->
+    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+      <i class="bi bi-shield-lock me-2 text-emerald"></i>Account Credentials & Role
+    </h5>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label for="id_admin_role" class="form-label fw-semibold">User Role <span class="text-danger">*</span></label>
+        {{ form.role }}
+      </div>
+      <div class="col-md-4">
+        <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+        {{ form.email }}
+      </div>
+      <div class="col-md-4">
+        <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">Full Legal Name <span class="text-danger">*</span></label>
+        {{ form.name }}
+      </div>
+      <div class="col-md-6">
+        <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">Temporary Password <span class="text-danger">*</span></label>
+        {{ form.password }}
+        <div class="form-text small">Minimum 8 characters with letters, numbers, and symbols.</div>
+      </div>
+      <div class="col-md-6">
+        <label for="{{ form.confirm_password.id_for_label }}" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+        {{ form.confirm_password }}
+      </div>
+      <div class="col-md-6">
+        <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold">Contact Phone</label>
+        {{ form.phone_number }}
+      </div>
+      <div class="col-md-6">
+        <label for="{{ form.license_number.id_for_label }}" class="form-label fw-semibold">Spices Board / License Number</label>
+        {{ form.license_number }}
+      </div>
+      <div class="col-12">
+        <label for="{{ form.address.id_for_label }}" class="form-label fw-semibold">Address / Location</label>
+        {{ form.address }}
+      </div>
+    </div>
+
+    <!-- Seller Profile Section -->
+    <div id="sellerProfileSection">
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="bi bi-tree me-2 text-emerald"></i>Cardamom Plantation / Farm Information
+      </h5>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="{{ form.farm_name.id_for_label }}" class="form-label fw-semibold">Farm / Estate Name <span class="text-danger">*</span></label>
+          {{ form.farm_name }}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ form.farm_location.id_for_label }}" class="form-label fw-semibold">Farm Location / Region <span class="text-danger">*</span></label>
+          {{ form.farm_location }}
+        </div>
+        <div class="col-md-4">
+          <label for="{{ form.farm_area.id_for_label }}" class="form-label fw-semibold">Plantation Area <span class="text-danger">*</span></label>
+          {{ form.farm_area }}
+        </div>
+        <div class="col-md-4">
+          <label for="{{ form.area_unit.id_for_label }}" class="form-label fw-semibold">Unit of Measurement</label>
+          {{ form.area_unit }}
+        </div>
+        <div class="col-md-4">
+          <label for="{{ form.cardamom_plants.id_for_label }}" class="form-label fw-semibold">Estimated Plants Count <span class="text-danger">*</span></label>
+          {{ form.cardamom_plants }}
+        </div>
+        <div class="col-12">
+          <label for="{{ form.cultivation_details.id_for_label }}" class="form-label fw-semibold">Cultivation Details</label>
+          {{ form.cultivation_details }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyer Profile Section -->
+    <div id="buyerProfileSection" style="display: none;">
+      <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+        <i class="bi bi-building me-2 text-primary"></i>Trading Firm / Buyer Information
+      </h5>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="{{ form.company_name.id_for_label }}" class="form-label fw-semibold">Company / Firm Name <span class="text-danger">*</span></label>
+          {{ form.company_name }}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ form.business_type.id_for_label }}" class="form-label fw-semibold">Business Type <span class="text-danger">*</span></label>
+          {{ form.business_type }}
+        </div>
+        <div class="col-12">
+          <label for="{{ form.business_address.id_for_label }}" class="form-label fw-semibold">Registered Business Address <span class="text-danger">*</span></label>
+          {{ form.business_address }}
+        </div>
+        <div class="col-12">
+          <label for="{{ form.business_details.id_for_label }}" class="form-label fw-semibold">Trading Experience / Operations</label>
+          {{ form.business_details }}
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 border-top pt-3">
+      <a href="{% url 'admin_all_users' %}" class="btn btn-secondary px-4">Cancel</a>
+      <button type="submit" class="btn btn-emerald px-5 fw-bold">
+        <i class="bi bi-check-circle-fill me-1"></i>Create & Activate Account
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const roleSelect = document.getElementById("id_admin_role");
+    const sellerSec = document.getElementById("sellerProfileSection");
+    const buyerSec = document.getElementById("buyerProfileSection");
+
+    function updateRoleView() {
+      if (roleSelect.value === "SELLER") {
+        sellerSec.style.display = "block";
+        buyerSec.style.display = "none";
+      } else if (roleSelect.value === "BUYER") {
+        sellerSec.style.display = "none";
+        buyerSec.style.display = "block";
+      }
+    }
+
+    roleSelect.addEventListener("change", updateRoleView);
+    updateRoleView();
+  });
+</script>
+{% endblock dashboard_content %}

@@ -27,6 +27,8 @@ class Auction(models.Model):
         choices=STATUS_CHOICES,
         default="UPCOMING",
     )
+    description = models.TextField(_("Auction Description"), blank=True, default="")
+    cancellation_reason = models.TextField(_("Cancellation Reason"), blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -49,15 +51,8 @@ class Auction(models.Model):
             self.close_auction()
 
     def close_auction(self):
-        self.status = "COMPLETED"
-        self.save(update_fields=["status"])
-        for lot in self.lots.all():
-            if (
-                lot.highest_bid_per_kg is not None
-                and lot.highest_bid_per_kg >= lot.base_price_per_kg
-            ):
-                lot.is_sold = True
-                lot.save(update_fields=["is_sold"])
+        from .services import close_auction as service_close_auction
+        service_close_auction(self)
 
 
 class Lot(models.Model):

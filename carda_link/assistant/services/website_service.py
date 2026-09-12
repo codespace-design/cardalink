@@ -4,8 +4,15 @@ from pathlib import Path
 import re
 from typing import Any
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    TfidfVectorizer = None  # type: ignore[assignment, misc]
+    cosine_similarity = None  # type: ignore[assignment, misc]
+    SKLEARN_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -193,7 +200,7 @@ class WebsiteService:
         self.suggested_questions = headings_list
 
     def _build_tfidf_index(self) -> None:
-        if not self.sections:
+        if not self.sections or not SKLEARN_AVAILABLE or TfidfVectorizer is None:
             self.vectorizer = None
             self.document_vectors = None
             return
@@ -290,20 +297,20 @@ class WebsiteService:
         # Stage 3: FAQ & Keyword Sentence Matching
         best_faq_section: GuideSection | None = None
         best_faq_score: float = 0.0
+        STOP_WORDS = {"how", "do", "i", "can", "where", "what", "is", "a", "to", "my", "the", "you", "explain"}
 
         for section in self.sections:
             all_patterns = section.faqs + section.keywords
             for item in all_patterns:
                 item_clean = re.sub(r"[^\w\s]", "", item.lower())
-                ratio = difflib.SequenceMatcher(None, item_clean, question_no_punct).ratio()
+                q_words = set(question_no_punct.split()) - STOP_WORDS
+                item_words = set(item_clean.split()) - STOP_WORDS
+                if not item_words or not q_words.intersection(item_words):
+                    continue
 
-                q_words = set(question_no_punct.split())
-                item_words = set(item_clean.split()) - {"how", "do", "i", "can", "where", "what", "is", "a", "to", "my", "the"}
-                if item_words:
-                    overlap = len(q_words.intersection(item_words)) / len(item_words)
-                    score = max(ratio, overlap)
-                else:
-                    score = ratio
+                ratio = difflib.SequenceMatcher(None, item_clean, question_no_punct).ratio()
+                overlap = len(q_words.intersection(item_words)) / len(item_words)
+                score = max(ratio, overlap)
 
                 if score > best_faq_score:
                     best_faq_score = score

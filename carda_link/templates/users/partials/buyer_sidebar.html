@@ -1,0 +1,46 @@
+{# Buyer sidebar partial — include in buyer dashboard/profile pages #}
+{# Usage: {% include "users/partials/buyer_sidebar.html" with active_item="dashboard" %} #}
+{# active_item options: "dashboard", "auctions", "estates", "assistant", "profile" #}
+<aside class="dashboard-sidebar" id="buyerSidebar">
+  <div class="sidebar-brand">
+    <div class="brand-capsule-sidebar">
+      <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+    </div>
+    <h5><i class="bi bi-briefcase-fill text-emerald-light me-2"></i>Buyer Portal</h5>
+    <small>{{ request.user.name|default:"Spice Trader" }}</small>
+  </div>
+  <ul class="sidebar-nav">
+    <li class="nav-section">Navigation</li>
+    <li class="nav-item">
+      <a href="{% url 'buyer_dashboard' %}" class="{% if active_item == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'auctions:simulation' %}" class="{% if active_item == 'auctions' %}active{% endif %}">
+        <i class="bi bi-hammer"></i> Live Auctions
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'estates:list' %}" class="{% if active_item == 'estates' %}active{% endif %}">
+        <i class="bi bi-geo-alt-fill"></i> Explore Estates
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'assistant:chatbot' %}" class="{% if active_item == 'assistant' %}active{% endif %}">
+        <i class="bi bi-robot"></i> AI Assistant
+      </a>
+    </li>
+    <li class="nav-section">Account</li>
+    <li class="nav-item">
+      <a href="{% url 'buyer_profile' %}" class="{% if active_item == 'profile' %}active{% endif %}">
+        <i class="bi bi-building"></i> Business Profile
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'account_logout' %}" class="text-danger">
+        <i class="bi bi-box-arrow-right"></i> Sign Out
+      </a>
+    </li>
+  </ul>
+</aside>

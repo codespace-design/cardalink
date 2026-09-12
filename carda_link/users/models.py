@@ -64,6 +64,9 @@ class User(AbstractUser):
         default="",
     )
     is_verified = models.BooleanField(_("Is Verified User"), default=False)
+    rejection_reason = models.TextField(_("Rejection Reason"), blank=True, default="")
+    suspension_reason = models.TextField(_("Suspension Reason"), blank=True, default="")
+    created_by_admin = models.BooleanField(_("Created by Admin"), default=False)
 
     @property
     def farm_name(self):
@@ -207,3 +210,38 @@ class BuyerProfile(models.Model):
 
     def __str__(self):
         return f"Buyer Profile: {self.user.email} - {self.company_name}"
+
+
+class AdminActionLog(models.Model):
+    admin_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="admin_actions",
+        verbose_name=_("Admin User"),
+    )
+    action = models.CharField(_("Action"), max_length=50)
+    target_model = models.CharField(_("Target Model"), max_length=50)
+    target_id = models.CharField(_("Target ID"), max_length=50)
+    reason = models.TextField(_("Reason / Remarks"), blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = _("Admin Action Log")
+        verbose_name_plural = _("Admin Action Logs")
+
+    def __str__(self):
+        return f"{self.timestamp:%Y-%m-%d %H:%M} | {self.admin_user.email} -> {self.action} on {self.target_model}#{self.target_id}"
+
+
+def log_admin_action(admin_user, action: str, target, reason: str | None = None) -> AdminActionLog:
+    """Helper to record audit trail of admin decisions and operations."""
+    target_model = target.__class__.__name__ if target is not None else "System"
+    target_id = str(getattr(target, "pk", target or ""))
+    return AdminActionLog.objects.create(
+        admin_user=admin_user,
+        action=action,
+        target_model=target_model,
+        target_id=target_id,
+        reason=reason or None,
+    )

@@ -1,0 +1,58 @@
+{% extends "users/dashboard_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Seller Profile — {{ request.user.name|default:request.user.email }}{% endblock %}
+
+{% block sidebar %}
+{% include "users/partials/seller_sidebar.html" with active_item="profile" %}
+{% endblock sidebar %}
+
+{% block dashboard_content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold font-heading mb-1 text-dark">Grower & Plantation Profile</h3>
+    <p class="text-muted mb-0">Your verified cardamom farmer and plantation details.</p>
+  </div>
+  <div>
+    <a href="{% url 'seller_profile_edit' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2">
+      <i class="bi bi-pencil-square"></i> Edit Profile
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="dash-section h-100">
+      <h5 class="fw-bold font-heading mb-3 border-bottom pb-2">
+        <i class="bi bi-person-circle text-emerald me-2"></i>Personal Details
+      </h5>
+      <table class="table table-borderless">
+        <tbody>
+          <tr><th class="text-muted ps-0" style="width: 40%;">Full Name</th><td class="fw-semibold">{{ request.user.name|default:"—" }}</td></tr>
+          <tr><th class="text-muted ps-0">Email Address</th><td>{{ request.user.email }}</td></tr>
+          <tr><th class="text-muted ps-0">Phone Number</th><td>{{ request.user.phone_number|default:"—" }}</td></tr>
+          <tr><th class="text-muted ps-0">Account Status</th><td><span class="status-badge status-{{ request.user.status|lower }}">{{ request.user.get_status_display }}</span></td></tr>
+          <tr><th class="text-muted ps-0">Member Since</th><td class="text-muted">{{ request.user.created_at|date:"d M Y" }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="dash-section h-100">
+      <h5 class="fw-bold font-heading mb-3 border-bottom pb-2">
+        <i class="bi bi-flower1 text-emerald me-2"></i>Farm Details
+      </h5>
+      <table class="table table-borderless">
+        <tbody>
+          <tr><th class="text-muted ps-0" style="width: 40%;">Farm / Estate Name</th><td class="fw-semibold">{{ profile.farm_name|default:"—" }}</td></tr>
+          <tr><th class="text-muted ps-0">Location</th><td>{{ profile.farm_location|default:"—" }}</td></tr>
+          <tr><th class="text-muted ps-0">Farm Area</th><td>{{ profile.farm_area }} {{ profile.get_area_unit_display }}</td></tr>
+          <tr><th class="text-muted ps-0">Cardamom Plants</th><td>{{ profile.cardamom_plants|default:"—" }} plants</td></tr>
+          <tr><th class="text-muted ps-0">Cultivation Details</th><td class="text-muted">{{ profile.cultivation_details|default:"—" }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock dashboard_content %}

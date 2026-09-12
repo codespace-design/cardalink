@@ -13,7 +13,6 @@ services:
     depends_on:
       - postgres
     volumes:
-      - /app/.venv
       - .:/app:z
     env_file:
       - ./.envs/.local/.django

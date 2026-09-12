@@ -1,0 +1,192 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Settlement & Invoicing Oversight{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold font-heading mb-0">
+      <i class="bi bi-receipt-cutoff text-emerald me-2"></i>Invoicing & Settlement Oversight
+    </h4>
+    <div class="text-muted small">Track buyer invoices, verify offline clearing, and oversee platform commission fees</div>
+  </div>
+  <a href="{% url 'admin_platform_settings' %}" class="btn btn-outline-emerald">
+    <i class="bi bi-sliders me-1"></i>Commission Rate Settings
+  </a>
+</div>
+
+<!-- Status Filter Tabs -->
+<div class="admin-card mb-4 p-2">
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'admin_invoices_list' %}" class="btn btn-sm {% if not status_filter %}btn-emerald{% else %}btn-outline-secondary{% endif %}">
+      All Invoices
+    </a>
+    {% for s_val, s_label in status_choices %}
+      <a href="{% url 'admin_invoices_list' %}?status={{ s_val }}" class="btn btn-sm {% if status_filter == s_val %}btn-emerald{% else %}btn-outline-secondary{% endif %}">
+        {{ s_label }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="admin-card">
+  {% if invoices %}
+  <div class="table-responsive">
+    <table class="data-table align-middle">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Auction & Lot</th>
+          <th>Buyer</th>
+          <th>Total Payable (₹)</th>
+          <th>Commission Fee (₹)</th>
+          <th>Status</th>
+          <th>Issued Date</th>
+          <th>Settlement Details</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td class="fw-bold">#{{ inv.id }}</td>
+          <td>
+            <div class="fw-semibold text-dark">{{ inv.lot.auction.title }}</div>
+            <div class="text-muted small">Lot #{{ inv.lot.lot_number }} ({{ inv.lot.harvest_batch.grade }})</div>
+          </td>
+          <td>
+            <div class="fw-medium">{{ inv.buyer.name|default:inv.buyer.email }}</div>
+            <div class="text-muted small">{{ inv.buyer.email }}</div>
+          </td>
+          <td class="fw-bold text-dark fs-6">₹{{ inv.total_amount }}</td>
+          <td class="text-emerald fw-semibold">₹{{ inv.commission_fee }}</td>
+          <td>
+            <span class="badge {% if inv.status == 'PAID' %}bg-success{% elif inv.status == 'PENDING' %}bg-warning text-dark{% elif inv.status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %} px-2 py-1">
+              {{ inv.get_status_display }}
+            </span>
+          </td>
+          <td class="text-muted small">{{ inv.issued_at|date:"d M Y" }}</td>
+          <td class="small">
+            {% if inv.status == 'PAID' and inv.paid_at %}
+              <div class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Cleared {{ inv.paid_at|date:"d M, H:i" }}</div>
+            {% endif %}
+            {% if inv.updated_by %}
+              <div class="text-muted">By: {{ inv.updated_by.email }}</div>
+            {% endif %}
+            {% if inv.status_note %}
+              <div class="text-muted fst-italic">"{{ inv.status_note|truncatechars:40 }}"</div>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1 align-items-center">
+              {% if inv.status != 'PAID' %}
+                <!-- Mark Paid Trigger -->
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#markPaidModal{{ inv.pk }}" title="Mark Paid">
+                  <i class="bi bi-check-lg me-1"></i>Mark Paid
+                </button>
+              {% endif %}
+
+              {% if inv.status != 'FAILED' %}
+                <!-- Mark Failed Trigger -->
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#markFailedModal{{ inv.pk }}" title="Mark Failed">
+                  <i class="bi bi-x-circle"></i>
+                </button>
+              {% endif %}
+            </div>
+
+            <!-- Mark Paid Modal -->
+            <div class="modal fade" id="markPaidModal{{ inv.pk }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form method="post" action="{% url 'admin_invoice_mark_paid' inv.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                      <h5 class="modal-title text-success"><i class="bi bi-check-circle-fill me-2"></i>Settle Invoice #{{ inv.id }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Mark Invoice #{{ inv.id }} for <strong>₹{{ inv.total_amount }}</strong> as <strong>PAID</strong>?</p>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Settlement / Reference Note (Optional)</label>
+                        <textarea name="status_note" class="form-control" rows="2" placeholder="e.g. Bank wire ref #99812, RTGS received..."></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-success">Confirm Payment Cleared</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mark Failed Modal -->
+            <div class="modal fade" id="markFailedModal{{ inv.pk }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form method="post" action="{% url 'admin_invoice_mark_failed' inv.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                      <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Fail Invoice #{{ inv.id }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Mark this invoice as <strong>FAILED</strong>?</p>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Failure Reason / Remarks</label>
+                        <textarea name="status_note" class="form-control" rows="2" placeholder="e.g. Buyer defaulted on payment window, bounced cheque..."></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-danger">Confirm Failed Status</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="small text-muted">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} invoices</div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&status={{ status_filter }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <div class="empty-state-icon-circle">
+      <i class="bi bi-receipt text-emerald fs-1"></i>
+    </div>
+    <h5 class="fw-bold text-dark font-heading mb-2">No Invoices Found</h5>
+    <p class="text-muted small mx-auto mb-0" style="max-width: 420px;">
+      No settlement invoices match your current filter parameters. Invoices are generated automatically as auctions conclude.
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

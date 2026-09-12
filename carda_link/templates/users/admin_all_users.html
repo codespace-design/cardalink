@@ -1,0 +1,182 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}All Users Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h4 class="fw-bold font-heading mb-0">
+    <i class="bi bi-people-fill text-emerald me-2"></i>Platform User Directory
+  </h4>
+  <a href="{% url 'admin_user_create' %}" class="btn btn-emerald">
+    <i class="bi bi-person-plus-fill me-1"></i>Manual User Registration
+  </a>
+</div>
+
+<!-- Filters & Search -->
+<div class="admin-card mb-4 p-3">
+  <form method="get" class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <div class="input-group">
+        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by name, email, phone, license...">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select name="role" class="form-select">
+        <option value="">All Roles</option>
+        {% for r_val, r_label in roles %}
+          <option value="{{ r_val }}" {% if role_filter == r_val %}selected{% endif %}>{{ r_label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="status" class="form-select">
+        <option value="">All Statuses</option>
+        {% for s_val, s_label in statuses %}
+          <option value="{{ s_val }}" {% if status_filter == s_val %}selected{% endif %}>{{ s_label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-outline-emerald w-100">Filter</button>
+      {% if search_query or role_filter or status_filter %}
+        <a href="{% url 'admin_all_users' %}" class="btn btn-outline-secondary" title="Reset Filters"><i class="bi bi-x-circle"></i></a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="admin-card">
+  {% if users %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User / Name</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Phone</th>
+          <th>License / Source</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div class="fw-bold">{{ u.name|default:"—" }}</div>
+            <div class="text-muted small">{{ u.email }}</div>
+          </td>
+          <td>
+            <span class="role-badge role-{{ u.role|lower }}">{{ u.get_role_display }}</span>
+          </td>
+          <td>
+            <span class="status-badge status-{{ u.status|lower }}">{{ u.get_status_display }}</span>
+          </td>
+          <td>{{ u.phone_number|default:"—" }}</td>
+          <td>
+            {% if u.created_by_admin %}
+              <span class="badge bg-info text-dark me-1" title="Created manually by Admin"><i class="bi bi-shield-check"></i> Admin Added</span>
+            {% endif %}
+            <span class="text-muted small">{{ u.license_number|default:"—" }}</span>
+          </td>
+          <td class="text-muted small">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            <div class="d-flex gap-1 align-items-center flex-wrap">
+              <a href="{% url 'admin_user_detail' u.pk %}" class="btn btn-sm btn-outline-secondary" title="View Profile">
+                <i class="bi bi-eye"></i>
+              </a>
+
+              {% if u.status == "ACTIVE" %}
+                <!-- Suspend Modal Trigger -->
+                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#suspendModal{{ u.pk }}" title="Suspend user">
+                  <i class="bi bi-pause-circle"></i>
+                </button>
+              {% elif u.status == "SUSPENDED" %}
+                <!-- Reactivate Form (POST) -->
+                <form method="post" action="{% url 'admin_user_reactivate' u.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-success" title="Reactivate user">
+                    <i class="bi bi-play-circle"></i> Reactivate
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+
+            <!-- Suspend Modal -->
+            {% if u.status == "ACTIVE" %}
+            <div class="modal fade" id="suspendModal{{ u.pk }}" tabindex="-1" aria-labelledby="suspendModalLabel{{ u.pk }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form method="post" action="{% url 'admin_user_suspend' u.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                      <h5 class="modal-title text-warning" id="suspendModalLabel{{ u.pk }}">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Suspend User Account
+                      </h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>You are about to suspend <strong>{{ u.email }}</strong>. The user will be barred from logging in and participating in auctions.</p>
+                      <div class="mb-3">
+                        <label for="suspend_reason_{{ u.pk }}" class="form-label fw-semibold">Suspension Reason <span class="text-danger">*</span></label>
+                        <textarea name="reason" id="suspend_reason_{{ u.pk }}" class="form-control" rows="3" required placeholder="Specify why this account is being suspended..."></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-warning">Confirm Suspension</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="small text-muted">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} users</div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&role={{ role_filter }}&status={{ status_filter }}&q={{ search_query }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&role={{ role_filter }}&status={{ status_filter }}&q={{ search_query }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&role={{ role_filter }}&status={{ status_filter }}&q={{ search_query }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <div class="empty-state-icon-circle">
+      <i class="bi bi-people text-emerald fs-1"></i>
+    </div>
+    <h5 class="fw-bold text-dark font-heading mb-2">No Users Found</h5>
+    <p class="text-muted small mx-auto mb-3" style="max-width: 420px;">
+      No registered accounts match your current filter parameters or search query.
+    </p>
+    <a href="{% url 'admin_all_users' %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3 py-2">
+      <i class="bi bi-arrow-clockwise me-1"></i>Reset All Filters
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

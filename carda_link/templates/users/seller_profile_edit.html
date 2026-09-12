@@ -1,0 +1,73 @@
+{% extends "users/dashboard_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Edit Seller Profile{% endblock %}
+
+{% block sidebar %}
+{% include "users/partials/seller_sidebar.html" with active_item="profile" %}
+{% endblock sidebar %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+  <a href="{% url 'seller_profile' %}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Profile</a>
+  <h3 class="fw-bold font-heading mb-1 text-dark">Edit Farm Profile</h3>
+  <p class="text-muted mb-0">Update your farm information and cardamom cultivation details.</p>
+</div>
+
+<div class="dash-section" style="max-width: 720px;">
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+          <div>{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="{{ form.farm_name.id_for_label }}" class="form-label fw-semibold">Farm / Estate Name</label>
+        {{ form.farm_name }}
+        {% if form.farm_name.errors %}<div class="text-danger small mt-1">{{ form.farm_name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label for="{{ form.farm_location.id_for_label }}" class="form-label fw-semibold">Farm Location</label>
+        {{ form.farm_location }}
+        {% if form.farm_location.errors %}<div class="text-danger small mt-1">{{ form.farm_location.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label for="{{ form.farm_area.id_for_label }}" class="form-label fw-semibold">Farm Area</label>
+        {{ form.farm_area }}
+        {% if form.farm_area.errors %}<div class="text-danger small mt-1">{{ form.farm_area.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label for="{{ form.area_unit.id_for_label }}" class="form-label fw-semibold">Area Unit</label>
+        {{ form.area_unit }}
+        {% if form.area_unit.errors %}<div class="text-danger small mt-1">{{ form.area_unit.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-12">
+        <label for="{{ form.cardamom_plants.id_for_label }}" class="form-label fw-semibold">Number of Cardamom Plants</label>
+        {{ form.cardamom_plants }}
+        {% if form.cardamom_plants.errors %}<div class="text-danger small mt-1">{{ form.cardamom_plants.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-12">
+        <label for="{{ form.cultivation_details.id_for_label }}" class="form-label fw-semibold">Cultivation Details & Varieties</label>
+        {{ form.cultivation_details }}
+        {% if form.cultivation_details.errors %}<div class="text-danger small mt-1">{{ form.cultivation_details.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-emerald-register text-white px-4 py-2 fw-semibold">Save Changes</button>
+      <a href="{% url 'seller_profile' %}" class="btn btn-outline-secondary px-4 py-2">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock dashboard_content %}

@@ -31,8 +31,13 @@ CACHES = {
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend",
+    default=(
+        "django.core.mail.backends.smtp.EmailBackend"
+        if env("DJANGO_EMAIL_HOST_USER", default="")
+        else "django.core.mail.backends.console.EmailBackend"
+    ),
 )
+
 
 # WhiteNoise
 # ------------------------------------------------------------------------------
@@ -57,6 +62,7 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TEMPLATE_CONTEXT": True,
 }
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
+INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 if env.str("USE_DOCKER", default="no") == "yes":
     import socket
 

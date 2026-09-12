@@ -1,0 +1,279 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Admin Dashboard Overview{% endblock %}
+
+{% block dashboard_content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold font-heading mb-0 text-dark">Executive Control Center</h4>
+      <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace small px-2 py-0.5">ADMIN</span>
+    </div>
+    <div class="text-muted small mt-1">Real-time cardamom auction monitoring, quality certification, and settlement oversight</div>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <a href="{% url 'admin_user_create' %}" class="btn btn-sm btn-emerald text-white d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm">
+      <i class="bi bi-person-plus-fill"></i> New User
+    </a>
+    <a href="{% url 'admin_auction_create' %}" class="btn btn-sm btn-outline-emerald d-inline-flex align-items-center gap-1.5 fw-semibold">
+      <i class="bi bi-calendar-plus-fill"></i> Schedule Auction
+    </a>
+  </div>
+</div>
+
+<!-- 8 Standardized Metric KPI Cards (2x4 Grid) -->
+<div class="row g-3 mb-4">
+  <!-- Card 1: Pending Approvals -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_pending_registrations' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-amber">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          {% if pending_users %}
+            <span class="kpi-tag kpi-tag-amber">Review Req</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">Clear</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ pending_users }}</div>
+        <div class="kpi-label">Pending Approvals</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 2: Active Directory -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_all_users' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-emerald">
+            <i class="bi bi-person-check-fill"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-emerald">Verified</span>
+        </div>
+        <div class="kpi-value">{{ active_users }}</div>
+        <div class="kpi-label">Active Directory</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 3: Ungraded Batches -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_batches_ungraded' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-rose">
+            <i class="bi bi-patch-check-fill"></i>
+          </div>
+          {% if ungraded_batches %}
+            <span class="kpi-tag kpi-tag-rose">In Queue</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">Certified</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ ungraded_batches }}</div>
+        <div class="kpi-label">Ungraded Batches</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 4: Pending Invoices -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_invoices_list' %}?status=PENDING" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-purple">
+            <i class="bi bi-receipt-cutoff"></i>
+          </div>
+          {% if pending_invoices %}
+            <span class="kpi-tag kpi-tag-purple">Unsettled</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">Settled</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ pending_invoices }}</div>
+        <div class="kpi-label">Pending Invoices</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 5: Active Auctions -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_auctions' %}?status=ACTIVE" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-cyan">
+            <i class="bi bi-broadcast"></i>
+          </div>
+          {% if active_auctions %}
+            <span class="kpi-tag kpi-tag-emerald">Live</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">No Live</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ active_auctions }}</div>
+        <div class="kpi-label">Active Auctions</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 6: Upcoming Sessions -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_auctions' %}?status=UPCOMING" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-indigo">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-indigo">Scheduled</span>
+        </div>
+        <div class="kpi-value">{{ upcoming_auctions }}</div>
+        <div class="kpi-label">Upcoming Sessions</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 7: Plantation Estates -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_estates' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-forest">
+            <i class="bi bi-tree-fill"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-emerald">Registered</span>
+        </div>
+        <div class="kpi-value">{{ total_estates }}</div>
+        <div class="kpi-label">Plantation Estates</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 8: Total Accounts -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'admin_all_users' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-slate">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-gray">Platform</span>
+        </div>
+        <div class="kpi-value">{{ total_users }}</div>
+        <div class="kpi-label">Total Accounts</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- Quick Action Shortcuts -->
+<div class="admin-card mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="fw-bold font-heading mb-0 text-dark"><i class="bi bi-lightning-charge-fill text-emerald me-2"></i>Quick Administrative Actions</h5>
+      <div class="text-muted small mt-0.5">Immediate shortcuts for routine daily operations</div>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{% url 'admin_pending_registrations' %}" class="admin-action-tile text-decoration-none">
+        <div class="action-tile-icon action-icon-amber">
+          <i class="bi bi-person-plus-fill"></i>
+        </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Pending Approvals</div>
+          <div class="action-tile-subtitle">{{ pending_users }} awaiting review</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{% url 'admin_batches_ungraded' %}" class="admin-action-tile text-decoration-none">
+        <div class="action-tile-icon action-icon-rose">
+          <i class="bi bi-patch-check-fill"></i>
+        </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Grade Verification</div>
+          <div class="action-tile-subtitle">{{ ungraded_batches }} batches in queue</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{% url 'admin_auction_create' %}" class="admin-action-tile text-decoration-none">
+        <div class="action-tile-icon action-icon-blue">
+          <i class="bi bi-calendar-plus-fill"></i>
+        </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Schedule Auction</div>
+          <div class="action-tile-subtitle">Create bidding session</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <a href="{% url 'admin_invoices_list' %}" class="admin-action-tile text-decoration-none">
+        <div class="action-tile-icon action-icon-purple">
+          <i class="bi bi-receipt-cutoff"></i>
+        </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Settlement Oversight</div>
+          <div class="action-tile-subtitle">{{ pending_invoices }} pending payouts</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Administrative Logs -->
+<div class="admin-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="fw-bold font-heading mb-0 text-dark"><i class="bi bi-journal-text text-emerald me-2"></i>Recent Administrative Activity</h5>
+      <div class="text-muted small mt-0.5">Audit trail of latest administrative overrides and updates</div>
+    </div>
+    <a href="{% url 'admin_audit_logs' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+      <i class="bi bi-eye me-1"></i>View Full Trail
+    </a>
+  </div>
+
+  {% if recent_logs %}
+  <div class="table-responsive">
+    <table class="data-table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Administrator</th>
+          <th>Action Type</th>
+          <th>Target Entity</th>
+          <th>Remarks / Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr>
+          <td class="text-muted small font-monospace" style="white-space: nowrap;">{{ log.timestamp|date:"d M, H:i:s" }}</td>
+          <td>
+            <div class="fw-semibold text-dark small">{{ log.admin_user.email }}</div>
+            {% if log.admin_user.name %}<div class="text-muted" style="font-size: 0.72rem;">{{ log.admin_user.name }}</div>{% endif %}
+          </td>
+          <td><span class="badge bg-light text-dark border font-monospace px-2.5 py-1">{{ log.action }}</span></td>
+          <td class="small fw-semibold text-emerald">{{ log.target_model }} #{{ log.target_id }}</td>
+          <td class="small text-muted">{{ log.reason|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-4 text-muted small">
+    <i class="bi bi-clock-history fs-3 d-block mb-1 text-secondary"></i>
+    No administrative activity recorded yet.
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

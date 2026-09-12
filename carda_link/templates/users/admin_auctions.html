@@ -1,0 +1,160 @@
+{% extends "users/admin_base.html" %}
+
+{% block dash_title %}Manage Auctions{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold font-heading mb-0"><i class="bi bi-hammer text-emerald me-2"></i>Auction Management</h4>
+    <div class="text-muted small">Schedule sessions, catalog lots, and supervise real-time bidding</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'admin_auction_create' %}" class="btn btn-emerald">
+      <i class="bi bi-calendar-plus-fill me-1"></i>Schedule New Auction
+    </a>
+    <a href="{% url 'auctions:simulation' %}" class="btn btn-outline-primary shadow-sm">
+      <i class="bi bi-broadcast me-1"></i>Simulation Console
+    </a>
+  </div>
+</div>
+
+<!-- Status Filter Tabs -->
+<div class="admin-card mb-4 p-2">
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'admin_auctions' %}" class="btn btn-sm {% if not status_filter %}btn-emerald{% else %}btn-outline-secondary{% endif %}">
+      All Sessions
+    </a>
+    {% for s_val, s_label in status_choices %}
+      <a href="{% url 'admin_auctions' %}?status={{ s_val }}" class="btn btn-sm {% if status_filter == s_val %}btn-emerald{% else %}btn-outline-secondary{% endif %}">
+        {{ s_label }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="admin-card">
+  {% if auctions %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Auction Title</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Status</th>
+          <th>Lots Cataloged</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for auction in auctions %}
+        <tr>
+          <td>
+            <div class="fw-bold text-dark">{{ auction.title }}</div>
+            {% if auction.description %}<div class="text-muted small text-truncate" style="max-width: 280px;">{{ auction.description }}</div>{% endif %}
+          </td>
+          <td>{{ auction.start_time|date:"d M Y, H:i" }}</td>
+          <td>{{ auction.end_time|date:"d M Y, H:i" }}</td>
+          <td>
+            <span class="status-badge {% if auction.status == 'ACTIVE' %}status-active{% elif auction.status == 'UPCOMING' %}status-pending{% elif auction.status == 'COMPLETED' %}bg-success text-white{% else %}status-suspended{% endif %}">
+              {{ auction.get_status_display }}
+            </span>
+          </td>
+          <td>
+            <span class="badge bg-secondary rounded-pill px-3">{{ auction.lots.count }} Lots</span>
+          </td>
+          <td>
+            <div class="d-flex gap-1 align-items-center flex-wrap">
+              <a href="{% url 'admin_auction_detail' auction.pk %}" class="btn btn-sm btn-outline-secondary" title="View details and lots">
+                <i class="bi bi-eye"></i> Details
+              </a>
+
+              {% if auction.status == "UPCOMING" %}
+                <a href="{% url 'admin_auction_edit' auction.pk %}" class="btn btn-sm btn-outline-primary" title="Edit schedule">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a href="{% url 'admin_auction_lots_add' auction.pk %}" class="btn btn-sm btn-outline-success" title="Assign lots">
+                  <i class="bi bi-plus-circle"></i> Lots
+                </a>
+              {% elif auction.status == "ACTIVE" %}
+                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#forceCloseModal{{ auction.pk }}" title="Emergency force-close">
+                  <i class="bi bi-stop-circle me-1"></i>Force Close
+                </button>
+              {% endif %}
+            </div>
+
+            <!-- Force Close Modal for ACTIVE auctions -->
+            {% if auction.status == "ACTIVE" %}
+            <div class="modal fade" id="forceCloseModal{{ auction.pk }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form method="post" action="{% url 'admin_auction_force_close' auction.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                      <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Emergency Auction Force-Close</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>You are about to immediately terminate <strong>{{ auction.title }}</strong>.</p>
+                      <ul class="small text-muted mb-0">
+                        <li>The auction status will become <strong>COMPLETED</strong>.</li>
+                        <li>Current highest bidders at or above reserve will be finalized as winners.</li>
+                        <li>Platform settlement invoices will be automatically generated.</li>
+                      </ul>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-danger">Confirm Emergency Force Close</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="small text-muted">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} auctions</div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&status={{ status_filter }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <div class="empty-state-icon-circle">
+      <i class="bi bi-hammer text-emerald fs-1"></i>
+    </div>
+    <h5 class="fw-bold text-dark font-heading mb-2">No Auctions Found</h5>
+    <p class="text-muted small mx-auto mb-3" style="max-width: 420px;">
+      No auction sessions match your selected status filter. Schedule a new cardamom auction to start cataloging lots.
+    </p>
+    <a href="{% url 'admin_auction_create' %}" class="btn btn-sm btn-emerald-primary text-white rounded-pill px-3 py-2">
+      <i class="bi bi-calendar-plus-fill me-1"></i>Schedule New Auction
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

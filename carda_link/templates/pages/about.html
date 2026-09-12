@@ -1,1 +1,159 @@
 {% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}About CardaLink — Cardamom Auction & Estate Platform{% endblock title %}
+{% block meta_description %}Learn about CardaLink, India's first integrated digital platform connecting cardamom growers, auctioneers, and traders across the Western Ghats.{% endblock %}
+
+{% block content %}
+<div class="py-5">
+
+  <!-- Hero Section -->
+  <div class="page-hero-card mb-5">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-8">
+        <span class="badge bg-white-10 text-emerald-light px-3 py-2 rounded-pill mb-3 fw-semibold">
+          <i class="bi bi-info-circle-fill me-1"></i> About the Platform
+        </span>
+        <h1 class="display-5 fw-bold mb-3 d-inline-flex align-items-center gap-2 flex-wrap">
+          About <span class="brand-capsule-nav py-1 px-3"><span class="brand-carda" style="font-size: 2rem;">Carda</span><span class="brand-link" style="font-size: 1.85rem;">Link</span></span>
+        </h1>
+        <p class="lead text-white-50 mb-0" style="max-width: 560px;">
+          India's first integrated digital platform connecting cardamom growers, auctioneers, and spice traders from the Western Ghats to global markets.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+        <a href="{% url 'home' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow-lg">
+          <i class="bi bi-house-door me-2"></i>Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- What is CardaLink -->
+  <div class="row g-5 mb-5 align-items-center">
+    <div class="col-lg-6">
+      <h2 class="fw-bold font-heading mb-3 text-dark">What is CardaLink?</h2>
+      <p class="text-muted" style="line-height: 1.75;">
+        CardaLink is a comprehensive digital platform purpose-built for the cardamom industry in India — primarily serving the Idukki district of Kerala and the Western Ghats region, which account for over 80% of India's total cardamom production.
+      </p>
+      <p class="text-muted" style="line-height: 1.75;">
+        Our platform bridges the gap between cardamom growers (sellers), certified auctioneers and spice traders (buyers), and quality assurance bodies — creating a transparent, traceable, and efficient trading ecosystem.
+      </p>
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #ecfdf5; color: #047857; font-size: 0.85rem;">
+          <i class="bi bi-tree-fill me-1"></i> Estate Management
+        </span>
+        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #ecfdf5; color: #047857; font-size: 0.85rem;">
+          <i class="bi bi-hammer me-1"></i> Live Auctions
+        </span>
+        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #ecfdf5; color: #047857; font-size: 0.85rem;">
+          <i class="bi bi-award-fill me-1"></i> Grade Certification
+        </span>
+        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #ecfdf5; color: #047857; font-size: 0.85rem;">
+          <i class="bi bi-robot me-1"></i> AI Price Assistant
+        </span>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border-left: 4px solid #10b981 !important; border-left-width: 4px;">
+        <h5 class="fw-bold text-emerald font-heading mb-3">
+          <i class="bi bi-geo-alt-fill me-2"></i>The Cardamom Belt
+        </h5>
+        <p class="text-muted small mb-3">
+          Cardamom cultivation in India is concentrated in the high-altitude forests of Kerala, Karnataka, and Tamil Nadu — the "Cardamom Hills." The primary trading hub is the Cardamom Trading Corporation (CTC) auction centre in Bodinayakanur, Tamil Nadu, and the Spices Board of India facilities in Idukki, Kerala.
+        </p>
+        <div class="row g-3 mt-1">
+          <div class="col-6">
+            <div class="spec-box text-center">
+              <div class="stat-value text-emerald" style="font-size: 1.5rem;">35,000+</div>
+              <div class="stat-label">Cardamom Growers</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="spec-box text-center">
+              <div class="stat-value text-emerald" style="font-size: 1.5rem;">80%</div>
+              <div class="stat-label">of India's Production</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="page-hero-card mb-5 p-0 overflow-hidden">
+    <div class="p-4 p-lg-5">
+      <h2 class="fw-bold font-heading text-white mb-4 text-center">How CardaLink Works</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="text-center p-3">
+            <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-3"
+                 style="width: 64px; height: 64px; background: rgba(255,255,255,0.12); font-size: 1.75rem; color: #34d399;">
+              <i class="bi bi-tree-fill"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">1. Growers Register</h5>
+            <p class="text-white-50 small">
+              Cardamom farmers register their plantations, log harvest batches, and obtain Spices Board grade certifications (AGEB, AGB, AGS) directly through the platform.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center p-3">
+            <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-3"
+                 style="width: 64px; height: 64px; background: rgba(255,255,255,0.12); font-size: 1.75rem; color: #fbbf24;">
+              <i class="bi bi-hammer"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">2. Live Auctions</h5>
+            <p class="text-white-50 small">
+              Certified auctioneers and buyers participate in real-time electronic auctions. Bids are recorded transparently with full lot traceability back to the source estate.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center p-3">
+            <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-3"
+                 style="width: 64px; height: 64px; background: rgba(255,255,255,0.12); font-size: 1.75rem; color: #a78bfa;">
+              <i class="bi bi-file-earmark-check-fill"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">3. Invoicing & Traceability</h5>
+            <p class="text-white-50 small">
+              Winning buyers receive digital invoices with complete lot provenance — estate, harvest date, grade, and weight — ensuring end-to-end traceability for export compliance.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technology Stack -->
+  <div class="row g-4 mb-5">
+    <div class="col-12">
+      <h2 class="fw-bold font-heading mb-4 text-dark">Built With</h2>
+    </div>
+    {% for tech in "Django,Python,Bootstrap 5,PostgreSQL,WebSockets,Google OAuth,AI Assistant,Docker"|split:"," %}
+    <div class="col-6 col-md-3">
+      <div class="spec-box text-center">
+        <i class="bi bi-code-slash text-emerald mb-2" style="font-size: 1.5rem;"></i>
+        <div class="fw-semibold text-dark small">{{ tech }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- CTA -->
+  <div class="card border-0 rounded-4 p-5 text-center" style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border: 1px solid #a7f3d0;">
+    <i class="bi bi-tree-fill text-emerald mb-3" style="font-size: 2.5rem;"></i>
+    <h3 class="fw-bold font-heading text-dark mb-2">Join CardaLink Today</h3>
+    <p class="text-muted mb-4">Register as a grower to list your plantation, or as a buyer to access premium cardamom lots from verified estates.</p>
+    <div class="d-flex flex-wrap gap-3 justify-content-center">
+      <a href="{% url 'seller_signup' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow">
+        <i class="bi bi-tree-fill me-2"></i>Register as Seller
+      </a>
+      <a href="{% url 'buyer_signup' %}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+        <i class="bi bi-cart-check-fill me-2"></i>Register as Buyer
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock content %}

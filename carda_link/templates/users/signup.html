@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Register — CardaLink{% endblock %}
+
+{% block bodyclass %}landing-offwhite-body{% endblock bodyclass %}
+
+{# Suppress navbar for clean registration flow #}
+{% block header %}{% endblock header %}
+
+{% block main_container %}
+<div class="landing-page-container d-flex align-items-center justify-content-center py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+
+        <!-- Brand Header -->
+        <div class="text-center mb-5">
+          <a href="{% url 'home' %}" class="text-decoration-none">
+            <h1 class="landing-brand-title justify-content-center mb-2" style="font-size: 2.5rem;">
+              <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+            </h1>
+          </a>
+          <h2 class="h4 fw-bold text-dark mb-1">Create an Account</h2>
+          <p class="text-muted">Select an account profile to continue</p>
+        </div>
+
+        <!-- Role Selection Cards -->
+        <div class="row g-4 mb-4">
+          <!-- Seller -->
+          <div class="col-md-6">
+            <a href="{% url 'seller_signup' %}" class="d-block text-decoration-none h-100">
+              <div class="role-selection-card h-100 text-center p-4 d-flex flex-column justify-content-between" style="border: 2px solid #e2e8f0; transition: all 0.25s ease; cursor: pointer; border-radius: 16px; background: #ffffff;">
+                <div>
+                  <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-3"
+                       style="width: 68px; height: 68px; background: #ecfdf5; color: #059669; font-size: 2rem;">
+                    <i class="bi bi-tree-fill"></i>
+                  </div>
+                  <h3 class="fw-bold font-heading h5 mb-2 text-dark">Seller</h3>
+                  <p class="text-muted small mb-0">Plantation management, harvest batch tracking, and auction lot submission.</p>
+                </div>
+                <div class="mt-4">
+                  <div class="btn btn-emerald-primary w-100 py-2 fw-semibold">
+                    Continue as Seller &rarr;
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Buyer -->
+          <div class="col-md-6">
+            <a href="{% url 'buyer_signup' %}" class="d-block text-decoration-none h-100">
+              <div class="role-selection-card h-100 text-center p-4 d-flex flex-column justify-content-between" style="border: 2px solid #e2e8f0; transition: all 0.25s ease; cursor: pointer; border-radius: 16px; background: #ffffff;">
+                <div>
+                  <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-3"
+                       style="width: 68px; height: 68px; background: #eff6ff; color: #2563eb; font-size: 2rem;">
+                    <i class="bi bi-cart-check-fill"></i>
+                  </div>
+                  <h3 class="fw-bold font-heading h5 mb-2 text-dark">Buyer</h3>
+                  <p class="text-muted small mb-0">Cardamom procurement, verified catalog access, and live auction participation.</p>
+                </div>
+                <div class="mt-4">
+                  <div class="btn btn-outline-primary w-100 py-2 fw-semibold">
+                    Continue as Buyer &rarr;
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Already have account -->
+        <div class="text-center">
+          <p class="text-muted mb-0">
+            Already have an account?
+            <a href="{% url 'home' %}" class="text-emerald fw-semibold text-decoration-none">Sign In &rarr;</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block inline_javascript %}
+<script>
+  document.querySelectorAll('.role-selection-card[style*="cursor: pointer"]').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      const isGreen = card.querySelector('.bi-tree-fill');
+      card.style.borderColor = isGreen ? '#10b981' : '#3b82f6';
+      card.style.transform = 'translateY(-4px)';
+      card.style.boxShadow = '0 12px 30px -5px rgba(15,23,42,0.12)';
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.borderColor = '#e2e8f0';
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    });
+  });
+</script>
+{% endblock inline_javascript %}
+{% endblock main_container %}

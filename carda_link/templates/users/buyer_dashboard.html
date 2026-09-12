@@ -1,0 +1,171 @@
+{% extends "users/dashboard_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Buyer Dashboard{% endblock %}
+
+{% block sidebar %}
+{% include "users/partials/buyer_sidebar.html" with active_item="dashboard" %}
+{% endblock sidebar %}
+
+{% block dashboard_content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold font-heading mb-1 text-dark">
+      Welcome, {{ request.user.name|default:request.user.email }}!
+    </h3>
+    <p class="text-muted mb-0">Browse live cardamom auctions, place bids, and track won lots from certified estates.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'auctions:simulation' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2">
+      <i class="bi bi-hammer"></i> Enter Live Auctions
+    </a>
+    <a href="{% url 'estates:list' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+      <i class="bi bi-geo-alt"></i> Browse Estates
+    </a>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-emerald"><i class="bi bi-hammer"></i></div>
+        <div>
+          <div class="stat-value">{{ active_auctions_count|default:"0" }}</div>
+          <div class="stat-label">Active Auctions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-slate"><i class="bi bi-calendar-event"></i></div>
+        <div>
+          <div class="stat-value">{{ upcoming_auctions_count|default:"0" }}</div>
+          <div class="stat-label">Upcoming Auctions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-amber"><i class="bi bi-hand-index-thumb-fill"></i></div>
+        <div>
+          <div class="stat-value">{{ user_bids_count|default:"0" }}</div>
+          <div class="stat-label">Bids Placed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-rose"><i class="bi bi-trophy-fill"></i></div>
+        <div>
+          <div class="stat-value">{{ won_lots_count|default:"0" }}</div>
+          <div class="stat-label">Lots Won</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Live & Upcoming Auctions -->
+<div class="dash-section mb-4">
+  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-broadcast text-danger me-2"></i>Spice Auctions</h5>
+    <a href="{% url 'auctions:simulation' %}" class="text-emerald text-decoration-none small fw-semibold">Open Live Bidding Console <i class="bi bi-arrow-right"></i></a>
+  </div>
+
+  {% if auctions %}
+  <div class="row g-3">
+    {% for auction in auctions %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 border rounded-3 p-3 shadow-sm hover-shadow transition">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="status-badge {% if auction.status == 'ACTIVE' %}status-active{% else %}status-pending{% endif %}">
+            {% if auction.status == 'ACTIVE' %}<i class="bi bi-record-fill text-danger me-1"></i> LIVE{% else %}{{ auction.get_status_display }}{% endif %}
+          </span>
+          <small class="text-muted">{{ auction.lots.count }} Lots</small>
+        </div>
+        <h6 class="fw-bold mb-2">{{ auction.title }}</h6>
+        <div class="text-muted small mb-3">
+          <div><i class="bi bi-clock me-1"></i> <strong>Start:</strong> {{ auction.start_time|date:"d M Y, H:i" }}</div>
+          <div><i class="bi bi-clock-history me-1"></i> <strong>End:</strong> {{ auction.end_time|date:"d M Y, H:i" }}</div>
+        </div>
+        <div class="mt-auto">
+          <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-emerald-register text-white w-100 fw-semibold">
+            <i class="bi bi-hammer me-1"></i> {% if auction.status == 'ACTIVE' %}Join Live Auction{% else %}View Lots{% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state py-4">
+    <i class="bi bi-calendar-x text-secondary fs-1"></i>
+    <h6 class="mt-2">No Active or Upcoming Auctions</h6>
+    <p class="text-muted small">Please check back soon. New spice auctions are scheduled regularly.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- My Recent Bids -->
+<div class="dash-section mb-4">
+  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-clock-history text-emerald me-2"></i>My Recent Bids</h5>
+  </div>
+  {% if recent_bids %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Auction</th>
+          <th>Lot #</th>
+          <th>Grade</th>
+          <th>Bid Amount (₹/kg)</th>
+          <th>Time</th>
+          <th>Lot Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bid in recent_bids %}
+        <tr>
+          <td class="fw-semibold">{{ bid.lot.auction.title }}</td>
+          <td>Lot #{{ bid.lot.lot_number }}</td>
+          <td><span class="badge bg-secondary">{{ bid.lot.harvest_batch.grade }}</span></td>
+          <td class="text-emerald fw-bold">₹{{ bid.amount_per_kg }}/kg</td>
+          <td class="text-muted small">{{ bid.timestamp|date:"d M Y, H:i:s" }}</td>
+          <td>
+            {% if bid.lot.is_sold %}
+              {% if bid.amount_per_kg == bid.lot.highest_bid_per_kg %}
+                <span class="badge bg-success">Won</span>
+              {% else %}
+                <span class="badge bg-secondary">Outbid</span>
+              {% endif %}
+            {% else %}
+              {% if bid.amount_per_kg == bid.lot.highest_bid_per_kg %}
+                <span class="badge bg-primary">Highest Bidder</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Outbid</span>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-4">
+    <i class="bi bi-hand-index text-secondary fs-1"></i>
+    <h6 class="mt-2">No Bids Placed Yet</h6>
+    <p class="text-muted small">Enter an active cardamom auction session to start bidding on premium spice lots.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock dashboard_content %}

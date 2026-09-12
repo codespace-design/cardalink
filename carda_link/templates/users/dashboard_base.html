@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% block dash_title %}Dashboard{% endblock %} — CardaLink{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% block sidebar %}{% endblock sidebar %}
+
+  <div class="dashboard-content">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %} mb-3">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block dashboard_content %}{% endblock dashboard_content %}
+  </div>
+</div>
+{% endblock content %}

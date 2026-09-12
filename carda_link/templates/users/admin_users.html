@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Users List — CardaLink{% endblock %}
+
+{% block content %}
+<div class="py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold font-heading mb-0"><i class="bi bi-people-fill text-emerald me-2"></i>Platform Users</h3>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 p-4">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Phone</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="fw-semibold">{{ u.name|default:"—" }}</td>
+            <td>{{ u.email }}</td>
+            <td>
+              <span class="badge bg-secondary">{{ u.role }}</span>
+            </td>
+            <td>
+              <span class="badge bg-info text-dark">{{ u.status }}</span>
+            </td>
+            <td>{{ u.phone_number|default:"—" }}</td>
+            <td class="text-muted small">{{ u.created_at|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}

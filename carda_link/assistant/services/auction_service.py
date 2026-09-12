@@ -82,7 +82,7 @@ class AuctionService:
         try:
             from carda_link.users.models import User
 
-            if not User.objects.filter(role="BUYER").exists() and not User.objects.exists():
+            if not User.objects.filter(role="BUYER").exists():
                 return None
             return User.objects.filter(role="BUYER").count()
         except Exception as e:
@@ -93,7 +93,7 @@ class AuctionService:
         try:
             from carda_link.users.models import User
 
-            if not User.objects.filter(role="SELLER").exists() and not User.objects.exists():
+            if not User.objects.filter(role="SELLER").exists():
                 return None
             return User.objects.filter(role="SELLER").count()
         except Exception as e:

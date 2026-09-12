@@ -144,9 +144,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "carda_link.users.validators.ComplexPasswordValidator",
+        "OPTIONS": {"min_length": 8},
+    },
 ]
 
 # MIDDLEWARE
@@ -227,10 +234,15 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 # https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
 FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 
-# SECURITY
+# SECURITY & SESSION MANAGEMENT
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#session-cookie-httponly
 SESSION_COOKIE_HTTPONLY = True
+# 2 hours session lifetime for enterprise administration
+SESSION_COOKIE_AGE = 7200
+# Sliding session: resets expiration timer on each request when user is active
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
 CSRF_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
@@ -243,8 +255,16 @@ EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND",
     default="django.core.mail.backends.smtp.EmailBackend",
 )
+EMAIL_HOST = env("DJANGO_EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("DJANGO_EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("DJANGO_EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env.bool("DJANGO_EMAIL_USE_SSL", default=False)
+EMAIL_HOST_USER = env("DJANGO_EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DJANGO_DEFAULT_FROM_EMAIL", default="CardaLink <noreply@cardalink.com>")
+SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-timeout
-EMAIL_TIMEOUT = 5
+EMAIL_TIMEOUT = 10
 
 # ADMIN
 # ------------------------------------------------------------------------------
@@ -298,12 +318,20 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = env("DJANGO_ACCOUNT_EMAIL_VERIFICATION", default="none")
 # https://docs.allauth.org/en/latest/account/configuration.html
 ACCOUNT_ADAPTER = "carda_link.users.adapters.AccountAdapter"
-# https://docs.allauth.org/en/latest/account/forms.html
-ACCOUNT_FORMS = {"signup": "carda_link.users.forms.UserSignupForm"}
+ACCOUNT_FORMS = {
+    "signup": "carda_link.users.forms.UserSignupForm",
+    "login": "carda_link.users.forms.CustomLoginForm",
+    "reset_password": "carda_link.users.forms.CustomResetPasswordForm",
+}
+# Inform user if email does not exist when requesting password reset
+ACCOUNT_PREVENT_ENUMERATION = False
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_ADAPTER = "carda_link.users.adapters.SocialAccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_FORMS = {"signup": "carda_link.users.forms.UserSocialSignupForm"}
+SOCIALACCOUNT_PROVIDERS = {}
+
+
 
 
 # Your stuff...

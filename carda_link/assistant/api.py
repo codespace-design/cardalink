@@ -8,7 +8,7 @@ router = Router(tags=["AI Agricultural Assistant"])
 chatbot_service = ChatbotService()
 
 
-@router.get("/health-check")
+@router.get("/health-check", auth=None)
 def assistant_health_check(request):
     return {
         "status": "ok",
@@ -16,7 +16,7 @@ def assistant_health_check(request):
     }
 
 
-@router.get("/chat")
+@router.get("/chat", auth=None)
 def chat(request, message: str):
     """
     Main chatbot endpoint.

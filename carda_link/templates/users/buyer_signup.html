@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Buyer Registration — CardaLink{% endblock %}
+
+{% block bodyclass %}landing-offwhite-body{% endblock bodyclass %}
+
+{# Suppress navbar for clean registration flow #}
+{% block header %}{% endblock header %}
+
+{% block main_container %}
+<div class="landing-page-container d-flex align-items-center justify-content-center py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-7 col-xl-6">
+
+        {% if success %}
+          <!-- Success State -->
+          <div class="auth-card text-center py-5">
+            <div class="mb-3">
+              <i class="bi bi-check-circle-fill text-emerald" style="font-size: 4rem;"></i>
+            </div>
+            <h2 class="fw-bold font-heading mb-2">Registration Submitted!</h2>
+            <p class="text-muted lead mb-4">Your buyer account is pending admin approval. You'll be able to sign in once your account is approved.</p>
+            <a href="{% url 'home' %}" class="btn btn-emerald-primary px-5 py-3 fw-bold">
+              <i class="bi bi-house-door me-2"></i>Return to Home
+            </a>
+          </div>
+        {% else %}
+          <!-- Brand Header -->
+          <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+              <h1 class="landing-brand-title justify-content-center mb-1" style="font-size: 2rem;">
+                <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+              </h1>
+            </a>
+            <p class="text-muted small">Cardamom Auction &amp; Estate Platform</p>
+          </div>
+
+          <div class="auth-card">
+            <!-- Form Header -->
+            <div class="form-section-header mb-4">
+              <span class="section-number-pill"><i class="bi bi-cart-check-fill"></i></span>
+              <div>
+                <h2 class="fw-bold font-heading mb-0 h4">Buyer Registration</h2>
+                <small class="text-muted">Trading &amp; Procurement Account &bull; Admin Verification Required</small>
+              </div>
+            </div>
+
+            <form method="POST" novalidate>
+              {% csrf_token %}
+
+              <!-- Personal Information -->
+              <h6 class="fw-bold text-muted text-uppercase small mb-3 mt-2" style="letter-spacing: 0.06em;">Personal Information</h6>
+              {% for field in form %}
+                {% if field.name in "name,email,phone_number,password,confirm_password" %}
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.name == 'password' %}
+                    <div class="form-text text-muted mt-1" style="font-size: 0.78rem;">
+                      <i class="bi bi-shield-check text-emerald me-1"></i>Must be at least 8 characters with letters, numbers, and special symbols (e.g. !@#$%^&*).
+                    </div>
+                  {% endif %}
+                  {% if field.errors %}
+                    {% for error in field.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>{% endfor %}
+                  {% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+
+              <!-- Business Details -->
+              <h6 class="fw-bold text-muted text-uppercase small mb-3 mt-4" style="letter-spacing: 0.06em;">Business Details</h6>
+              {% for field in form %}
+                {% if field.name in "business_name,business_type,business_address,business_details" %}
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}
+                    {% for error in field.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>{% endfor %}
+                  {% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3 border-0">
+                  {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                </div>
+              {% endif %}
+
+              <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-emerald-primary py-3 fw-bold">
+                  <i class="bi bi-person-plus-fill me-2"></i>Submit Registration
+                </button>
+              </div>
+            </form>
+
+            <!-- Footer Links -->
+            <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+              <a href="{% url 'signup_selection' %}" class="small text-muted text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>Back to role selection
+              </a>
+              <a href="{% url 'home' %}" class="small text-emerald text-decoration-none fw-semibold">
+                Sign In instead &rarr;
+              </a>
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock main_container %}

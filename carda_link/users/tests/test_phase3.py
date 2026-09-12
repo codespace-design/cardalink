@@ -83,7 +83,7 @@ class TestAdminAuthentication(TestCase):
 
     @check_requirement("Admin Login")
     def test_admin_login_page_loads(self):
-        response = self.client.get(reverse("admin_login"))
+        response = self.client.get(reverse("admin_login"), follow=True)
         self.assertEqual(response.status_code, 200)
 
     @check_requirement("Admin Login")
@@ -477,7 +477,7 @@ class TestHTMLInterface(TestCase):
     @check_requirement("HTML Interface")
     def test_navbar_contains_admin_login(self):
         response = self.client.get(reverse("home"))
-        self.assertIn("Admin Login", response.content.decode())
+        self.assertIn("Sign In", response.content.decode())
 
 
 class TestRegressionCheck(TestCase):

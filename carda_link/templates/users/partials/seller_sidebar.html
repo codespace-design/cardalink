@@ -1,0 +1,52 @@
+{# Seller sidebar partial — include in seller dashboard/profile pages #}
+{# Usage: {% include "users/partials/seller_sidebar.html" with active_item="dashboard" %} #}
+{# active_item options: "dashboard", "estates", "estate_register", "auctions", "assistant", "profile" #}
+<aside class="dashboard-sidebar" id="sellerSidebar">
+  <div class="sidebar-brand">
+    <div class="brand-capsule-sidebar">
+      <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+    </div>
+    <h5><i class="bi bi-tree-fill text-emerald-light me-2"></i>Grower Portal</h5>
+    <small>{{ request.user.name|default:"Cardamom Grower" }}</small>
+  </div>
+  <ul class="sidebar-nav">
+    <li class="nav-section">Navigation</li>
+    <li class="nav-item">
+      <a href="{% url 'seller_dashboard' %}" class="{% if active_item == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'estates:list' %}" class="{% if active_item == 'estates' %}active{% endif %}">
+        <i class="bi bi-geo-alt-fill"></i> My Estates
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'estates:register' %}" class="{% if active_item == 'estate_register' %}active{% endif %}">
+        <i class="bi bi-plus-circle-fill"></i> Register Estate
+      </a>
+    </li>
+    <li class="nav-section">Marketplace</li>
+    <li class="nav-item">
+      <a href="{% url 'auctions:simulation' %}" class="{% if active_item == 'auctions' %}active{% endif %}">
+        <i class="bi bi-hammer"></i> Live Auctions
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'assistant:chatbot' %}" class="{% if active_item == 'assistant' %}active{% endif %}">
+        <i class="bi bi-robot"></i> AI Assistant
+      </a>
+    </li>
+    <li class="nav-section">Account</li>
+    <li class="nav-item">
+      <a href="{% url 'seller_profile' %}" class="{% if active_item == 'profile' %}active{% endif %}">
+        <i class="bi bi-person-badge"></i> Farm Profile
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'account_logout' %}" class="text-danger">
+        <i class="bi bi-box-arrow-right"></i> Sign Out
+      </a>
+    </li>
+  </ul>
+</aside>

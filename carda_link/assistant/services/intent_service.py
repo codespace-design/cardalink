@@ -2,8 +2,15 @@ import logging
 import re
 from typing import Literal
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    TfidfVectorizer = None  # type: ignore[assignment, misc]
+    cosine_similarity = None  # type: ignore[assignment, misc]
+    SKLEARN_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +25,7 @@ class IntentClassifier:
     - Auction
     - Farm Assistant
     - Unknown
-    Uses semantic similarity and pre-compiled TF-IDF corpus vectors.
+    Uses semantic similarity and pre-compiled TF-IDF corpus vectors (with fallback).
     """
 
     def __init__(self) -> None:
@@ -61,12 +68,15 @@ class IntentClassifier:
                 self.doc_texts.append(phrase)
                 self.doc_categories.append(category)
 
-        self.vectorizer = TfidfVectorizer(
-            lowercase=True,
-            stop_words="english",
-            ngram_range=(1, 2),
-        )
-        self.doc_vectors = self.vectorizer.fit_transform(self.doc_texts)
+        self.vectorizer = None
+        self.doc_vectors = None
+        if SKLEARN_AVAILABLE and TfidfVectorizer is not None:
+            self.vectorizer = TfidfVectorizer(
+                lowercase=True,
+                stop_words="english",
+                ngram_range=(1, 2),
+            )
+            self.doc_vectors = self.vectorizer.fit_transform(self.doc_texts)
 
     def classify(self, question: str) -> IntentType:
         """
@@ -173,22 +183,27 @@ class IntentClassifier:
             return "Website Guide"
 
         # TF-IDF Cosine Similarity calculation
-        try:
-            q_vector = self.vectorizer.transform([clean_question])
-            similarities = cosine_similarity(q_vector, self.doc_vectors)[0]
+        if (
+            self.vectorizer is not None
+            and self.doc_vectors is not None
+            and cosine_similarity is not None
+        ):
+            try:
+                q_vector = self.vectorizer.transform([clean_question])
+                similarities = cosine_similarity(q_vector, self.doc_vectors)[0]
 
-            best_idx = int(similarities.argmax())
-            best_score = float(similarities[best_idx])
+                best_idx = int(similarities.argmax())
+                best_score = float(similarities[best_idx])
 
-            logger.debug(
-                "Intent classification question='%s', best_cat='%s', score=%.4f",
-                question,
-                self.doc_categories[best_idx],
-                best_score,
-            )
+                logger.debug(
+                    "Intent classification question='%s', best_cat='%s', score=%.4f",
+                    question,
+                    self.doc_categories[best_idx],
+                    best_score,
+                )
 
-            if best_score >= 0.08:
-                return self.doc_categories[best_idx]
+                if best_score >= 0.08:
+                    return self.doc_categories[best_idx]
 
         except Exception as e:
             logger.exception("Error during intent classification")
