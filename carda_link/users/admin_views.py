@@ -690,3 +690,66 @@ def admin_audit_logs_view(request):
         "selected_admin": admin_id,
         "selected_action": action_type,
     })
+
+
+# -----------------------------------------------------------------------------
+# 8. Harvest Intake / Batch Logging (Operations)
+# -----------------------------------------------------------------------------
+
+@is_admin_user
+def admin_batch_create_view(request):
+    estates = Estate.objects.select_related("owner").all().order_by("name")
+    selected_estate_id = request.GET.get("estate_id") or request.POST.get("estate_id")
+
+    if request.method == "POST":
+        estate_id = request.POST.get("estate_id")
+        weight_kg = request.POST.get("weight_kg", "").strip()
+        harvest_date = request.POST.get("harvest_date", "").strip()
+        grade = request.POST.get("grade", "UNGRADED").strip()
+        quality_certificate = request.FILES.get("quality_certificate")
+
+        if not estate_id or not weight_kg or not harvest_date:
+            messages.error(request, "Origin estate, harvest weight, and harvest date are required.")
+        else:
+            try:
+                estate = Estate.objects.get(pk=estate_id)
+                weight = Decimal(weight_kg)
+                if weight <= 0:
+                    raise ValueError("Harvest weight must be greater than 0 kg.")
+
+                valid_grades = [c[0] for c in HarvestBatch.GRADE_CHOICES]
+                assigned_grade = grade if grade in valid_grades else "UNGRADED"
+
+                batch = HarvestBatch.objects.create(
+                    estate=estate,
+                    weight_kg=weight,
+                    harvest_date=harvest_date,
+                    grade=assigned_grade,
+                    quality_certificate=quality_certificate,
+                )
+                log_admin_action(
+                    admin_user=request.user,
+                    action="LOG_HARVEST_BATCH",
+                    target=batch,
+                    reason=f"Logged harvest batch #{batch.id} ({weight} kg, {assigned_grade}) for estate '{estate.name}'",
+                )
+                messages.success(
+                    request,
+                    f"Harvest batch #{batch.id} ({batch.weight_kg} kg, {batch.get_grade_display()}) successfully logged for '{estate.name}'.",
+                )
+                return redirect("admin_estate_detail", pk=estate.pk)
+            except Estate.DoesNotExist:
+                messages.error(request, "Selected plantation estate does not exist.")
+            except Exception as e:
+                messages.error(request, f"Error saving harvest batch: {str(e)}")
+
+    recent_batches = HarvestBatch.objects.select_related("estate", "estate__owner").order_by("-created_at")[:10]
+    return render(
+        request,
+        "users/admin_batch_create.html",
+        {
+            "estates": estates,
+            "selected_estate_id": int(selected_estate_id) if selected_estate_id and str(selected_estate_id).isdigit() else None,
+            "recent_batches": recent_batches,
+        },
+    )

@@ -1,180 +1,248 @@
-{% extends "users/dashboard_base.html" %}
+{% extends "users/seller_base.html" %}
 {% load static i18n %}
 
 {% block dash_title %}Seller Dashboard{% endblock %}
 
-{% block sidebar %}
-{% include "users/partials/seller_sidebar.html" with active_item="dashboard" %}
-{% endblock sidebar %}
-
 {% block dashboard_content %}
-<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
   <div>
-    <h3 class="fw-bold font-heading mb-1 text-dark">
-      Welcome back, {{ request.user.name|default:request.user.email }}!
-    </h3>
-    <p class="text-muted mb-0">Manage your cardamom plantations, track harvest quality grades, and follow auction lots.</p>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold font-heading mb-0 text-dark">Planter &amp; Producer Operations</h4>
+      <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace small px-2 py-0.5">SELLER</span>
+    </div>
+    <div class="text-muted small mt-1">Direct cardamom auction participation, quality verification queue, and automated payouts</div>
   </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2">
-      <i class="bi bi-plus-circle-fill"></i> Add Estate
+  <div class="d-flex gap-2 align-items-center">
+    <a href="{% url 'seller_batches' %}" class="btn btn-sm btn-emerald text-white d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm">
+      <i class="bi bi-plus-circle-fill"></i> Log Harvest Batch
     </a>
-    <a href="{% url 'assistant:chatbot' %}" class="btn btn-outline-success d-flex align-items-center gap-2">
-      <i class="bi bi-robot"></i> Ask AI Assistant
+    <a href="{% url 'seller_estates' %}" class="btn btn-sm btn-outline-emerald d-inline-flex align-items-center gap-1.5 fw-semibold">
+      <i class="bi bi-tree-fill"></i> My Estates
     </a>
   </div>
 </div>
 
-<!-- Stat Cards -->
+<!-- 4 Standardized Metric KPI Cards -->
+<div class="row g-3 mb-4">
+  <!-- Card 1: Estates -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'seller_estates' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-emerald">
+            <i class="bi bi-tree-fill"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-emerald">Registered</span>
+        </div>
+        <div class="kpi-value">{{ estates_count|default:"0" }}</div>
+        <div class="kpi-label">Plantation Estates</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 2: Batches in Queue -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'seller_batches' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-amber">
+            <i class="bi bi-patch-check-fill"></i>
+          </div>
+          {% if ungraded_count %}
+            <span class="kpi-tag kpi-tag-amber">{{ ungraded_count }} Pending</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">Up to Date</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ total_batches_count|default:"0" }}</div>
+        <div class="kpi-label">Harvest Batches</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 3: Active Auction Lots -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'seller_lots' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-cyan">
+            <i class="bi bi-hammer"></i>
+          </div>
+          {% if active_lots_count %}
+            <span class="kpi-tag kpi-tag-emerald">Live Bidding</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">None Live</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ active_lots_count|default:"0" }}</div>
+        <div class="kpi-label">Live Auction Lots</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 4: Total Sold Value -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'seller_earnings' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-purple">
+            <i class="bi bi-wallet2"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-purple">Gross Sold</span>
+        </div>
+        <div class="kpi-value">₹{{ total_sold_value|default:"0"|floatformat:0 }}</div>
+        <div class="kpi-label">Total Volume Sold ({{ total_sold_kg }} kg)</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- 4 Action Shortcuts -->
 <div class="row g-3 mb-4">
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-emerald"><i class="bi bi-tree-fill"></i></div>
-        <div>
-          <div class="stat-value">{{ estates_count|default:"0" }}</div>
-          <div class="stat-label">Total Estates</div>
+    <a href="{% url 'seller_batches' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-amber">
+          <i class="bi bi-plus-circle"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Log Batch</div>
+          <div class="action-tile-subtitle">Submit harvest for lab grading</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-slate"><i class="bi bi-rulers"></i></div>
-        <div>
-          <div class="stat-value">{{ total_acres|default:"0" }}</div>
-          <div class="stat-label">Total Acres</div>
+    <a href="{% url 'seller_estates' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-blue">
+          <i class="bi bi-geo-alt"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">My Estates</div>
+          <div class="action-tile-subtitle">Manage plantation profiles</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-amber"><i class="bi bi-box-seam-fill"></i></div>
-        <div>
-          <div class="stat-value">{{ harvests_count|default:"0" }}</div>
-          <div class="stat-label">Harvest Batches</div>
+    <a href="{% url 'seller_lots' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-purple">
+          <i class="bi bi-broadcast"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Live Floor</div>
+          <div class="action-tile-subtitle">Track bids on your lots</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-rose"><i class="bi bi-tag-fill"></i></div>
-        <div>
-          <div class="stat-value">{{ total_harvest_kg|default:"0" }} <small class="fs-6 fw-normal">kg</small></div>
-          <div class="stat-label">Total Cardamom</div>
+    <a href="{% url 'seller_earnings' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-rose">
+          <i class="bi bi-cash-coin"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Payouts</div>
+          <div class="action-tile-subtitle">Bank settlement status</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
 </div>
 
-<!-- Estates Overview -->
-<div class="dash-section mb-4">
-  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
-    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-geo-alt-fill text-emerald me-2"></i>My Plantations</h5>
-    <a href="{% url 'estates:list' %}" class="text-emerald text-decoration-none small fw-semibold">View All <i class="bi bi-arrow-right"></i></a>
-  </div>
-
-  {% if estates %}
-  <div class="row g-3">
-    {% for estate in estates %}
-    <div class="col-md-6 col-lg-4">
-      <div class="card h-100 border rounded-3 overflow-hidden shadow-sm hover-shadow transition">
-        {% if estate.primary_photo %}
-        <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}" class="card-img-top" style="height: 160px; object-fit: cover;">
-        {% else %}
-        <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 160px;">
-          <i class="bi bi-tree fs-1 text-secondary opacity-50"></i>
-        </div>
-        {% endif %}
-        <div class="card-body p-3">
-          <h6 class="fw-bold mb-1"><a href="{% url 'estates:detail' estate.pk %}" class="text-dark text-decoration-none">{{ estate.name }}</a></h6>
-          <p class="text-muted small mb-2"><i class="bi bi-geo-alt text-danger me-1"></i>{{ estate.location }}</p>
-          <div class="d-flex justify-content-between text-muted small border-top pt-2">
-            <span><strong>{{ estate.area_in_acres }}</strong> Acres</span>
-            <span><strong>{{ estate.harvest_batches.count }}</strong> Batches</span>
-          </div>
-        </div>
-        <div class="card-footer bg-white border-top-0 pt-0 pb-3 px-3 d-flex gap-2">
-          <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-sm btn-outline-primary flex-fill"><i class="bi bi-eye"></i> View</a>
-          <a href="{% url 'estates:harvest-create' estate.pk %}" class="btn btn-sm btn-outline-success flex-fill"><i class="bi bi-plus-lg"></i> Log Harvest</a>
-        </div>
-      </div>
+<!-- Recent Harvest Batches Table -->
+<div class="admin-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="fw-bold font-heading mb-0 text-dark">Harvest Batches &amp; Quality Status</h5>
+      <small class="text-muted">Direct verification status from Spices Board &amp; platform certified graders</small>
     </div>
-    {% endfor %}
+    <a href="{% url 'seller_batches' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+      View All Batches &rarr;
+    </a>
   </div>
-  {% else %}
-  <div class="empty-state py-4">
-    <i class="bi bi-tree text-emerald fs-1"></i>
-    <h6 class="mt-2">No Estates Registered Yet</h6>
-    <p class="text-muted small">Register your cardamom plantation to start tracking harvests and quality certification.</p>
-    <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white btn-sm mt-2">Register Your First Estate</a>
-  </div>
-  {% endif %}
-</div>
 
-<!-- Recent Harvest Batches & Quality Grades -->
-<div class="dash-section mb-4">
-  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
-    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-award-fill text-emerald me-2"></i>Harvest Batches & Spices Board Grades</h5>
-  </div>
-  {% if recent_harvests %}
   <div class="table-responsive">
-    <table class="data-table">
-      <thead>
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
         <tr>
-          <th>Estate</th>
+          <th>Batch ID</th>
+          <th>Plantation Estate</th>
           <th>Harvest Date</th>
-          <th>Weight (kg)</th>
-          <th>Grade Certification</th>
-          <th>Auction Lot</th>
-          <th>Actions</th>
+          <th>Weight</th>
+          <th>Lab Certificate</th>
+          <th>Certification Status</th>
+          <th>Remarks / Rejection Reason</th>
         </tr>
       </thead>
       <tbody>
-        {% for batch in recent_harvests %}
-        <tr>
-          <td class="fw-semibold">{{ batch.estate.name }}</td>
-          <td>{{ batch.harvest_date|date:"d M Y" }}</td>
-          <td>{{ batch.weight_kg }} kg</td>
-          <td>
-            {% if batch.grade == 'AGEB' %}
-              <span class="badge bg-success-subtle text-success border border-success fw-bold px-2 py-1">Alleppey Green Extra Bold (AGEB)</span>
-            {% elif batch.grade == 'AGB' %}
-              <span class="badge bg-primary-subtle text-primary border border-primary fw-bold px-2 py-1">Alleppey Green Bold (AGB)</span>
-            {% elif batch.grade == 'AGS' %}
-              <span class="badge bg-info-subtle text-info border border-info fw-bold px-2 py-1">Alleppey Green Superior (AGS)</span>
-            {% else %}
-              <span class="badge bg-warning-subtle text-warning border border-warning fw-bold px-2 py-1">Ungraded / Pending</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if batch.auction_lot %}
-              <span class="badge bg-dark">Lot #{{ batch.auction_lot.lot_number }}</span>
-              <small class="text-muted ms-1">({{ batch.auction_lot.auction.get_status_display }})</small>
-            {% else %}
-              <span class="text-muted small">Not Cataloged</span>
-            {% endif %}
-          </td>
-          <td>
-            <a href="{% url 'estates:harvest-update' batch.pk %}" class="btn-action btn-view"><i class="bi bi-pencil"></i> Edit</a>
-          </td>
-        </tr>
+        {% for batch in recent_batches %}
+          <tr>
+            <td class="font-monospace text-muted small">#{{ batch.id }}</td>
+            <td>
+              <div class="fw-bold text-dark">{{ batch.estate.name }}</div>
+              <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ batch.estate.location }}</div>
+            </td>
+            <td class="text-muted small">{{ batch.harvest_date|date:"d M Y" }}</td>
+            <td class="fw-bold text-emerald">{{ batch.weight_kg }} kg</td>
+            <td>
+              {% if batch.quality_certificate %}
+                <a href="{{ batch.quality_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-2.5">
+                  <i class="bi bi-file-earmark-pdf me-1"></i>Lab Cert
+                </a>
+              {% else %}
+                <span class="badge bg-light text-muted border">None Uploaded</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if batch.is_rejected %}
+                <span class="badge bg-danger font-monospace px-2.5 py-1">
+                  <i class="bi bi-x-circle me-1"></i>Rejected
+                </span>
+              {% elif batch.grade == 'UNGRADED' %}
+                <span class="badge bg-warning text-dark font-monospace px-2.5 py-1">
+                  <i class="bi bi-hourglass-split me-1"></i>Ungraded
+                </span>
+              {% else %}
+                <span class="badge bg-success font-monospace px-2.5 py-1">
+                  <i class="bi bi-check2-circle me-1"></i>Certified ({{ batch.grade }})
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if batch.is_rejected %}
+                <div class="alert alert-danger py-1 px-2.5 mb-0 small rounded-3 d-inline-block">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i><strong>Admin Reason:</strong> {{ batch.rejection_reason|default:"Quality criteria not met." }}
+                </div>
+              {% elif batch.auction_lot %}
+                <span class="text-dark small"><i class="bi bi-hammer text-emerald me-1"></i>Cataloged in Auction Lot #{{ batch.auction_lot.lot_number }}</span>
+              {% else %}
+                <span class="text-muted small">In verification queue</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-boxes text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Harvest Batches Logged</h6>
+              <p class="small text-muted mb-3">Log your harvested cardamom weight and lab certificate to submit for auction grading.</p>
+              <a href="{% url 'seller_batches' %}" class="btn btn-sm btn-emerald text-white">Log Your First Batch</a>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% else %}
-  <div class="empty-state py-4">
-    <i class="bi bi-box-seam text-secondary fs-1"></i>
-    <h6 class="mt-2">No Harvest Batches Recorded</h6>
-    <p class="text-muted small">Log harvest weights from your plantations to obtain quality grades and enter auctions.</p>
-  </div>
-  {% endif %}
 </div>
 {% endblock dashboard_content %}

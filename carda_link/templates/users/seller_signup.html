@@ -12,7 +12,7 @@
 <div class="landing-page-container d-flex align-items-center justify-content-center py-5">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-12 col-md-10 col-lg-7 col-xl-6">
+      <div class="col-12 col-md-11 col-lg-9 col-xl-8">
 
         {% if success %}
           <!-- Success State -->
@@ -21,7 +21,7 @@
               <i class="bi bi-check-circle-fill text-emerald" style="font-size: 4rem;"></i>
             </div>
             <h2 class="fw-bold font-heading mb-2">Registration Submitted!</h2>
-            <p class="text-muted lead mb-4">Your seller account is pending admin approval. You'll be able to sign in once your account is approved.</p>
+            <p class="text-muted lead mb-4">Your farmer/seller registration is pending administrator review. You will be notified once approved.</p>
             <a href="{% url 'home' %}" class="btn btn-emerald-primary px-5 py-3 fw-bold">
               <i class="bi bi-house-door me-2"></i>Return to Home
             </a>
@@ -34,70 +34,168 @@
                 <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
               </h1>
             </a>
-            <p class="text-muted small">Cardamom Auction &amp; Estate Platform</p>
+            <p class="text-muted small">Cardamom Auction &amp; Estate Monitoring Platform</p>
           </div>
 
-          <div class="auth-card">
+          <div class="auth-card p-4 p-md-5">
             <!-- Form Header -->
             <div class="form-section-header mb-4">
               <span class="section-number-pill"><i class="bi bi-tree-fill"></i></span>
               <div>
-                <h2 class="fw-bold font-heading mb-0 h4">Seller Registration</h2>
-                <small class="text-muted">Plantation &amp; Harvest Management &bull; Admin Verification Required</small>
+                <h2 class="fw-bold font-heading mb-0 h4">Cardamom Farmer &amp; Seller Registration</h2>
+                <small class="text-muted">Direct Auction Access &bull; Quality Certification &bull; Admin Verification Required</small>
               </div>
             </div>
 
-            <form method="POST" novalidate>
+            <form method="POST" enctype="multipart/form-data" novalidate>
               {% csrf_token %}
 
-              <!-- Personal Information -->
-              <h6 class="fw-bold text-muted text-uppercase small mb-3 mt-2" style="letter-spacing: 0.06em;">Personal Information</h6>
-              {% for field in form %}
-                {% if field.name in "name,email,phone_number,password,confirm_password" %}
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                  {{ field }}
-                  {% if field.name == 'password' %}
-                    <div class="form-text text-muted mt-1" style="font-size: 0.78rem;">
-                      <i class="bi bi-shield-check text-emerald me-1"></i>Must be at least 8 characters with letters, numbers, and special symbols (e.g. !@#$%^&*).
-                    </div>
-                  {% endif %}
-                  {% if field.errors %}
-                    {% for error in field.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>{% endfor %}
-                  {% endif %}
-                </div>
-                {% endif %}
-              {% endfor %}
-
-              <!-- Farm Details -->
-              <h6 class="fw-bold text-muted text-uppercase small mb-3 mt-4" style="letter-spacing: 0.06em;">Farm Details</h6>
-              {% for field in form %}
-                {% if field.name in "farm_name,farm_location,farm_area,area_unit,cardamom_plants,cultivation_details" %}
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                  {{ field }}
-                  {% if field.errors %}
-                    {% for error in field.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>{% endfor %}
-                  {% endif %}
-                </div>
-                {% endif %}
-              {% endfor %}
-
               {% if form.non_field_errors %}
-                <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3 border-0">
-                  {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                <div class="alert alert-danger py-2 px-3 small rounded-3 mb-4 border-0">
+                  {% for error in form.non_field_errors %}<div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>{% endfor %}
                 </div>
               {% endif %}
 
+              <!-- 1. Personal & Contact Information -->
+              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                <span class="badge bg-emerald-subtle text-emerald rounded-pill px-2.5">Step 1</span>
+                <h6 class="fw-bold text-dark text-uppercase small mb-0" style="letter-spacing: 0.05em;">Contact &amp; Account</h6>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="text-danger">*</span></label>
+                  {{ form.name }}
+                  {% for error in form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }} <span class="text-danger">*</span></label>
+                  {{ form.phone_number }}
+                  <div class="form-text text-muted" style="font-size: 0.75rem;">SMS verification code will be dispatched here.</div>
+                  {% for error in form.phone_number.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="text-danger">*</span></label>
+                  {{ form.email }}
+                  {% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.password.id_for_label }}">{{ form.password.label }} <span class="text-danger">*</span></label>
+                  {{ form.password }}
+                  {% for error in form.password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.confirm_password.id_for_label }}">{{ form.confirm_password.label }} <span class="text-danger">*</span></label>
+                  {{ form.confirm_password }}
+                  {% for error in form.confirm_password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <!-- 2. Farm & Plantation Details -->
+              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                <span class="badge bg-emerald-subtle text-emerald rounded-pill px-2.5">Step 2</span>
+                <h6 class="fw-bold text-dark text-uppercase small mb-0" style="letter-spacing: 0.05em;">Plantation &amp; Provenance Details</h6>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.farm_name.id_for_label }}">{{ form.farm_name.label }} <span class="text-danger">*</span></label>
+                  {{ form.farm_name }}
+                  {% for error in form.farm_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.farm_location.id_for_label }}">{{ form.farm_location.label }}</label>
+                  {{ form.farm_location }}
+                  {% for error in form.farm_location.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.district.id_for_label }}">{{ form.district.label }} <span class="text-danger">*</span></label>
+                  {{ form.district }}
+                  {% for error in form.district.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.taluk.id_for_label }}">{{ form.taluk.label }} <span class="text-danger">*</span></label>
+                  {{ form.taluk }}
+                  {% for error in form.taluk.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.village.id_for_label }}">{{ form.village.label }} <span class="text-danger">*</span></label>
+                  {{ form.village }}
+                  {% for error in form.village.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.farm_area.id_for_label }}">{{ form.farm_area.label }} <span class="text-danger">*</span></label>
+                  {{ form.farm_area }}
+                  {% for error in form.farm_area.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.area_unit.id_for_label }}">{{ form.area_unit.label }} <span class="text-danger">*</span></label>
+                  {{ form.area_unit }}
+                  {% for error in form.area_unit.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.cardamom_plants.id_for_label }}">{{ form.cardamom_plants.label }} <span class="text-danger">*</span></label>
+                  {{ form.cardamom_plants }}
+                  {% for error in form.cardamom_plants.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.cultivation_method.id_for_label }}">{{ form.cultivation_method.label }} <span class="text-danger">*</span></label>
+                  {{ form.cultivation_method }}
+                  {% for error in form.cultivation_method.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.ownership_proof.id_for_label }}">{{ form.ownership_proof.label }}</label>
+                  {{ form.ownership_proof }}
+                  {% if form.ownership_proof.help_text %}<div class="form-text text-muted" style="font-size: 0.75rem;">{{ form.ownership_proof.help_text }}</div>{% endif %}
+                  {% for error in form.ownership_proof.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.cultivation_details.id_for_label }}">{{ form.cultivation_details.label }}</label>
+                  {{ form.cultivation_details }}
+                  {% for error in form.cultivation_details.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <!-- 3. Banking Details -->
+              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                <span class="badge bg-emerald-subtle text-emerald rounded-pill px-2.5">Step 3</span>
+                <h6 class="fw-bold text-dark text-uppercase small mb-0" style="letter-spacing: 0.05em;">Bank Settlement Account</h6>
+                <span class="badge bg-light text-muted font-monospace ms-auto small"><i class="bi bi-shield-lock-fill text-emerald me-1"></i>Encrypted at Rest</span>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.bank_account_holder.id_for_label }}">{{ form.bank_account_holder.label }} <span class="text-danger">*</span></label>
+                  {{ form.bank_account_holder }}
+                  {% for error in form.bank_account_holder.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.bank_ifsc.id_for_label }}">{{ form.bank_ifsc.label }} <span class="text-danger">*</span></label>
+                  {{ form.bank_ifsc }}
+                  {% for error in form.bank_ifsc.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-secondary" for="{{ form.bank_account_number.id_for_label }}">{{ form.bank_account_number.label }} <span class="text-danger">*</span></label>
+                  {{ form.bank_account_number }}
+                  <div class="form-text text-muted" style="font-size: 0.75rem;">Encrypted using independent symmetric key storage. Never displayed publicly.</div>
+                  {% for error in form.bank_account_number.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+              </div>
+
               <div class="d-grid mt-4">
-                <button type="submit" class="btn btn-emerald-primary py-3 fw-bold">
-                  <i class="bi bi-person-plus-fill me-2"></i>Submit Registration
+                <button type="submit" class="btn btn-emerald-primary py-3 fw-bold shadow-sm">
+                  <i class="bi bi-check2-circle me-2"></i>Submit Seller Application &amp; Verify Phone
                 </button>
               </div>
             </form>
 
             <!-- Footer Links -->
-            <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+            <div class="d-flex justify-content-between align-items-center pt-3 mt-4 border-top">
               <a href="{% url 'signup_selection' %}" class="small text-muted text-decoration-none">
                 <i class="bi bi-arrow-left me-1"></i>Back to role selection
               </a>

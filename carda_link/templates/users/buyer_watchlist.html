@@ -1,0 +1,89 @@
+{% extends "users/buyer_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}My Watchlist — Buyer Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">My Starred Lots Watchlist</h4>
+    <div class="text-muted small mt-1">Keep track of priority cardamom lots and monitor price movements</div>
+  </div>
+  <div>
+    <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-outline-emerald fw-semibold">
+      <i class="bi bi-plus-circle me-1"></i> Browse More Lots
+    </a>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Lot #</th>
+          <th>Grade</th>
+          <th>Estate &amp; Origin</th>
+          <th>Available Weight</th>
+          <th>Base Price</th>
+          <th>Highest Floor Bid</th>
+          <th>Auction Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in watchlist_items %}
+          <tr>
+            <td class="fw-bold text-dark font-monospace">Lot #{{ item.lot.lot_number }}</td>
+            <td>
+              <span class="badge bg-secondary font-monospace">{{ item.lot.harvest_batch.grade }}</span>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ item.lot.harvest_batch.estate.name }}</div>
+              <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ item.lot.harvest_batch.estate.location }}</div>
+            </td>
+            <td class="fw-bold text-emerald">{{ item.lot.harvest_batch.weight_kg }} kg</td>
+            <td class="text-muted font-monospace">₹{{ item.lot.base_price_per_kg }}/kg</td>
+            <td class="fw-bold text-dark font-monospace">
+              {% if item.lot.highest_bid_per_kg %}
+                <span class="text-emerald">₹{{ item.lot.highest_bid_per_kg }}/kg</span>
+              {% else %}
+                <span class="text-muted small">No Bids Yet</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {% if item.lot.auction.status == 'ACTIVE' %}bg-emerald-subtle text-emerald border border-emerald-light{% elif item.lot.auction.status == 'UPCOMING' %}bg-slate text-secondary{% else %}bg-light text-muted border{% endif %} font-monospace">
+                {{ item.lot.auction.get_status_display }}
+              </span>
+            </td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-2">
+                <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-emerald text-white rounded-pill px-3">
+                  Bid
+                </a>
+                <form method="post" action="{% url 'buyer_watchlist_toggle' item.lot.id %}" class="d-inline m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" title="Remove from Watchlist">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-star text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">Your Watchlist is Empty</h6>
+              <p class="small text-muted mb-3">Star lots in live or upcoming auctions to track them closely here.</p>
+              <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-emerald text-white">Browse Live Auctions</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock dashboard_content %}

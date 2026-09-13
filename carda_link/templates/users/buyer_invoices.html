@@ -1,0 +1,213 @@
+{% extends "users/buyer_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Invoices &amp; Payments — Buyer Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Invoices &amp; Settlement Oversight</h4>
+    <div class="text-muted small mt-1">Platform invoices, commission fee breakdowns, and payment confirmation records</div>
+  </div>
+  <div>
+    <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace px-3 py-1.5">
+      <i class="bi bi-shield-check me-1"></i>Secure Spices Board Settlement
+    </span>
+  </div>
+</div>
+
+<!-- Summary KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="admin-card p-3 h-100 border-0 shadow-sm rounded-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-muted small">Total Invoices Issued</div>
+          <h4 class="fw-bold mb-0 text-dark mt-1">{{ total_invoices|default:0 }}</h4>
+          <span class="text-muted small">Billed: ₹{{ total_billed|default:"0.00" }}</span>
+        </div>
+        <div class="p-3 bg-light rounded-3 text-secondary">
+          <i class="bi bi-receipt fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="admin-card p-3 h-100 border-0 shadow-sm rounded-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-muted small">Settled &amp; Paid</div>
+          <h4 class="fw-bold mb-0 text-emerald mt-1">{{ paid_count|default:0 }}</h4>
+          <span class="text-emerald small fw-semibold">Paid: ₹{{ total_paid|default:"0.00" }}</span>
+        </div>
+        <div class="p-3 bg-emerald-subtle rounded-3 text-emerald">
+          <i class="bi bi-check2-circle fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="admin-card p-3 h-100 border-0 shadow-sm rounded-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-muted small">Pending Settlement</div>
+          <h4 class="fw-bold mb-0 {% if pending_count %}text-danger{% else %}text-dark{% endif %} mt-1">{{ pending_count|default:0 }}</h4>
+          <span class="{% if pending_count %}text-danger fw-semibold{% else %}text-muted{% endif %} small">Due: ₹{{ total_pending|default:"0.00" }}</span>
+        </div>
+        <div class="p-3 {% if pending_count %}bg-warning-subtle text-warning-emphasis{% else %}bg-light text-secondary{% endif %} rounded-3">
+          <i class="bi bi-hourglass-split fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Invoice #</th>
+          <th>Lot Details</th>
+          <th>Estate Origin</th>
+          <th>Total Value</th>
+          <th>Platform Commission</th>
+          <th>Status</th>
+          <th>Issued Date</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+          <tr>
+            <td class="fw-bold text-dark font-monospace">INV-{{ inv.id|stringformat:"05d" }}</td>
+            <td>
+              <div class="fw-bold text-dark">Lot #{{ inv.lot.lot_number }} ({{ inv.lot.harvest_batch.weight_kg }} kg)</div>
+              <span class="badge bg-slate text-secondary font-monospace small">{{ inv.lot.harvest_batch.grade }}</span>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ inv.lot.harvest_batch.estate.name }}</div>
+              <div class="text-muted small">{{ inv.lot.harvest_batch.estate.location }}</div>
+            </td>
+            <td class="font-monospace fw-bold text-dark fs-6">₹{{ inv.total_amount }}</td>
+            <td class="font-monospace text-muted">₹{{ inv.commission_fee }}</td>
+            <td>
+              {% if inv.status == 'PAID' %}
+                <span class="badge bg-success font-monospace"><i class="bi bi-check2-circle me-1"></i>Paid</span>
+              {% elif inv.status == 'PENDING' %}
+                <span class="badge bg-warning text-dark font-monospace"><i class="bi bi-hourglass-split me-1"></i>Payment Pending</span>
+              {% elif inv.status == 'FAILED' %}
+                <span class="badge bg-danger font-monospace"><i class="bi bi-x-circle me-1"></i>Failed</span>
+              {% else %}
+                <span class="badge bg-secondary font-monospace">{{ inv.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ inv.issued_at|date:"d M Y" }}</td>
+            <td class="text-end">
+              {% if inv.status == 'PENDING' %}
+                <a href="{% url 'buyer_invoice_pay' inv.pk %}" class="btn btn-sm btn-emerald text-white rounded-pill px-3 shadow-sm me-1">
+                  <i class="bi bi-credit-card me-1"></i>Pay Now
+                </a>
+              {% endif %}
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#invoiceDetailModal{{ inv.id }}">
+                <i class="bi bi-eye me-1"></i>View
+              </button>
+
+              <!-- Invoice Detail Modal -->
+              <div class="modal fade text-start" id="invoiceDetailModal{{ inv.id }}" tabindex="-1" aria-labelledby="invModalLabel{{ inv.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" style="max-width: 580px;">
+                  <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="modal-header bg-dark text-white border-0 p-4">
+                      <div>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="admin-brand-carda text-white">Carda</span><span class="admin-brand-link text-emerald-light">Link</span>
+                          <span class="badge bg-emerald font-monospace ms-2">INVOICE</span>
+                        </div>
+                        <div class="text-white-50 small mt-1">Ref: INV-{{ inv.id|stringformat:"05d" }}</div>
+                      </div>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                      <div class="row g-3 mb-4 pb-3 border-bottom">
+                        <div class="col-6">
+                          <div class="text-muted small text-uppercase">Billed To</div>
+                          <div class="fw-bold text-dark">{{ inv.buyer.name|default:inv.buyer.email }}</div>
+                          <div class="text-muted small">{{ inv.buyer.buyer_profile.company_name|default:"" }}</div>
+                          <div class="text-muted small">{{ inv.buyer.buyer_profile.business_address|default:"" }}</div>
+                        </div>
+                        <div class="col-6 text-end">
+                          <div class="text-muted small text-uppercase">Settlement Date</div>
+                          <div class="fw-bold text-dark">{{ inv.issued_at|date:"d M Y, H:i" }}</div>
+                          <div class="text-muted small">Status: <span class="fw-semibold text-emerald">{{ inv.get_status_display }}</span></div>
+                        </div>
+                      </div>
+
+                      <h6 class="fw-bold text-dark mb-3">Line Item Breakdown</h6>
+                      <div class="bg-light p-3 rounded-3 mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                          <div>
+                            <div class="fw-bold text-dark">Lot #{{ inv.lot.lot_number }} — {{ inv.lot.harvest_batch.grade }}</div>
+                            <small class="text-muted">{{ inv.lot.harvest_batch.weight_kg }} kg @ ₹{{ inv.lot.highest_bid_per_kg }}/kg</small>
+                          </div>
+                          <div class="fw-bold text-dark font-monospace">₹{{ inv.total_amount }}</div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small pt-2 border-top">
+                          <span>Platform Facilitation &amp; Lab Commission:</span>
+                          <span class="font-monospace">₹{{ inv.commission_fee }}</span>
+                        </div>
+                      </div>
+
+                      <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-emerald-subtle rounded-3">
+                        <span class="fw-bold text-emerald">Total Payable Amount:</span>
+                        <span class="fw-bold fs-5 text-emerald font-monospace">₹{{ inv.total_amount }}</span>
+                      </div>
+
+                      {% if inv.status == 'PAID' %}
+                        <div class="mt-3 p-2.5 bg-success-subtle rounded-3 text-success small d-flex align-items-center gap-2 border border-success-subtle">
+                          <i class="bi bi-check-circle-fill fs-5"></i>
+                          <div>
+                            <strong>Settlement Completed:</strong> {{ inv.status_note|default:"Paid in full" }}
+                            <div class="text-muted" style="font-size: 0.75rem;">Paid on {{ inv.paid_at|date:"d M Y, H:i" }}</div>
+                          </div>
+                        </div>
+                      {% elif inv.status_note %}
+                        <div class="mt-3 text-muted small">
+                          <strong>Settlement Note:</strong> {{ inv.status_note }}
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between align-items-center">
+                      <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Close</button>
+                      <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="window.print()">
+                          <i class="bi bi-printer me-1"></i>Print PDF
+                        </button>
+                        {% if inv.status == 'PENDING' %}
+                          <a href="{% url 'buyer_invoice_pay' inv.pk %}" class="btn btn-sm btn-emerald text-white rounded-pill px-3 fw-bold shadow-sm">
+                            <i class="bi bi-credit-card me-1"></i>Proceed to Pay ₹{{ inv.total_amount }}
+                          </a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-receipt-cutoff text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Invoices Issued Yet</h6>
+              <p class="small text-muted mb-3">When you win auction lots, certified settlement invoices will appear here automatically.</p>
+              <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-emerald text-white">Browse Live Auctions</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock dashboard_content %}

@@ -1,35 +1,40 @@
-{% extends "users/admin_base.html" %}
 {% load static i18n %}
 
-{% block dash_title %}Estate Details — {{ estate.name }}{% endblock %}
-
-{% block dashboard_content %}
-<div class="mb-4">
-  <!-- Top Navigation Bar -->
-  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-    <div class="d-flex align-items-center gap-2">
-      <a href="{% url 'admin_estates' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-        <i class="bi bi-arrow-left me-1"></i>Back to Estates
-      </a>
-      <span class="badge bg-emerald-subtle text-emerald font-monospace px-2.5 py-1.5 rounded-pill">
-        <i class="bi bi-shield-lock-fill me-1"></i>Admin Management Console
-      </span>
-    </div>
-    <div class="d-flex align-items-center gap-2">
-      <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3 py-1.5">
-        <i class="bi bi-box-arrow-up-right me-1"></i>Public Preview
-      </a>
-      {% if estate.owner %}
-        <a href="{% url 'admin_user_detail' estate.owner.pk %}" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5">
-          <i class="bi bi-person me-1"></i>Owner Profile
+<div class="{% if not in_dashboard %}py-4{% else %}mb-4{% endif %}">
+  <!-- Top Navigation & Breadcrumb -->
+  {% if in_dashboard %}
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <a href="{% if request.user.role == 'ADMIN' %}{% url 'admin_estates' %}{% elif request.user.role == 'SELLER' %}{% url 'seller_estates' %}{% elif request.user.role == 'BUYER' %}{% url 'buyer_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+          <i class="bi bi-arrow-left me-1"></i>Back to {% if request.user.role == 'ADMIN' %}Estates Overview{% elif request.user.role == 'SELLER' %}My Estates{% else %}Dashboard{% endif %}
+        </a>
+        <span class="badge bg-emerald-subtle text-emerald font-monospace px-2.5 py-1.5 rounded-pill">
+          <i class="bi bi-patch-check-fill me-1"></i>Public Preview
+        </span>
+      </div>
+      {% if request.user.role == 'ADMIN' %}
+        <a href="{% url 'admin_estate_detail' estate.pk %}" class="btn btn-sm btn-emerald-register text-white rounded-pill px-3 py-1.5 shadow-sm">
+          <i class="bi bi-award-fill me-1"></i>Open Quality Grading Console
+        </a>
+      {% elif request.user == estate.owner %}
+        <a href="{% url 'seller_estate_edit' estate.pk %}" class="btn btn-sm btn-emerald-register text-white rounded-pill px-3 py-1.5 shadow-sm">
+          <i class="bi bi-pencil me-1"></i>Edit Estate Details
         </a>
       {% endif %}
     </div>
-  </div>
+  {% else %}
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-emerald"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'estates:list' %}" class="text-decoration-none text-emerald">Estates Directory</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ estate.name }}</li>
+      </ol>
+    </nav>
+  {% endif %}
 
   <!-- Hero Header Banner -->
   <div class="estate-detail-hero mb-4 rounded-4 overflow-hidden shadow-sm border">
-    <div class="estate-hero-banner position-relative" style="min-height: 260px; max-height: 320px; background: linear-gradient(135deg, #064e3b 0%, #047857 100%);">
+    <div class="estate-hero-banner position-relative" style="min-height: 280px; max-height: 360px; background: linear-gradient(135deg, #064e3b 0%, #047857 100%);">
       {% if estate.primary_photo %}
         <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}" class="w-100 h-100" style="object-fit: cover; opacity: 0.65;">
       {% elif estate.photos.first %}
@@ -70,12 +75,20 @@
       </div>
 
       <div class="d-flex flex-wrap align-items-center gap-2">
-        <button type="button" class="btn btn-sm btn-emerald text-white rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#adminLogBatchModal">
-          <i class="bi bi-plus-circle-fill me-1"></i> Log Harvest Batch
-        </button>
-        <a href="#gradingSection" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold">
-          <i class="bi bi-award me-1"></i> Quality Grading
-        </a>
+        {% if request.user.role == 'ADMIN' %}
+          <a href="{% url 'admin_estate_detail' estate.pk %}" class="btn btn-sm btn-emerald-register text-white rounded-pill px-3 py-1.5 fw-semibold">
+            <i class="bi bi-sliders me-1"></i> Admin Grading Console
+          </a>
+        {% elif request.user == estate.owner %}
+          <a href="{% url 'seller_estate_edit' estate.pk %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3 py-1.5 fw-semibold">
+            <i class="bi bi-pencil me-1"></i> Edit Estate
+          </a>
+        {% endif %}
+        {% if not in_dashboard %}
+          <a href="{% url 'estates:list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5">
+            <i class="bi bi-arrow-left me-1"></i> All Estates Directory
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -107,7 +120,11 @@
         </div>
         <div class="text-muted small">Photo Gallery</div>
         <h4 class="fw-bold mb-0 text-emerald mt-1">
-          {% if estate.primary_photo %}{{ estate.photos.count|add:1 }}{% else %}{{ estate.photos.count }}{% endif %}
+          {% if estate.primary_photo %}
+            {{ estate.photos.count|add:1 }}
+          {% else %}
+            {{ estate.photos.count }}
+          {% endif %}
           <span class="fs-6 text-muted fw-normal">Photos</span>
         </h4>
       </div>
@@ -118,13 +135,13 @@
           <i class="bi bi-box-seam"></i>
         </div>
         <div class="text-muted small">Harvest Batches</div>
-        <h4 class="fw-bold mb-0 text-emerald mt-1">{{ harvest_batches.count }} <span class="fs-6 text-muted fw-normal">Lots</span></h4>
+        <h4 class="fw-bold mb-0 text-emerald mt-1">{{ estate.harvest_batches.count }} <span class="fs-6 text-muted fw-normal">Lots</span></h4>
       </div>
     </div>
   </div>
 
   <div class="row g-4">
-    <!-- Left Column: Gallery, Overview & Grading Table -->
+    <!-- Left Column: Details & Photo Gallery -->
     <div class="col-lg-8">
       <!-- Photo Gallery Card -->
       <div class="admin-card p-4 mb-4">
@@ -138,6 +155,7 @@
         </div>
 
         <div class="gallery-grid">
+          <!-- Primary Photo if exists -->
           {% if estate.primary_photo %}
             <div class="gallery-card" onclick="openPhotoModal('{{ estate.primary_photo.url }}', 'Primary Cover Photo — {{ estate.name }}')">
               <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}">
@@ -150,6 +168,7 @@
             </div>
           {% endif %}
 
+          <!-- Additional Gallery Photos -->
           {% for photo in estate.photos.all %}
             <div class="gallery-card" onclick="openPhotoModal('{{ photo.image.url }}', '{{ photo.caption|default:estate.name }}')">
               <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:estate.name }}">
@@ -182,39 +201,34 @@
         {% endif %}
       </div>
 
-      <!-- Harvest Batches & Spices Board Quality Grading Section -->
-      <div class="admin-card p-4" id="gradingSection">
+      <!-- Harvest Batches -->
+      <div class="admin-card p-4">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
           <div>
             <h5 class="fw-bold mb-0 text-dark font-heading">
-              <i class="bi bi-award-fill text-emerald me-2"></i>Harvest Batches &amp; Spices Board Quality Grading
+              <i class="bi bi-box-seam-fill text-emerald me-2"></i>Harvest Batches &amp; Curing Lots
             </h5>
-            <span class="text-muted small">Log new harvested yield, assign certified grades, and catalog into auctions</span>
+            <span class="text-muted small">Total Yield: <strong class="text-emerald">{{ estate.total_harvest_kg }} kg</strong> across {{ estate.harvest_batches.count }} lot{{ estate.harvest_batches.count|pluralize }}</span>
           </div>
-          <button type="button" class="btn btn-sm btn-emerald text-white rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#adminLogBatchModal">
-            <i class="bi bi-plus-circle-fill me-1"></i> Log Harvest Batch
-          </button>
         </div>
 
-        {% if harvest_batches %}
+        {% if estate.harvest_batches.all %}
           <div class="table-responsive">
             <table class="data-table mb-0">
               <thead>
                 <tr>
                   <th>Batch #</th>
                   <th>Harvest Date</th>
+                  <th>Grade</th>
                   <th>Weight (kg)</th>
-                  <th>Current Grade</th>
-                  <th>Auction Lot</th>
-                  <th>Spices Board Grade Action</th>
+                  <th>Quality Certificate</th>
                 </tr>
               </thead>
               <tbody>
-                {% for batch in harvest_batches %}
+                {% for batch in estate.harvest_batches.all %}
                   <tr>
-                    <td class="fw-semibold text-dark">#{{ batch.id }}</td>
+                    <td class="text-dark fw-semibold">#{{ batch.id }}</td>
                     <td class="text-muted">{{ batch.harvest_date|date:"d M Y" }}</td>
-                    <td class="fw-bold text-dark">{{ batch.weight_kg }} kg</td>
                     <td>
                       {% if batch.grade == 'AGEB' %}
                         <span class="badge bg-success-subtle text-success border border-success fw-bold px-2 py-1">Alleppey Green Extra Bold (AGEB)</span>
@@ -226,26 +240,15 @@
                         <span class="badge bg-warning-subtle text-warning border border-warning fw-bold px-2 py-1">Ungraded</span>
                       {% endif %}
                     </td>
+                    <td class="fw-bold text-emerald">{{ batch.weight_kg }} kg</td>
                     <td>
-                      {% if batch.auction_lot %}
-                        <span class="badge bg-dark">Lot #{{ batch.auction_lot.lot_number }}</span>
+                      {% if batch.quality_certificate %}
+                        <a href="{{ batch.quality_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2.5 small">
+                          <i class="bi bi-file-earmark-pdf me-1"></i> View Lab PDF
+                        </a>
                       {% else %}
-                        <span class="text-muted small">Not Cataloged</span>
+                        <span class="text-muted small">Standard Assortment</span>
                       {% endif %}
-                    </td>
-                    <td>
-                      <form method="post" action="{% url 'admin_harvest_grade_update' batch.pk %}" class="d-flex align-items-center gap-2">
-                        {% csrf_token %}
-                        <select name="grade" class="form-select form-select-sm" style="min-width: 140px;">
-                          <option value="AGEB" {% if batch.grade == 'AGEB' %}selected{% endif %}>AGEB (Extra Bold)</option>
-                          <option value="AGB" {% if batch.grade == 'AGB' %}selected{% endif %}>AGB (Bold)</option>
-                          <option value="AGS" {% if batch.grade == 'AGS' %}selected{% endif %}>AGS (Superior)</option>
-                          <option value="UNGRADED" {% if batch.grade == 'UNGRADED' %}selected{% endif %}>Ungraded</option>
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-emerald text-white rounded-pill px-2.5 py-1">
-                          <i class="bi bi-check2"></i> Set
-                        </button>
-                      </form>
                     </td>
                   </tr>
                 {% endfor %}
@@ -255,17 +258,15 @@
         {% else %}
           <div class="text-center py-4 text-muted">
             <i class="bi bi-box-seam display-4 text-secondary opacity-50"></i>
-            <p class="mt-2 mb-2 small">No harvest batches recorded for this estate yet.</p>
-            <button type="button" class="btn btn-sm btn-emerald text-white rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#adminLogBatchModal">
-              <i class="bi bi-plus-circle-fill me-1"></i> Log First Harvest Batch
-            </button>
+            <p class="mt-2 mb-0 small">No harvest batches logged for this estate yet.</p>
           </div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Right Column: Owner & Verification Information -->
+    <!-- Right Column: Owner Contact & Verified Details -->
     <div class="col-lg-4">
+      <!-- Owner Contact Card -->
       <div class="admin-card p-4 mb-4">
         <h5 class="fw-bold text-dark mb-3 font-heading">
           <i class="bi bi-person-lines-fill text-emerald me-2"></i>Owner &amp; Contact Info
@@ -282,18 +283,6 @@
         </div>
 
         <ul class="list-unstyled d-flex flex-column gap-3 mb-4 small">
-          {% if estate.owner %}
-            <li class="d-flex align-items-start gap-2">
-              <i class="bi bi-person-badge text-emerald mt-1"></i>
-              <div>
-                <div class="text-muted" style="font-size: 0.75rem;">Account User</div>
-                <a href="{% url 'admin_user_detail' estate.owner.pk %}" class="fw-semibold text-emerald text-decoration-none">
-                  {{ estate.owner.name|default:estate.owner.email }} &rarr;
-                </a>
-              </div>
-            </li>
-          {% endif %}
-
           {% if estate.phone_number %}
             <li class="d-flex align-items-start gap-2">
               <i class="bi bi-telephone-fill text-emerald mt-1"></i>
@@ -309,8 +298,14 @@
           <li class="d-flex align-items-start gap-2">
             <i class="bi bi-envelope-fill text-emerald mt-1"></i>
             <div>
-              <div class="text-muted" style="font-size: 0.75rem;">Email Address</div>
-              <span class="fw-medium text-dark">{{ estate.owner.email }}</span>
+              <div class="text-muted" style="font-size: 0.75rem;">Owner Account Email</div>
+              {% if request.user.role == 'ADMIN' and estate.owner %}
+                <a href="{% url 'admin_user_detail' estate.owner.pk %}" class="fw-semibold text-emerald text-decoration-none">
+                  {{ estate.owner.email }} &rarr;
+                </a>
+              {% else %}
+                <span class="fw-medium text-dark">{{ estate.owner.email }}</span>
+              {% endif %}
             </div>
           </li>
 
@@ -340,7 +335,7 @@
         {% endif %}
       </div>
 
-      <!-- Spices Board Quality Assurance Card -->
+      <!-- Spices Board Quality Certification Card -->
       <div class="admin-card p-4 border border-emerald-subtle bg-emerald-subtle rounded-3">
         <div class="d-flex align-items-center gap-2 mb-2">
           <i class="bi bi-shield-check text-emerald fs-4"></i>
@@ -381,56 +376,3 @@
     }
   }
 </script>
-<!-- Modal: Log Harvest Batch for Estate -->
-<div class="modal fade" id="adminLogBatchModal" tabindex="-1" aria-labelledby="adminLogBatchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
-    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="log_harvest">
-        <div class="modal-header bg-dark text-white border-0 p-3 px-4">
-          <h5 class="modal-title fw-bold" id="adminLogBatchModalLabel">
-            <i class="bi bi-boxes text-emerald-light me-2"></i>Log Harvest Batch
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="alert alert-light border small mb-3 text-secondary">
-            <i class="bi bi-tree-fill text-emerald me-1.5"></i>Logging harvest batch for <strong>{{ estate.name }}</strong> (Owner: {{ estate.owner_name|default:estate.owner.name|default:estate.owner.email }})
-          </div>
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label small fw-semibold text-secondary">Harvest Weight (kg) <span class="text-danger">*</span></label>
-              <input type="number" step="0.01" min="0.01" name="weight_kg" class="form-control" placeholder="e.g. 450.00" required>
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-semibold text-secondary">Harvest Date <span class="text-danger">*</span></label>
-              <input type="date" name="harvest_date" class="form-control" value="{% now 'Y-m-d' %}" required>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-secondary">Quality Grade <span class="text-danger">*</span></label>
-            <select name="grade" class="form-select" required>
-              <option value="UNGRADED" selected>Ungraded / Assorted</option>
-              <option value="AGEB">Alleppey Green Extra Bold (AGEB)</option>
-              <option value="AGB">Alleppey Green Bold (AGB)</option>
-              <option value="AGS">Alleppey Green Superior (AGS)</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-secondary">Quality / Lab Certificate (Optional)</label>
-            <input type="file" name="quality_certificate" class="form-control" accept=".pdf,image/*">
-            <div class="form-text text-muted" style="font-size: 0.75rem;">Spices Board or accredited lab moisture and size certificate (PDF or Image).</div>
-          </div>
-        </div>
-        <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
-          <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-sm btn-emerald text-white rounded-pill px-4 fw-bold shadow-sm">
-            <i class="bi bi-check2 me-1"></i>Save Harvest Batch
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-{% endblock dashboard_content %}

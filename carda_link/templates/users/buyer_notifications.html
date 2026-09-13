@@ -1,0 +1,69 @@
+{% extends "users/buyer_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Notifications — Buyer Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Notifications &amp; Alerts</h4>
+    <div class="text-muted small mt-1">Real-time alerts for outbid events, upcoming auctions, won lots, and settlement invoices</div>
+  </div>
+  <div>
+    <form method="post" action="{% url 'mark_all_notifications_read' %}" class="d-inline m-0">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-outline-secondary fw-semibold">
+        <i class="bi bi-check2-all me-1"></i>Mark All Read
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="list-group list-group-flush">
+    {% for notif in notifications %}
+      <div class="list-group-item p-3 d-flex justify-content-between align-items-center {% if not notif.is_read %}bg-light-subtle border-start border-4 border-emerald{% endif %}">
+        <div class="d-flex align-items-start gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mt-1" style="width: 38px; height: 38px; background: #ecfdf5; color: #047857; flex-shrink: 0;">
+            {% if notif.notification_type == 'OUTBID' %}
+              <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+            {% elif notif.notification_type == 'LOT_WON' %}
+              <i class="bi bi-trophy-fill text-warning"></i>
+            {% elif notif.notification_type == 'INVOICE' %}
+              <i class="bi bi-receipt text-primary"></i>
+            {% else %}
+              <i class="bi bi-bell-fill text-emerald"></i>
+            {% endif %}
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-slate text-secondary font-monospace" style="font-size: 0.68rem;">{{ notif.get_notification_type_display }}</span>
+              <small class="text-muted">{{ notif.created_at|date:"d M Y, H:i" }} ({{ notif.created_at|timesince }} ago)</small>
+              {% if not notif.is_read %}
+                <span class="badge bg-emerald-subtle text-emerald small font-monospace">NEW</span>
+              {% endif %}
+            </div>
+            <p class="mb-0 text-dark fw-medium">{{ notif.message }}</p>
+          </div>
+        </div>
+
+        {% if notif.link %}
+          <div>
+            <a href="{{ notif.link }}" class="btn btn-sm btn-outline-emerald rounded-pill px-3">
+              View <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="text-center py-5 text-muted">
+        <div class="empty-state-icon-circle">
+          <i class="bi bi-bell-slash text-emerald fs-3"></i>
+        </div>
+        <h6 class="fw-bold text-dark">No Notifications</h6>
+        <p class="small text-muted mb-0">You're all caught up! Updates regarding your bids and auctions will appear here.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock dashboard_content %}

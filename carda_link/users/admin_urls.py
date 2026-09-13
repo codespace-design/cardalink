@@ -29,8 +29,9 @@ urlpatterns = [
     path("auctions/<int:pk>/lots/add/", admin_views.admin_auction_lots_add_view, name="admin_auction_lots_add"),
     path("lots/<int:pk>/remove/", admin_views.admin_lot_remove_view, name="admin_lot_remove"),
 
-    # 5. Grade Verification Queue
+    # 5. Grade Verification Queue & Batch Intake
     path("batches/ungraded/", admin_views.admin_batches_ungraded_view, name="admin_batches_ungraded"),
+    path("batches/log/", admin_views.admin_batch_create_view, name="admin_batch_create"),
     path("batches/<int:pk>/grade/", admin_views.admin_batch_grade_view, name="admin_batch_grade"),
     path("batches/<int:pk>/reject/", admin_views.admin_batch_reject_view, name="admin_batch_reject"),
 
@@ -46,4 +47,5 @@ urlpatterns = [
     # 8. Estates Overview
     path("estates/", user_views.admin_estates_view, name="admin_estates"),
     path("estates/<int:pk>/", user_views.admin_estate_detail_view, name="admin_estate_detail"),
+    path("harvest/<int:pk>/grade/", user_views.admin_harvest_grade_update_view, name="admin_harvest_grade_update"),
 ]

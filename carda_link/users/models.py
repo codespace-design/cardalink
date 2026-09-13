@@ -5,6 +5,7 @@ from django.db.models import CharField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from .fields import EncryptedCharField
 from .managers import UserManager
 
 
@@ -157,13 +158,43 @@ class SellerProfile(models.Model):
         ACRE = "ACRE", _("Acre")
         CENT = "CENT", _("Cent")
 
+    class District(models.TextChoices):
+        ALAPPUZHA = "ALAPPUZHA", _("Alappuzha")
+        ERNAKULAM = "ERNAKULAM", _("Ernakulam")
+        IDUKKI = "IDUKKI", _("Idukki")
+        KANNUR = "KANNUR", _("Kannur")
+        KASARAGOD = "KASARAGOD", _("Kasaragod")
+        KOLLAM = "KOLLAM", _("Kollam")
+        KOTTAYAM = "KOTTAYAM", _("Kottayam")
+        KOZHIKODE = "KOZHIKODE", _("Kozhikode")
+        MALAPPURAM = "MALAPPURAM", _("Malappuram")
+        PALAKKAD = "PALAKKAD", _("Palakkad")
+        PATHANAMTHITTA = "PATHANAMTHITTA", _("Pathanamthitta")
+        THIRUVANANTHAPURAM = "THIRUVANANTHAPURAM", _("Thiruvananthapuram")
+        THRISSUR = "THRISSUR", _("Thrissur")
+        WAYANAD = "WAYANAD", _("Wayanad")
+
+    class CultivationMethod(models.TextChoices):
+        ORGANIC = "ORGANIC", _("Organic")
+        CONVENTIONAL = "CONVENTIONAL", _("Conventional")
+        MIXED = "MIXED", _("Mixed")
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="seller_profile",
     )
     farm_name = models.CharField(_("Farm Name"), max_length=255)
-    farm_location = models.CharField(_("Farm Location"), max_length=255)
+    farm_location = models.CharField(_("Farm Location"), max_length=255, blank=True, default="")
+    district = models.CharField(
+        _("District"),
+        max_length=30,
+        choices=District.choices,
+        default=District.IDUKKI,
+    )
+    taluk = models.CharField(_("Taluk"), max_length=100, blank=True, default="")
+    village = models.CharField(_("Village"), max_length=100, blank=True, default="")
+
     farm_area = models.DecimalField(
         _("Farm Area"),
         max_digits=10,
@@ -173,12 +204,45 @@ class SellerProfile(models.Model):
         _("Area Unit"),
         max_length=10,
         choices=AreaUnit.choices,
+        default=AreaUnit.ACRE,
     )
     cardamom_plants = models.PositiveIntegerField(
         _("Number of Cardamom Plants"),
     )
+    cultivation_method = models.CharField(
+        _("Cultivation Method"),
+        max_length=20,
+        choices=CultivationMethod.choices,
+        default=CultivationMethod.CONVENTIONAL,
+    )
     cultivation_details = models.TextField(
         _("Cultivation Details"),
+        blank=True,
+        default="",
+    )
+    ownership_proof = models.FileField(
+        _("Land Ownership / Cultivation Proof"),
+        upload_to="seller_documents/",
+        blank=True,
+        null=True,
+    )
+
+    # Banking details (account number encrypted at rest with independent key)
+    bank_account_holder = models.CharField(
+        _("Bank Account Holder Name"),
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    bank_ifsc = models.CharField(
+        _("Bank IFSC Code"),
+        max_length=20,
+        blank=True,
+        default="",
+    )
+    bank_account_number = EncryptedCharField(
+        _("Bank Account Number"),
+        max_length=255,
         blank=True,
         default="",
     )
@@ -191,14 +255,44 @@ class SellerProfile(models.Model):
 
 
 class BuyerProfile(models.Model):
+    class BusinessType(models.TextChoices):
+        EXPORTER = "EXPORTER", _("Exporter")
+        WHOLESALER = "WHOLESALER", _("Wholesaler")
+        TRADER = "TRADER", _("Trader")
+        PROCESSOR = "PROCESSOR", _("Processor")
+        RETAILER = "RETAILER", _("Retailer")
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="buyer_profile",
     )
     company_name = models.CharField(_("Company/Business Name"), max_length=255)
-    business_type = models.CharField(_("Business Type"), max_length=100)
+    business_type = models.CharField(
+        _("Business Type"),
+        max_length=50,
+        choices=BusinessType.choices,
+        default=BusinessType.TRADER,
+    )
+    gst_number = models.CharField(
+        _("GST / Business Registration Number"),
+        max_length=50,
+        blank=True,
+        default="",
+    )
     business_address = models.TextField(_("Business Address"))
+    registration_certificate = models.FileField(
+        _("Business License / Registration Certificate"),
+        upload_to="buyer_certificates/",
+        blank=True,
+        null=True,
+    )
+    purchase_capacity = models.CharField(
+        _("Expected Purchase Capacity"),
+        max_length=100,
+        blank=True,
+        default="",
+    )
     business_details = models.TextField(
         _("Business Details"),
         blank=True,
@@ -210,6 +304,59 @@ class BuyerProfile(models.Model):
 
     def __str__(self):
         return f"Buyer Profile: {self.user.email} - {self.company_name}"
+
+
+class Watchlist(models.Model):
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="watchlist_items",
+    )
+    lot = models.ForeignKey(
+        "auctions.Lot",
+        on_delete=models.CASCADE,
+        related_name="watched_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        unique_together = ("buyer", "lot")
+
+    def __str__(self):
+        return f"{self.buyer.email} -> Lot #{self.lot.lot_number}"
+
+
+class Notification(models.Model):
+    class NotificationType(models.TextChoices):
+        OUTBID = "OUTBID", _("Outbid Alert")
+        AUCTION = "AUCTION", _("Auction Event")
+        LOT_WON = "LOT_WON", _("Lot Won")
+        INVOICE = "INVOICE", _("Invoice & Settlement")
+        BATCH = "BATCH", _("Harvest Batch Quality")
+        SYSTEM = "SYSTEM", _("System Notification")
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    message = models.CharField(_("Message"), max_length=255)
+    link = models.CharField(_("Target Link"), max_length=255, blank=True, default="")
+    notification_type = models.CharField(
+        _("Notification Type"),
+        max_length=20,
+        choices=NotificationType.choices,
+        default=NotificationType.SYSTEM,
+    )
+    is_read = models.BooleanField(_("Is Read"), default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Notification for {self.user.email}: {self.message[:30]}"
 
 
 class AdminActionLog(models.Model):

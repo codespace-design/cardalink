@@ -116,38 +116,87 @@ class SellerSignupForm(forms.ModelForm):
         required=True,
     )
 
-    # Seller Profile fields (explicily defined form fields)
+    # Seller Profile fields
     farm_name = forms.CharField(
-        label=_("Farm Name"),
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label=_("Farm / Estate Name"),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Cardamom Valley Estate"}),
         required=True,
     )
     farm_location = forms.CharField(
         label=_("Farm Location"),
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Vandanmedu, Idukki"}),
+        required=False,
+    )
+    district = forms.ChoiceField(
+        label=_("District"),
+        choices=SellerProfile.District.choices,
+        initial=SellerProfile.District.IDUKKI,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False,
+    )
+    taluk = forms.CharField(
+        label=_("Taluk"),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Udumbanchola"}),
+        required=False,
+    )
+    village = forms.CharField(
+        label=_("Village"),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Vandanmedu"}),
+        required=False,
     )
     farm_area = forms.DecimalField(
-        label=_("Farm Area"),
+        label=_("Cultivated Area"),
         max_digits=10,
         decimal_places=2,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
+        widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g. 10.5"}),
         required=True,
     )
     area_unit = forms.ChoiceField(
         label=_("Area Unit"),
         choices=SellerProfile.AreaUnit.choices,
+        initial=SellerProfile.AreaUnit.ACRE,
         widget=forms.Select(attrs={"class": "form-select"}),
         required=True,
     )
     cardamom_plants = forms.IntegerField(
-        label=_("Number of Cardamom Plants"),
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
+        label=_("Approx. Cardamom Plant Count"),
+        widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g. 2500"}),
         required=True,
     )
+    cultivation_method = forms.ChoiceField(
+        label=_("Cultivation Method"),
+        choices=SellerProfile.CultivationMethod.choices,
+        initial=SellerProfile.CultivationMethod.CONVENTIONAL,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False,
+    )
+    ownership_proof = forms.FileField(
+        label=_("Land Ownership / Cultivation Proof Document"),
+        widget=forms.FileInput(attrs={"class": "form-control"}),
+        required=False,
+        help_text=_("Upload tax receipt, title deed, or cultivation certificate (PDF or Image)."),
+    )
+
+    # Bank Account Details
+    bank_account_holder = forms.CharField(
+        label=_("Bank Account Holder Name"),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "As shown in bank passbook"}),
+        required=False,
+    )
+    bank_ifsc = forms.CharField(
+        label=_("Bank IFSC Code"),
+        max_length=20,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. SBIN0001234"}),
+        required=False,
+    )
+    bank_account_number = forms.CharField(
+        label=_("Bank Account Number"),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Account number for payouts"}),
+        required=False,
+    )
     cultivation_details = forms.CharField(
-        label=_("Cultivation Details"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        label=_("Additional Farm Notes"),
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 2, "placeholder": "Optional details..."}),
         required=False,
     )
 
@@ -159,9 +208,9 @@ class SellerSignupForm(forms.ModelForm):
             "phone_number",
         )
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "email": forms.EmailInput(attrs={"class": "form-control"}),
-            "phone_number": forms.TextInput(attrs={"class": "form-control"}),
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Full legal name"}),
+            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "name@example.com"}),
+            "phone_number": forms.TextInput(attrs={"class": "form-control", "placeholder": "10-digit mobile number"}),
         }
 
     def clean_email(self):
@@ -169,6 +218,12 @@ class SellerSignupForm(forms.ModelForm):
         if User.objects.filter(email=email).exists():
             raise ValidationError(_("This email is already registered."))
         return email
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get("phone_number", "").strip()
+        if not phone:
+            raise ValidationError(_("Phone number is required for OTP verification."))
+        return phone
 
     def clean(self):
         cleaned_data = super().clean()
@@ -204,14 +259,43 @@ class SellerSignupForm(forms.ModelForm):
         user.status = User.Status.PENDING
         if commit:
             user.save()
+            district = self.cleaned_data.get("district") or SellerProfile.District.IDUKKI
+            taluk = self.cleaned_data.get("taluk", "")
+            village = self.cleaned_data.get("village", "")
+            parts = [p for p in [village, taluk, district] if p]
+            loc_from_parts = ", ".join(parts)
+            farm_location = self.cleaned_data.get("farm_location") or (loc_from_parts or district)
+
             SellerProfile.objects.create(
                 user=user,
                 farm_name=self.cleaned_data["farm_name"],
-                farm_location=self.cleaned_data["farm_location"],
+                farm_location=farm_location,
+                district=district,
+                taluk=taluk,
+                village=village,
                 farm_area=self.cleaned_data["farm_area"],
                 area_unit=self.cleaned_data["area_unit"],
                 cardamom_plants=self.cleaned_data["cardamom_plants"],
+                cultivation_method=self.cleaned_data.get("cultivation_method") or SellerProfile.CultivationMethod.CONVENTIONAL,
                 cultivation_details=self.cleaned_data.get("cultivation_details", ""),
+                ownership_proof=self.cleaned_data.get("ownership_proof"),
+                bank_account_holder=self.cleaned_data.get("bank_account_holder", ""),
+                bank_ifsc=self.cleaned_data.get("bank_ifsc", "").upper(),
+                bank_account_number=self.cleaned_data.get("bank_account_number", ""),
+            )
+            from carda_link.estates.models import Estate
+            area_val = self.cleaned_data.get("farm_area") or Decimal("1.00")
+            if area_val <= 0:
+                area_val = Decimal("1.00")
+            Estate.objects.create(
+                owner=user,
+                name=self.cleaned_data["farm_name"],
+                owner_name=user.name or user.email,
+                phone_number=user.phone_number or "",
+                address=user.address or farm_location,
+                location=farm_location,
+                area_in_acres=area_val,
+                description=self.cleaned_data.get("cultivation_details", ""),
             )
         return user
 
@@ -228,25 +312,44 @@ class BuyerSignupForm(forms.ModelForm):
         required=True,
     )
 
-    # Buyer Profile fields (defined as explicit form fields, maps to BuyerProfile company_name/business_type/business_address/business_details)
+    # Buyer Profile fields
     business_name = forms.CharField(
-        label=_("Company/Business Name"),
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label=_("Company / Business Name"),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Spice Route Exports Pvt Ltd"}),
         required=True,
     )
     business_type = forms.CharField(
         label=_("Business Type"),
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-        required=True,
+        widget=forms.Select(choices=BuyerProfile.BusinessType.choices, attrs={"class": "form-select"}),
+        required=False,
+        initial=BuyerProfile.BusinessType.TRADER,
+    )
+    gst_number = forms.CharField(
+        label=_("GST / Business Registration Number"),
+        max_length=50,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. 32AAAAA0000A1Z5"}),
+        required=False,
     )
     business_address = forms.CharField(
-        label=_("Business Address"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        label=_("Registered Business Address"),
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Street, City, State, PIN"}),
         required=True,
     )
+    registration_certificate = forms.FileField(
+        label=_("Business License / Registration Certificate"),
+        widget=forms.FileInput(attrs={"class": "form-control"}),
+        required=False,
+        help_text=_("Upload GST certificate, trade license, or Spices Board registration."),
+    )
+    purchase_capacity = forms.CharField(
+        label=_("Expected Purchase Capacity (Optional)"),
+        max_length=100,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. 500 - 1000 kg / month"}),
+        required=False,
+    )
     business_details = forms.CharField(
-        label=_("Business Details"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        label=_("Additional Business Details"),
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 2, "placeholder": "Optional info..."}),
         required=False,
     )
 
@@ -258,9 +361,9 @@ class BuyerSignupForm(forms.ModelForm):
             "phone_number",
         )
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "email": forms.EmailInput(attrs={"class": "form-control"}),
-            "phone_number": forms.TextInput(attrs={"class": "form-control"}),
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Contact person name"}),
+            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "buyer@company.com"}),
+            "phone_number": forms.TextInput(attrs={"class": "form-control", "placeholder": "10-digit mobile number"}),
         }
 
     def clean_email(self):
@@ -268,6 +371,26 @@ class BuyerSignupForm(forms.ModelForm):
         if User.objects.filter(email=email).exists():
             raise ValidationError(_("This email is already registered."))
         return email
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get("phone_number", "").strip()
+        if not phone:
+            raise ValidationError(_("Phone number is required for OTP verification."))
+        return phone
+
+    def clean_business_type(self):
+        bt = str(self.cleaned_data.get("business_type", "")).strip().upper()
+        if "EXPORTER" in bt:
+            return BuyerProfile.BusinessType.EXPORTER
+        elif "WHOLESALER" in bt:
+            return BuyerProfile.BusinessType.WHOLESALER
+        elif "PROCESSOR" in bt:
+            return BuyerProfile.BusinessType.PROCESSOR
+        elif "RETAILER" in bt:
+            return BuyerProfile.BusinessType.RETAILER
+        elif "TRADER" in bt:
+            return BuyerProfile.BusinessType.TRADER
+        return BuyerProfile.BusinessType.TRADER
 
     def clean(self):
         cleaned_data = super().clean()
@@ -296,7 +419,10 @@ class BuyerSignupForm(forms.ModelForm):
                 user=user,
                 company_name=self.cleaned_data["business_name"],
                 business_type=self.cleaned_data["business_type"],
+                gst_number=self.cleaned_data.get("gst_number", ""),
                 business_address=self.cleaned_data["business_address"],
+                registration_certificate=self.cleaned_data.get("registration_certificate"),
+                purchase_capacity=self.cleaned_data.get("purchase_capacity", ""),
                 business_details=self.cleaned_data.get("business_details", ""),
             )
         return user

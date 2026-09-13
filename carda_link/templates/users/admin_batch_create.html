@@ -1,0 +1,233 @@
+{% extends "users/admin_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Log Harvest Batch{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+  <!-- Top Navigation & Header -->
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div>
+      <a href="{% url 'admin_estates' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-2">
+        <i class="bi bi-arrow-left me-1"></i>Back to Plantations
+      </a>
+      <h3 class="fw-bold text-dark font-heading mb-1">
+        <i class="bi bi-boxes text-emerald me-2"></i>Log Harvest Intake Batch
+      </h3>
+      <p class="text-muted small mb-0">
+        Record newly arrived cardamom harvest batches, specify origin plantation, assign quality grade, or upload lab reports.
+      </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'admin_batches_ungraded' %}" class="btn btn-sm btn-outline-amber rounded-pill px-3 py-1.5 fw-semibold">
+        <i class="bi bi-patch-check-fill me-1"></i>Grade Verification Queue
+      </a>
+      <a href="{% url 'admin_estates' %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3 py-1.5 fw-semibold">
+        <i class="bi bi-tree-fill me-1"></i>View All Estates
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Form Column -->
+    <div class="col-lg-7">
+      <div class="admin-card p-4 shadow-sm border-0 rounded-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+          <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-file-earmark-plus-fill text-emerald me-2"></i>Intake Batch Details
+          </h5>
+          <span class="badge bg-emerald-subtle text-emerald font-monospace px-2.5 py-1 rounded-pill small">
+            Batch Entry Form
+          </span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          <!-- Origin Estate Selection -->
+          <div class="mb-3">
+            <label for="id_estate_id" class="form-label fw-semibold text-dark">
+              Origin Plantation / Estate <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0 text-muted">
+                <i class="bi bi-tree"></i>
+              </span>
+              <select name="estate_id" id="id_estate_id" class="form-select border-start-0" required>
+                <option value="">-- Choose Registered Plantation --</option>
+                {% for estate in estates %}
+                  <option value="{{ estate.pk }}" {% if selected_estate_id == estate.pk %}selected{% endif %}>
+                    {{ estate.name }} — {{ estate.location }} (Owner: {{ estate.owner_name|default:estate.owner.name|default:estate.owner.email }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-text small text-muted">
+              Select the registered cardamom plantation that produced this harvest lot.
+            </div>
+          </div>
+
+          <!-- Weight & Harvest Date -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="id_weight_kg" class="form-label fw-semibold text-dark">
+                Harvest Net Weight (kg) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                  <i class="bi bi-speedometer2"></i>
+                </span>
+                <input type="number" step="0.01" min="0.01" name="weight_kg" id="id_weight_kg" class="form-control border-start-0" placeholder="e.g. 500.00" required>
+                <span class="input-group-text bg-light">kg</span>
+              </div>
+              <div class="form-text small text-muted">Cleaned, cured cardamom dried weight.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="id_harvest_date" class="form-label fw-semibold text-dark">
+                Harvest Date <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                  <i class="bi bi-calendar-date"></i>
+                </span>
+                <input type="date" name="harvest_date" id="id_harvest_date" class="form-control border-start-0" value="{% now 'Y-m-d' %}" required>
+              </div>
+              <div class="form-text small text-muted">Date pods were picked or cured.</div>
+            </div>
+          </div>
+
+          <!-- Quality Grade -->
+          <div class="mb-3">
+            <label for="id_grade" class="form-label fw-semibold text-dark">
+              Initial Quality Grade <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0 text-muted">
+                <i class="bi bi-award"></i>
+              </span>
+              <select name="grade" id="id_grade" class="form-select border-start-0" required>
+                <option value="UNGRADED" selected>Ungraded / Assorted (Pending Official Inspection)</option>
+                <option value="AGEB">Alleppey Green Extra Bold (AGEB - 8mm+ pods)</option>
+                <option value="AGB">Alleppey Green Bold (AGB - 7mm to 7.9mm)</option>
+                <option value="AGS">Alleppey Green Superior (AGS - 6mm to 6.9mm)</option>
+              </select>
+            </div>
+            <div class="form-text small text-muted">
+              Select <strong>Ungraded</strong> to send to the Admin Grade Verification queue, or assign an accredited grade directly.
+            </div>
+          </div>
+
+          <!-- Quality Certificate Upload -->
+          <div class="mb-4">
+            <label for="id_quality_certificate" class="form-label fw-semibold text-dark">
+              Quality / Lab Certificate (Optional)
+            </label>
+            <input type="file" name="quality_certificate" id="id_quality_certificate" class="form-control" accept=".pdf,image/*">
+            <div class="form-text small text-muted">
+              Upload Spices Board testing report or accredited moisture &amp; pesticide certificate (.pdf, .jpg, .png).
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex align-items-center justify-content-between pt-3 border-top gap-2">
+            <a href="{% url 'admin_estates' %}" class="btn btn-light border rounded-pill px-4">
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-emerald text-white rounded-pill px-4 py-2 fw-bold shadow-sm">
+              <i class="bi bi-check2-circle me-1"></i> Log Harvest Batch
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Info & Recent Batches -->
+    <div class="col-lg-5">
+      <!-- Standard Guide Card -->
+      <div class="admin-card p-4 mb-4 shadow-sm border-0 rounded-4">
+        <h6 class="fw-bold text-dark mb-3">
+          <i class="bi bi-info-circle-fill text-emerald me-2"></i>Spices Board Grading Standards
+        </h6>
+        <div class="small text-muted">
+          <div class="d-flex align-items-start gap-2 mb-2.5">
+            <span class="badge bg-emerald text-white font-monospace" style="min-width: 60px;">AGEB</span>
+            <div><strong>Alleppey Green Extra Bold:</strong> Pod diameter &ge; 8.0 mm, max moisture 10.5%, pristine deep green uniform pods.</div>
+          </div>
+          <div class="d-flex align-items-start gap-2 mb-2.5">
+            <span class="badge bg-teal text-white font-monospace" style="min-width: 60px;">AGB</span>
+            <div><strong>Alleppey Green Bold:</strong> Pod diameter 7.0 mm &ndash; 7.9 mm, 3-cornered full mature pods.</div>
+          </div>
+          <div class="d-flex align-items-start gap-2 mb-2.5">
+            <span class="badge bg-secondary text-white font-monospace" style="min-width: 60px;">AGS</span>
+            <div><strong>Alleppey Green Superior:</strong> Pod diameter 6.0 mm &ndash; 6.9 mm, standard commercial grade.</div>
+          </div>
+          <div class="d-flex align-items-start gap-2">
+            <span class="badge bg-warning text-dark font-monospace" style="min-width: 60px;">UNGRADED</span>
+            <div>Queued for physical inspection and manual grade verification before lot creation.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Batches Card -->
+      <div class="admin-card p-4 shadow-sm border-0 rounded-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <h6 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-clock-history text-emerald me-2"></i>Recent Intake Batches
+          </h6>
+          <span class="badge bg-light text-muted border rounded-pill px-2 py-1 small">Last 10</span>
+        </div>
+
+        {% if recent_batches %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+              <thead class="table-light">
+                <tr>
+                  <th>Batch / Estate</th>
+                  <th>Weight</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for b in recent_batches %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold text-truncate" style="max-width: 150px;" title="{{ b.estate.name }}">
+                        <a href="{% url 'admin_estate_detail' b.estate.pk %}" class="text-decoration-none text-dark">
+                          {{ b.estate.name }}
+                        </a>
+                      </div>
+                      <div class="text-muted" style="font-size: 0.75rem;">
+                        #{{ b.id }} &bull; {{ b.harvest_date|date:"d M Y" }}
+                      </div>
+                    </td>
+                    <td>
+                      <span class="fw-bold font-monospace">{{ b.weight_kg }}</span> <span class="text-muted small">kg</span>
+                    </td>
+                    <td>
+                      {% if b.grade == 'AGEB' %}
+                        <span class="badge bg-emerald-subtle text-emerald rounded-pill px-2 py-0.5 font-monospace">AGEB</span>
+                      {% elif b.grade == 'AGB' %}
+                        <span class="badge bg-info-subtle text-info rounded-pill px-2 py-0.5 font-monospace">AGB</span>
+                      {% elif b.grade == 'AGS' %}
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5 font-monospace">AGS</span>
+                      {% else %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-2 py-0.5 font-monospace">UNGRADED</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted small">
+            <i class="bi bi-inbox fs-3 d-block mb-2 text-secondary"></i>
+            No harvest batches logged in the system yet.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock dashboard_content %}

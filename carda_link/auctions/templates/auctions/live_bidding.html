@@ -6,8 +6,9 @@
     <title>CardaLink — Live Auction Simulation Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
           rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <style>
       :root {
         --bg-page: #f8fafc;
@@ -62,42 +63,91 @@
       .brand {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 4px;
         text-decoration: none;
         color: var(--text-main);
       }
 
-      .brand-logo {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--accent-emerald), var(--accent-emerald-dark));
-        border-radius: 10px;
+      .admin-brand-carda {
+        color: #047857;
+        font-weight: 800;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.45rem;
+        letter-spacing: -0.02em;
+      }
+
+      .admin-brand-link {
+        background-color: #047857;
+        color: #ffffff !important;
+        font-weight: 800;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.35rem;
+        padding: 0.12rem 0.55rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(4, 120, 87, 0.22);
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+        margin-left: 2px;
+      }
+
+      .admin-badge-console {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+        border-radius: 6px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        padding: 4px 8px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-left: 10px;
+      }
+
+      .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        padding: 4px 12px 4px 6px;
+        border-radius: 30px;
+      }
+
+      .user-chip-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #047857;
+        color: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 800;
-        font-size: 20px;
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        font-weight: 700;
+        font-size: 12px;
       }
 
-      .brand-title {
-        font-size: 20px;
-        font-weight: 800;
-        letter-spacing: -0.5px;
+      .user-chip-info {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+        text-align: left;
+      }
+
+      .user-chip-name {
+        font-size: 12px;
+        font-weight: 700;
         color: var(--text-main);
       }
 
-      .brand-badge {
-        background: var(--accent-emerald-light);
-        border: 1px solid var(--accent-emerald);
+      .user-chip-role {
+        font-size: 10px;
         color: var(--accent-emerald-dark);
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
       }
 
       .nav-actions {
@@ -452,16 +502,34 @@
   </head>
   <body>
     <header>
-      <a href="{% url 'home' %}" class="brand">
-        <div class="brand-logo">C</div>
-        <div>
-          <div class="brand-title">CardaLink</div>
-        </div>
-        <span class="brand-badge">LIVE AUCTION ENGINE</span>
-      </a>
+      <div class="brand-container">
+        <a href="{% if request.user.role == 'ADMIN' %}{% url 'admin_dashboard' %}{% elif request.user.role == 'BUYER' %}{% url 'buyer_dashboard' %}{% elif request.user.role == 'SELLER' %}{% url 'seller_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="brand">
+          <span class="admin-brand-carda">Carda</span><span class="admin-brand-link">Link</span>
+          <span class="admin-badge-console">LIVE AUCTION ENGINE</span>
+        </a>
+      </div>
       <div class="nav-actions">
-        <button class="btn btn-secondary" onclick="seedMockData()">Re-seed Test Data</button>
-        <a href="/api/docs" target="_blank" class="btn btn-primary">OpenAPI Docs</a>
+        <a href="{% if request.user.role == 'ADMIN' %}{% url 'admin_dashboard' %}{% elif request.user.role == 'BUYER' %}{% url 'buyer_dashboard' %}{% elif request.user.role == 'SELLER' %}{% url 'seller_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn btn-secondary">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to {% if request.user.role == 'ADMIN' %}Admin Console{% elif request.user.role == 'BUYER' %}Buyer Portal{% elif request.user.role == 'SELLER' %}Seller Portal{% else %}Home{% endif %}</span>
+        </a>
+        <button class="btn btn-secondary" onclick="seedMockData()">
+          <i class="bi bi-arrow-repeat"></i> Re-seed Test Data
+        </button>
+        <a href="/api/docs" target="_blank" class="btn btn-primary">
+          <i class="bi bi-file-earmark-code"></i> OpenAPI Docs
+        </a>
+        {% if request.user.is_authenticated %}
+          <div class="user-chip">
+            <div class="user-chip-avatar">
+              {{ request.user.name|default:request.user.email|slice:":1"|upper }}
+            </div>
+            <div class="user-chip-info">
+              <span class="user-chip-name">{{ request.user.name|default:request.user.email }}</span>
+              <span class="user-chip-role">{{ request.user.get_role_display|default:request.user.role }}</span>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </header>
     <div class="container">

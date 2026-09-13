@@ -1,0 +1,83 @@
+{% extends "users/seller_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Sales History — Seller Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Completed Sales History</h4>
+    <div class="text-muted small mt-1">Record of all sold cardamom lots, final sale prices, and buyer payment settlement statuses</div>
+  </div>
+  <div>
+    <a href="{% url 'seller_earnings' %}" class="btn btn-sm btn-outline-emerald fw-semibold">
+      <i class="bi bi-wallet2 me-1"></i> View Payout Summary
+    </a>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Lot #</th>
+          <th>Auction Event</th>
+          <th>Grade &amp; Estate</th>
+          <th>Sold Weight</th>
+          <th>Winning Price</th>
+          <th>Gross Sale Value</th>
+          <th>Buyer Payment Status</th>
+          <th>Net Seller Payout</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lot in completed_lots %}
+          <tr>
+            <td class="fw-bold text-dark font-monospace">Lot #{{ lot.lot_number }}</td>
+            <td>
+              <div class="fw-semibold text-dark">{{ lot.auction.title }}</div>
+              <div class="text-muted small">Closed {{ lot.auction.end_time|date:"d M Y" }}</div>
+            </td>
+            <td>
+              <span class="badge bg-slate text-secondary font-monospace">{{ lot.harvest_batch.grade }}</span>
+              <div class="text-muted small">{{ lot.harvest_batch.estate.name }}</div>
+            </td>
+            <td class="fw-bold text-dark">{{ lot.harvest_batch.weight_kg }} kg</td>
+            <td class="font-monospace fw-bold text-emerald">₹{{ lot.highest_bid_per_kg }}/kg</td>
+            <td class="font-monospace fw-bold text-dark fs-6">₹{{ lot.final_sale_value }}</td>
+            <td>
+              {% if lot.invoice %}
+                {% if lot.invoice.status == 'PAID' %}
+                  <span class="badge bg-success font-monospace"><i class="bi bi-check2-circle me-1"></i>Buyer Paid</span>
+                {% elif lot.invoice.status == 'PENDING' %}
+                  <span class="badge bg-warning text-dark font-monospace"><i class="bi bi-hourglass-split me-1"></i>Payment Pending</span>
+                {% else %}
+                  <span class="badge bg-danger font-monospace">{{ lot.invoice.get_status_display }}</span>
+                {% endif %}
+              {% else %}
+                <span class="badge bg-light text-muted border">Invoicing</span>
+              {% endif %}
+            </td>
+            <td class="font-monospace fw-bold text-emerald fs-6">
+              ₹{{ lot.net_payout }}
+              <div class="text-muted" style="font-size: 0.7rem; font-weight: normal;">(After 2% fee)</div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-clock-history text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Sales Completed Yet</h6>
+              <p class="small text-muted mb-3">When your lots conclude bidding in active auctions and sell, they will appear here.</p>
+              <a href="{% url 'seller_batches' %}" class="btn btn-sm btn-emerald text-white">Log Harvest Batches</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock dashboard_content %}

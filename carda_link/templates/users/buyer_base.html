@@ -1,0 +1,50 @@
+{% extends "users/dashboard_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Buyer Portal{% endblock %}
+
+{% block sidebar_nav %}
+<div class="admin-sidebar-section">Main</div>
+<a href="{% url 'buyer_dashboard' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_dashboard' %}active{% endif %}">
+  <i class="bi bi-grid-1x2-fill item-icon"></i>
+  <span>Dashboard</span>
+</a>
+
+<div class="admin-sidebar-section">Trading &amp; Auctions</div>
+<a href="{% url 'buyer_auctions' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_auctions' %}active{% endif %}">
+  <i class="bi bi-hammer item-icon"></i>
+  <span>Live Auctions</span>
+  {% if active_auctions_count %}<span class="admin-badge-count admin-badge-emerald">{{ active_auctions_count }} live</span>{% endif %}
+</a>
+<a href="{% url 'buyer_watchlist' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_watchlist' %}active{% endif %}">
+  <i class="bi bi-star-fill item-icon"></i>
+  <span>Watchlist</span>
+  {% if watchlist_count %}<span class="admin-badge-count admin-badge-amber">{{ watchlist_count }}</span>{% endif %}
+</a>
+<a href="{% url 'buyer_bids' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_bids' %}active{% endif %}">
+  <i class="bi bi-hand-index-thumb-fill item-icon"></i>
+  <span>My Bids</span>
+  {% if leading_count %}<span class="admin-badge-count admin-badge-emerald">{{ leading_count }} leading</span>{% endif %}
+</a>
+<a href="{% url 'buyer_won_lots' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_won_lots' %}active{% endif %}">
+  <i class="bi bi-trophy-fill item-icon"></i>
+  <span>Won Lots</span>
+  {% if won_lots_count %}<span class="admin-badge-count admin-badge-emerald">{{ won_lots_count }}</span>{% endif %}
+</a>
+
+<div class="admin-sidebar-section">Finance &amp; Account</div>
+<a href="{% url 'buyer_invoices' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_invoices' %}active{% endif %}">
+  <i class="bi bi-receipt-cutoff item-icon"></i>
+  <span>Invoices &amp; Payments</span>
+  {% if pending_invoices_count %}<span class="admin-badge-count admin-badge-amber">{{ pending_invoices_count }}</span>{% endif %}
+</a>
+<a href="{% url 'buyer_notifications' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_notifications' %}active{% endif %}">
+  <i class="bi bi-bell-fill item-icon"></i>
+  <span>Notifications</span>
+  {% if unread_notifications_count %}<span class="admin-badge-count admin-badge-rose">{{ unread_notifications_count }}</span>{% endif %}
+</a>
+<a href="{% url 'buyer_profile' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'buyer_profile' or request.resolver_match.url_name == 'buyer_profile_edit' %}active{% endif %}">
+  <i class="bi bi-building item-icon"></i>
+  <span>Business Profile</span>
+</a>
+{% endblock sidebar_nav %}
