@@ -495,3 +495,59 @@ class TestAuditLogsView:
         resp_filter = client.get(reverse("admin_audit_logs") + "?action=CUSTOM_TEST_ACTION")
         assert resp_filter.status_code == 200
         assert "CUSTOM_TEST_ACTION" in resp_filter.content.decode()
+
+
+@pytest.mark.django_db
+class TestAdminBatchCreateView:
+    def test_admin_batch_create_get(self, client, admin_user, seller_user):
+        client.force_login(admin_user)
+        estate = Estate.objects.create(
+            name="Hilltop Spices Plantation",
+            location="Idukki",
+            area_in_acres=Decimal("15.00"),
+            owner=seller_user,
+        )
+
+        resp = client.get(reverse("admin_batch_create"))
+        assert resp.status_code == 200
+        content = resp.content.decode()
+        assert "Log Harvest Intake Batch" in content
+        assert "Log Harvest Batch" in content
+        assert "Hilltop Spices Plantation" in content
+        assert reverse("admin_batch_create") in content
+
+    def test_admin_batch_create_post_success(self, client, admin_user, seller_user):
+        client.force_login(admin_user)
+        estate = Estate.objects.create(
+            name="Valley Cardamom Estate",
+            location="Vandanmedu",
+            area_in_acres=Decimal("20.00"),
+            owner=seller_user,
+        )
+
+        data = {
+            "estate_id": estate.pk,
+            "weight_kg": "350.50",
+            "harvest_date": "2026-09-13",
+            "grade": "AGEB",
+        }
+        resp = client.post(reverse("admin_batch_create"), data)
+        assert resp.status_code == 302
+        assert resp.url == reverse("admin_estate_detail", kwargs={"pk": estate.pk})
+
+        batch = HarvestBatch.objects.get(estate=estate)
+        assert batch.weight_kg == Decimal("350.50")
+        assert batch.grade == "AGEB"
+
+        # Verify admin audit log
+        log_entry = AdminActionLog.objects.filter(action="LOG_HARVEST_BATCH", target_id=str(batch.pk)).first()
+        assert log_entry is not None
+        assert "Valley Cardamom Estate" in log_entry.reason
+
+    def test_admin_batch_create_post_validation_error(self, client, admin_user):
+        client.force_login(admin_user)
+        # Missing weight_kg and harvest_date
+        resp = client.post(reverse("admin_batch_create"), {"estate_id": "9999"})
+        assert resp.status_code == 200
+        assert HarvestBatch.objects.count() == 0
+

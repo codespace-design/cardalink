@@ -1,171 +1,247 @@
-{% extends "users/dashboard_base.html" %}
+{% extends "users/buyer_base.html" %}
 {% load static i18n %}
 
 {% block dash_title %}Buyer Dashboard{% endblock %}
 
-{% block sidebar %}
-{% include "users/partials/buyer_sidebar.html" with active_item="dashboard" %}
-{% endblock sidebar %}
-
 {% block dashboard_content %}
-<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
   <div>
-    <h3 class="fw-bold font-heading mb-1 text-dark">
-      Welcome, {{ request.user.name|default:request.user.email }}!
-    </h3>
-    <p class="text-muted mb-0">Browse live cardamom auctions, place bids, and track won lots from certified estates.</p>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold font-heading mb-0 text-dark">Buyer Procurement Center</h4>
+      <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace small px-2 py-0.5">BUYER</span>
+    </div>
+    <div class="text-muted small mt-1">Real-time cardamom bidding, certified lot tracking, and settlement management</div>
   </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'auctions:simulation' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2">
-      <i class="bi bi-hammer"></i> Enter Live Auctions
+  <div class="d-flex gap-2 align-items-center">
+    <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-emerald text-white d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm">
+      <i class="bi bi-hammer"></i> View Live Auctions
     </a>
-    <a href="{% url 'estates:list' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-      <i class="bi bi-geo-alt"></i> Browse Estates
+    <a href="{% url 'buyer_watchlist' %}" class="btn btn-sm btn-outline-emerald d-inline-flex align-items-center gap-1.5 fw-semibold">
+      <i class="bi bi-star"></i> My Watchlist
     </a>
   </div>
 </div>
 
-<!-- Stat Cards -->
+{% if pending_invoices_count %}
+  <div class="alert alert-warning border-warning-subtle d-flex align-items-center justify-content-between mb-4 rounded-4 shadow-sm p-3 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-3">
+      <div class="p-2 bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+      </div>
+      <div>
+        <div class="fw-bold text-dark mb-0">Pending Invoice Settlement Notice</div>
+        <div class="small text-muted">You have <strong>{{ pending_invoices_count }} lot invoice{{ pending_invoices_count|pluralize }}</strong> awaiting settlement to initiate lot release.</div>
+      </div>
+    </div>
+    <a href="{% url 'buyer_invoices' %}" class="btn btn-sm btn-dark text-white rounded-pill px-4 fw-semibold shadow-sm">
+      <i class="bi bi-credit-card me-1"></i>Review &amp; Pay
+    </a>
+  </div>
+{% endif %}
+
+<!-- 4 Standardized Metric KPI Cards -->
+<div class="row g-3 mb-4">
+  <!-- Card 1: Active Auctions -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'buyer_auctions' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-emerald">
+            <i class="bi bi-hammer"></i>
+          </div>
+          {% if active_auctions_count %}
+            <span class="kpi-tag kpi-tag-emerald">Bidding Open</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">Standby</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ active_auctions_count|default:"0" }}</div>
+        <div class="kpi-label">Active Auctions</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 2: Bids Placed -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'buyer_bids' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-amber">
+            <i class="bi bi-hand-index-thumb-fill"></i>
+          </div>
+          {% if leading_count %}
+            <span class="kpi-tag kpi-tag-amber">{{ leading_count }} Leading</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-gray">None Leading</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ total_bids_count|default:"0" }}</div>
+        <div class="kpi-label">Total Bids Placed</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 3: Lots Won -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'buyer_won_lots' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-purple">
+            <i class="bi bi-trophy-fill"></i>
+          </div>
+          <span class="kpi-tag kpi-tag-purple">Purchased</span>
+        </div>
+        <div class="kpi-value">{{ won_lots_count|default:"0" }}</div>
+        <div class="kpi-label">Lots Won</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 4: Pending Invoices -->
+  <div class="col-6 col-lg-3">
+    <a href="{% url 'buyer_invoices' %}" class="text-decoration-none">
+      <div class="admin-kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon kpi-icon-rose">
+            <i class="bi bi-receipt-cutoff"></i>
+          </div>
+          {% if pending_invoices_count %}
+            <span class="kpi-tag kpi-tag-rose">Payment Due</span>
+          {% else %}
+            <span class="kpi-tag kpi-tag-emerald">All Settled</span>
+          {% endif %}
+        </div>
+        <div class="kpi-value">{{ pending_invoices_count|default:"0" }}</div>
+        <div class="kpi-label">Pending Invoices</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- 4 Action Shortcuts -->
 <div class="row g-3 mb-4">
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-emerald"><i class="bi bi-hammer"></i></div>
-        <div>
-          <div class="stat-value">{{ active_auctions_count|default:"0" }}</div>
-          <div class="stat-label">Active Auctions</div>
+    <a href="{% url 'buyer_auctions' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-blue">
+          <i class="bi bi-broadcast"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Live Floor</div>
+          <div class="action-tile-subtitle">Simulate real-time auction</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-slate"><i class="bi bi-calendar-event"></i></div>
-        <div>
-          <div class="stat-value">{{ upcoming_auctions_count|default:"0" }}</div>
-          <div class="stat-label">Upcoming Auctions</div>
+    <a href="{% url 'buyer_watchlist' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-amber">
+          <i class="bi bi-star"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Watchlist</div>
+          <div class="action-tile-subtitle">Starred cardamom lots</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-amber"><i class="bi bi-hand-index-thumb-fill"></i></div>
-        <div>
-          <div class="stat-value">{{ user_bids_count|default:"0" }}</div>
-          <div class="stat-label">Bids Placed</div>
+    <a href="{% url 'buyer_won_lots' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-purple">
+          <i class="bi bi-patch-check"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Certificates</div>
+          <div class="action-tile-subtitle">Download won lot certs</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="stat-card">
-      <div class="d-flex align-items-center gap-3">
-        <div class="stat-icon bg-rose"><i class="bi bi-trophy-fill"></i></div>
-        <div>
-          <div class="stat-value">{{ won_lots_count|default:"0" }}</div>
-          <div class="stat-label">Lots Won</div>
+    <a href="{% url 'buyer_invoices' %}" class="text-decoration-none">
+      <div class="admin-action-tile">
+        <div class="action-tile-icon action-icon-rose">
+          <i class="bi bi-cash-stack"></i>
         </div>
+        <div class="action-tile-content">
+          <div class="action-tile-title">Settlements</div>
+          <div class="action-tile-subtitle">Invoices &amp; payment state</div>
+        </div>
+        <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
-    </div>
+    </a>
   </div>
 </div>
 
-<!-- Live & Upcoming Auctions -->
-<div class="dash-section mb-4">
-  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
-    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-broadcast text-danger me-2"></i>Spice Auctions</h5>
-    <a href="{% url 'auctions:simulation' %}" class="text-emerald text-decoration-none small fw-semibold">Open Live Bidding Console <i class="bi bi-arrow-right"></i></a>
-  </div>
-
-  {% if auctions %}
-  <div class="row g-3">
-    {% for auction in auctions %}
-    <div class="col-md-6 col-lg-4">
-      <div class="card h-100 border rounded-3 p-3 shadow-sm hover-shadow transition">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="status-badge {% if auction.status == 'ACTIVE' %}status-active{% else %}status-pending{% endif %}">
-            {% if auction.status == 'ACTIVE' %}<i class="bi bi-record-fill text-danger me-1"></i> LIVE{% else %}{{ auction.get_status_display }}{% endif %}
-          </span>
-          <small class="text-muted">{{ auction.lots.count }} Lots</small>
-        </div>
-        <h6 class="fw-bold mb-2">{{ auction.title }}</h6>
-        <div class="text-muted small mb-3">
-          <div><i class="bi bi-clock me-1"></i> <strong>Start:</strong> {{ auction.start_time|date:"d M Y, H:i" }}</div>
-          <div><i class="bi bi-clock-history me-1"></i> <strong>End:</strong> {{ auction.end_time|date:"d M Y, H:i" }}</div>
-        </div>
-        <div class="mt-auto">
-          <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-emerald-register text-white w-100 fw-semibold">
-            <i class="bi bi-hammer me-1"></i> {% if auction.status == 'ACTIVE' %}Join Live Auction{% else %}View Lots{% endif %}
-          </a>
-        </div>
-      </div>
+<!-- Recent Bids Table -->
+<div class="admin-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="fw-bold font-heading mb-0 text-dark">Recent Bidding Activity</h5>
+      <small class="text-muted">Real-time status comparison against highest floor bids</small>
     </div>
-    {% endfor %}
+    <a href="{% url 'buyer_bids' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+      View All Bids &rarr;
+    </a>
   </div>
-  {% else %}
-  <div class="empty-state py-4">
-    <i class="bi bi-calendar-x text-secondary fs-1"></i>
-    <h6 class="mt-2">No Active or Upcoming Auctions</h6>
-    <p class="text-muted small">Please check back soon. New spice auctions are scheduled regularly.</p>
-  </div>
-  {% endif %}
-</div>
 
-<!-- My Recent Bids -->
-<div class="dash-section mb-4">
-  <div class="dash-section-header d-flex align-items-center justify-content-between mb-3">
-    <h5 class="mb-0 fw-bold font-heading"><i class="bi bi-clock-history text-emerald me-2"></i>My Recent Bids</h5>
-  </div>
-  {% if recent_bids %}
   <div class="table-responsive">
-    <table class="data-table">
-      <thead>
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
         <tr>
-          <th>Auction</th>
           <th>Lot #</th>
-          <th>Grade</th>
-          <th>Bid Amount (₹/kg)</th>
+          <th>Auction</th>
+          <th>Grade &amp; Origin</th>
+          <th>Your Bid</th>
+          <th>Current Highest</th>
+          <th>Status</th>
           <th>Time</th>
-          <th>Lot Status</th>
         </tr>
       </thead>
       <tbody>
         {% for bid in recent_bids %}
-        <tr>
-          <td class="fw-semibold">{{ bid.lot.auction.title }}</td>
-          <td>Lot #{{ bid.lot.lot_number }}</td>
-          <td><span class="badge bg-secondary">{{ bid.lot.harvest_batch.grade }}</span></td>
-          <td class="text-emerald fw-bold">₹{{ bid.amount_per_kg }}/kg</td>
-          <td class="text-muted small">{{ bid.timestamp|date:"d M Y, H:i:s" }}</td>
-          <td>
-            {% if bid.lot.is_sold %}
-              {% if bid.amount_per_kg == bid.lot.highest_bid_per_kg %}
-                <span class="badge bg-success">Won</span>
+          <tr>
+            <td class="fw-bold text-dark font-monospace">Lot #{{ bid.lot.lot_number }}</td>
+            <td>{{ bid.lot.auction.title }}</td>
+            <td>
+              <span class="badge bg-slate text-secondary font-monospace">{{ bid.lot.harvest_batch.grade }}</span>
+              <div class="text-muted small">{{ bid.lot.harvest_batch.estate.name }} ({{ bid.lot.harvest_batch.estate.location }})</div>
+            </td>
+            <td class="fw-bold text-dark">₹{{ bid.amount_per_kg }}/kg</td>
+            <td class="fw-semibold text-emerald">
+              {% if bid.lot.highest_bid_per_kg %}
+                ₹{{ bid.lot.highest_bid_per_kg }}/kg
               {% else %}
-                <span class="badge bg-secondary">Outbid</span>
+                ₹{{ bid.lot.base_price_per_kg }}/kg (Base)
               {% endif %}
-            {% else %}
-              {% if bid.amount_per_kg == bid.lot.highest_bid_per_kg %}
-                <span class="badge bg-primary">Highest Bidder</span>
-              {% else %}
-                <span class="badge bg-warning text-dark">Outbid</span>
-              {% endif %}
-            {% endif %}
-          </td>
-        </tr>
+            </td>
+            <td>
+              <span class="badge {{ bid.computed_status.badge }} font-monospace px-2.5 py-1">
+                {{ bid.computed_status.label }}
+              </span>
+            </td>
+            <td class="text-muted small">{{ bid.timestamp|timesince }} ago</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-hand-index-thumb text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Bids Placed Yet</h6>
+              <p class="small text-muted mb-3">Browse our active auctions to place bids on certified cardamom lots.</p>
+              <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-emerald text-white">Browse Live Auctions</a>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% else %}
-  <div class="empty-state py-4">
-    <i class="bi bi-hand-index text-secondary fs-1"></i>
-    <h6 class="mt-2">No Bids Placed Yet</h6>
-    <p class="text-muted small">Enter an active cardamom auction session to start bidding on premium spice lots.</p>
-  </div>
-  {% endif %}
 </div>
 {% endblock dashboard_content %}

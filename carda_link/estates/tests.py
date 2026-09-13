@@ -114,39 +114,25 @@ class EstateTests(TestCase):
         self.assertFalse(invalid_form.is_valid())
         self.assertIn("area_in_acres", invalid_form.errors)
 
-    def test_estate_register_view_get(self):
+    def test_estate_register_view_redirects_to_seller_estates(self):
         response = self.client.get(reverse("estates:register"))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Register Your Cardamom Estate")
-        self.assertContains(response, "Estate & Owner Profile")
-        self.assertContains(response, "Estate / Plantation Name")
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("seller_estates"))
 
-    def test_estate_register_view_post_with_photos(self):
-        primary_img = get_test_image()
-        gallery_img_1 = get_test_image()
-        gallery_img_2 = get_test_image()
-
+    def test_estate_creation_via_seller_estates(self):
         post_data = {
             "name": "Highland Green Plantation",
-            "owner_name": "John Grower",
-            "phone_number": "+91 98470 12345",
-            "address": "Munnar Road, Nedumkandam, Idukki",
             "location": "Nedumkandam, Idukki",
             "area_in_acres": "18.75",
             "description": "Organic certified cardamom plantation.",
-            "primary_photo": primary_img,
-            "photos": [gallery_img_1, gallery_img_2],
         }
-        response = self.client.post(reverse("estates:register"), data=post_data, follow=True)
+        response = self.client.post(reverse("seller_estates"), data=post_data, follow=True)
         self.assertEqual(response.status_code, 200)
 
         estate = Estate.objects.get(name="Highland Green Plantation")
         self.assertEqual(estate.owner, self.user)
-        self.assertEqual(estate.owner_name, "John Grower")
-        self.assertEqual(estate.phone_number, "+91 98470 12345")
-        self.assertEqual(estate.address, "Munnar Road, Nedumkandam, Idukki")
-        self.assertEqual(estate.photos.count(), 2)
-        self.assertTrue(bool(estate.primary_photo))
+        self.assertEqual(estate.location, "Nedumkandam, Idukki")
+        self.assertEqual(estate.area_in_acres, Decimal("18.75"))
 
     def test_estate_list_view(self):
         Estate.objects.create(

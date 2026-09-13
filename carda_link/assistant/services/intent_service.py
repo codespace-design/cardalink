@@ -205,7 +205,7 @@ class IntentClassifier:
                 if best_score >= 0.08:
                     return self.doc_categories[best_idx]
 
-        except Exception as e:
-            logger.exception("Error during intent classification")
+            except Exception as e:
+                logger.exception("Error during intent classification")
 
         return "Unknown"

@@ -1,0 +1,317 @@
+{% extends "users/buyer_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Settlement Checkout — Invoice #INV-{{ invoice.id|stringformat:"05d" }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+  <!-- Top Nav Bar -->
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div>
+      <a href="{% url 'buyer_invoices' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-2">
+        <i class="bi bi-arrow-left me-1"></i>Back to Invoices
+      </a>
+      <h3 class="fw-bold text-dark font-heading mb-1">
+        <i class="bi bi-shield-check text-emerald me-2"></i>Auction Settlement &amp; Payment
+      </h3>
+      <p class="text-muted small mb-0">
+        Complete certified settlement payment for won cardamom auction lot. Funds are held in escrow until delivery verification.
+      </p>
+    </div>
+    <div>
+      <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace px-3 py-2 rounded-pill">
+        <i class="bi bi-lock-fill me-1"></i>256-Bit SSL Encrypted Escrow
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Payment Methods Form Column -->
+    <div class="col-lg-7">
+      <div class="admin-card p-4 shadow-sm border-0 rounded-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+          <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-credit-card-2-front-fill text-emerald me-2"></i>Select Payment Method
+          </h5>
+          <span class="badge bg-warning-subtle text-warning-emphasis font-monospace px-2.5 py-1 rounded-pill small">
+            <i class="bi bi-clock-history me-1"></i>Awaiting Payment
+          </span>
+        </div>
+
+        <form method="post" id="buyerPaymentForm" novalidate>
+          {% csrf_token %}
+
+          <!-- Payment Options Nav Pills -->
+          <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded-4" id="paymentMethodTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active rounded-pill fw-semibold py-2" id="tab-upi" data-bs-toggle="pill" data-bs-target="#pane-upi" type="button" role="tab" onclick="setPaymentMethod('UPI')">
+                <i class="bi bi-qr-code me-1.5"></i>UPI / QR
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill fw-semibold py-2" id="tab-netbanking" data-bs-toggle="pill" data-bs-target="#pane-netbanking" type="button" role="tab" onclick="setPaymentMethod('NETBANKING')">
+                <i class="bi bi-bank me-1.5"></i>Net Banking
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill fw-semibold py-2" id="tab-card" data-bs-toggle="pill" data-bs-target="#pane-card" type="button" role="tab" onclick="setPaymentMethod('CARD')">
+                <i class="bi bi-credit-card me-1.5"></i>Card
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill fw-semibold py-2" id="tab-wire" data-bs-toggle="pill" data-bs-target="#pane-wire" type="button" role="tab" onclick="setPaymentMethod('NEFT_RTGS')">
+                <i class="bi bi-arrow-left-right me-1.5"></i>NEFT / RTGS
+              </button>
+            </li>
+          </ul>
+
+          <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="UPI">
+
+          <!-- Tab Contents -->
+          <div class="tab-content mb-4" id="paymentMethodContent">
+            <!-- 1. UPI / QR -->
+            <div class="tab-pane fade show active" id="pane-upi" role="tabpanel">
+              <div class="p-3 border rounded-3 bg-white mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="fw-bold text-dark"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Instant UPI Settlement</div>
+                  <div class="d-flex gap-2">
+                    <span class="badge bg-light text-dark border">GPay</span>
+                    <span class="badge bg-light text-dark border">PhonePe</span>
+                    <span class="badge bg-light text-dark border">Paytm</span>
+                    <span class="badge bg-light text-dark border">BHIM</span>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="upi_id" class="form-label small fw-semibold text-secondary">Virtual Payment Address (VPA / UPI ID)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-at"></i></span>
+                    <input type="text" name="upi_id" id="upi_id" class="form-control" placeholder="yourname@okhdfcbank" value="buyer@upi">
+                  </div>
+                  <div class="form-text small text-muted">A payment authorization request will be dispatched to your UPI app.</div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 text-center border">
+                  <div class="text-muted small mb-2"><i class="bi bi-qr-code-scan me-1"></i>Or scan dynamic Spices Board escrow QR</div>
+                  <div class="d-inline-block bg-white p-3 rounded-3 shadow-xs border">
+                    <div style="width: 130px; height: 130px; background: #064e3b; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px;" class="mx-auto">
+                      <i class="bi bi-qr-code display-5 mb-1 text-emerald-light"></i>
+                      <span class="font-monospace fw-bold" style="font-size: 0.65rem;">₹{{ invoice.total_amount }}</span>
+                    </div>
+                  </div>
+                  <div class="text-muted small mt-2">CardaLink Escrow Ref: <span class="font-monospace fw-semibold text-dark">CL-{{ invoice.id }}-{{ lot.lot_number }}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Net Banking -->
+            <div class="tab-pane fade" id="pane-netbanking" role="tabpanel">
+              <div class="p-3 border rounded-3 bg-white mb-3">
+                <div class="fw-bold text-dark mb-2"><i class="bi bi-bank2 text-emerald me-1"></i>Select Authorized Indian Bank</div>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <div class="form-check p-2.5 border rounded-3 bg-light">
+                      <input class="form-check-input ms-1" type="radio" name="bank_name" id="bank_sbi" value="State Bank of India" checked>
+                      <label class="form-check-label fw-semibold ms-2 small" for="bank_sbi">State Bank of India</label>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check p-2.5 border rounded-3 bg-light">
+                      <input class="form-check-input ms-1" type="radio" name="bank_name" id="bank_hdfc" value="HDFC Bank">
+                      <label class="form-check-label fw-semibold ms-2 small" for="bank_hdfc">HDFC Bank</label>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check p-2.5 border rounded-3 bg-light">
+                      <input class="form-check-input ms-1" type="radio" name="bank_name" id="bank_icici" value="ICICI Bank">
+                      <label class="form-check-label fw-semibold ms-2 small" for="bank_icici">ICICI Bank</label>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check p-2.5 border rounded-3 bg-light">
+                      <input class="form-check-input ms-1" type="radio" name="bank_name" id="bank_axis" value="Axis Bank">
+                      <label class="form-check-label fw-semibold ms-2 small" for="bank_axis">Axis Bank</label>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check p-2.5 border rounded-3 bg-light">
+                      <input class="form-check-input ms-1" type="radio" name="bank_name" id="bank_federal" value="Federal Bank">
+                      <label class="form-check-label fw-semibold ms-2 small" for="bank_federal">Federal Bank (Kerala)</label>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check p-2.5 border rounded-3 bg-light">
+                      <input class="form-check-input ms-1" type="radio" name="bank_name" id="bank_canara" value="Canara Bank">
+                      <label class="form-check-label fw-semibold ms-2 small" for="bank_canara">Canara Bank</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-text small text-muted">You will be routed to your bank's secure net banking portal to authenticate.</div>
+              </div>
+            </div>
+
+            <!-- 3. Card Payment -->
+            <div class="tab-pane fade" id="pane-card" role="tabpanel">
+              <div class="p-3 border rounded-3 bg-white mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="fw-bold text-dark"><i class="bi bi-credit-card-fill text-emerald me-1"></i>Business / Debit Card</div>
+                  <div class="d-flex gap-2">
+                    <span class="badge bg-light text-dark border">RuPay</span>
+                    <span class="badge bg-light text-dark border">Visa</span>
+                    <span class="badge bg-light text-dark border">MasterCard</span>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold text-secondary">Card Number</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-credit-card"></i></span>
+                    <input type="text" name="card_number" class="form-control font-monospace" placeholder="4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 9876" value="4532 8901 2345 9876">
+                  </div>
+                </div>
+
+                <div class="row g-2 mb-2">
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-secondary">Expiry Date</label>
+                    <input type="text" class="form-control font-monospace" placeholder="MM/YY" value="12/28">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-secondary">CVV / CVC</label>
+                    <input type="password" maxlength="4" class="form-control font-monospace" placeholder="&bull;&bull;&bull;" value="123">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. NEFT / RTGS Wire Transfer -->
+            <div class="tab-pane fade" id="pane-wire" role="tabpanel">
+              <div class="p-3 border rounded-3 bg-white mb-3">
+                <div class="fw-bold text-dark mb-2"><i class="bi bi-bank text-emerald me-1"></i>CardaLink Spices Board Escrow Virtual Account</div>
+                <div class="p-3 bg-emerald-subtle rounded-3 mb-3 border border-emerald-light">
+                  <div class="row g-2 small">
+                    <div class="col-6">
+                      <span class="text-muted d-block">Beneficiary Account Name:</span>
+                      <strong class="text-dark">CardaLink Spices Escrow A/C</strong>
+                    </div>
+                    <div class="col-6">
+                      <span class="text-muted d-block">Bank &amp; Branch:</span>
+                      <strong class="text-dark">Federal Bank, Bodinayakanur</strong>
+                    </div>
+                    <div class="col-6">
+                      <span class="text-muted d-block">Virtual Account Number:</span>
+                      <strong class="font-monospace text-emerald fs-6">CARDALINK{{ invoice.id|stringformat:"05d" }}</strong>
+                    </div>
+                    <div class="col-6">
+                      <span class="text-muted d-block">IFSC Code:</span>
+                      <strong class="font-monospace text-dark">FDRL0001928</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="utr_number" class="form-label small fw-semibold text-secondary">Bank UTR / Transaction Reference Number <span class="text-danger">*</span></label>
+                  <input type="text" name="utr_number" id="utr_number" class="form-control font-monospace" placeholder="e.g. UTR20260913982012">
+                  <div class="form-text small text-muted">Enter the 16 or 22-character UTR generated by your banking portal.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction Security Seals -->
+          <div class="p-3 bg-light rounded-3 mb-4 border text-muted small">
+            <div class="d-flex align-items-center gap-2 mb-1 text-dark fw-semibold">
+              <i class="bi bi-shield-fill-check text-emerald fs-5"></i> Spices Board Settlement Guarantee
+            </div>
+            <div>Upon authorization, payment is locked in verified digital escrow. The planter is notified immediately to arrange physical delivery or warehouse release.</div>
+          </div>
+
+          <!-- Submit CTA -->
+          <button type="submit" class="btn btn-emerald text-white rounded-pill px-4 py-3 fw-bold shadow-sm w-100 fs-6">
+            <i class="bi bi-lock-fill me-2"></i>Authorize &amp; Complete Payment of ₹{{ invoice.total_amount }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order & Lot Summary Column -->
+    <div class="col-lg-5">
+      <div class="admin-card p-4 shadow-sm border-0 rounded-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-receipt text-emerald me-2"></i>Invoice Summary
+          </h5>
+          <span class="badge bg-light text-dark font-monospace border">
+            INV-{{ invoice.id|stringformat:"05d" }}
+          </span>
+        </div>
+
+        <!-- Lot Header Card -->
+        <div class="p-3 bg-light rounded-3 mb-3 border">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="fw-bold text-dark fs-6">Lot #{{ lot.lot_number }}</div>
+              <div class="text-muted small"><i class="bi bi-tree me-1"></i>{{ estate.name }} &bull; {{ estate.location }}</div>
+            </div>
+            <span class="badge bg-emerald font-monospace px-2.5 py-1">{{ harvest_batch.grade }}</span>
+          </div>
+          <div class="text-muted small">
+            Planter / Grower: <strong class="text-dark">{{ estate.owner_name|default:estate.owner.name|default:"Verified Planter" }}</strong>
+          </div>
+        </div>
+
+        <!-- Line Item Breakdown -->
+        <div class="small mb-3">
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Harvest Net Weight:</span>
+            <strong class="font-monospace text-dark">{{ weight_kg }} kg</strong>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Winning Bid Rate:</span>
+            <strong class="font-monospace text-dark">₹{{ rate_per_kg }}/kg</strong>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Lot Auction Subtotal:</span>
+            <span class="font-monospace fw-semibold text-dark">₹{{ subtotal }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Platform Facilitation &amp; Lab Fee:</span>
+            <span class="font-monospace text-muted">₹{{ invoice.commission_fee }}</span>
+          </div>
+        </div>
+
+        <!-- Total Box -->
+        <div class="p-3 bg-emerald-subtle rounded-3 border border-emerald-light mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="small text-emerald text-uppercase fw-semibold d-block">Net Amount Payable</span>
+              <span class="small text-muted">Inclusive of all platform charges</span>
+            </div>
+            <div class="text-end">
+              <span class="fs-4 fw-bold text-emerald font-monospace">₹{{ invoice.total_amount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lab Certificate if available -->
+        {% if harvest_batch.quality_certificate %}
+          <div class="mb-3 text-center">
+            <a href="{{ harvest_batch.quality_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 w-100">
+              <i class="bi bi-file-earmark-pdf me-1"></i>View Spices Board Lab Certificate
+            </a>
+          </div>
+        {% endif %}
+
+        <div class="text-center text-muted" style="font-size: 0.78rem;">
+          <i class="bi bi-info-circle me-1"></i>Invoice issued on {{ invoice.issued_at|date:"d M Y, H:i" }}. Certified tax invoice will be generated upon receipt.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setPaymentMethod(method) {
+    document.getElementById('selectedPaymentMethod').value = method;
+  }
+</script>
+{% endblock dashboard_content %}

@@ -1,0 +1,93 @@
+{% extends "users/buyer_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Won Lots — Buyer Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Won Cardamom Lots</h4>
+    <div class="text-muted small mt-1">Certified lots successfully won at auction, with origin certificates and invoice links</div>
+  </div>
+  <div>
+    <a href="{% url 'buyer_invoices' %}" class="btn btn-sm btn-outline-emerald fw-semibold">
+      <i class="bi bi-receipt me-1"></i> Invoices &amp; Settlements
+    </a>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Lot #</th>
+          <th>Grade</th>
+          <th>Weight</th>
+          <th>Winning Bid</th>
+          <th>Total Value</th>
+          <th>Estate Origin</th>
+          <th>Lab Certificate</th>
+          <th>Invoice &amp; Settlement</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lot in won_lots %}
+          <tr>
+            <td class="fw-bold text-dark font-monospace">Lot #{{ lot.lot_number }}</td>
+            <td>
+              <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace">{{ lot.harvest_batch.grade }}</span>
+            </td>
+            <td class="fw-bold text-dark">{{ lot.harvest_batch.weight_kg }} kg</td>
+            <td class="font-monospace fw-semibold text-emerald">₹{{ lot.winning_bid.amount_per_kg }}/kg</td>
+            <td class="font-monospace fw-bold text-dark">₹{{ lot.calculated_total }}</td>
+            <td>
+              <div class="fw-semibold text-dark">{{ lot.harvest_batch.estate.name }}</div>
+              <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ lot.harvest_batch.estate.location }}</div>
+            </td>
+            <td>
+              {% if lot.harvest_batch.quality_certificate %}
+                <a href="{{ lot.harvest_batch.quality_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                  <i class="bi bi-file-earmark-pdf me-1"></i>View Lab Cert
+                </a>
+              {% else %}
+                <span class="badge bg-light text-muted border">Platform Certified</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if lot.invoice %}
+                {% if lot.invoice.status == 'PENDING' %}
+                  <a href="{% url 'buyer_invoice_pay' lot.invoice.id %}" class="btn btn-sm btn-emerald text-white rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-credit-card me-1"></i>Pay ₹{{ lot.invoice.total_amount }}
+                  </a>
+                {% elif lot.invoice.status == 'PAID' %}
+                  <a href="{% url 'buyer_invoices' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                    <i class="bi bi-check2-circle me-1"></i>Settled (#{{ lot.invoice.id }})
+                  </a>
+                {% else %}
+                  <a href="{% url 'buyer_invoices' %}" class="btn btn-sm btn-secondary text-white rounded-pill px-3">
+                    <i class="bi bi-receipt me-1"></i>Invoice #{{ lot.invoice.id }}
+                  </a>
+                {% endif %}
+              {% else %}
+                <span class="badge bg-amber-subtle text-amber border border-amber font-monospace">Settlement Pending</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-trophy text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Won Lots Yet</h6>
+              <p class="small text-muted mb-3">When you win lots at auction, their certified origin documents and settlement invoices will appear here.</p>
+              <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-emerald text-white">Browse Live Auctions</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock dashboard_content %}

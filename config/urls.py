@@ -6,6 +6,9 @@ from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 
+from carda_link.assistant.query_views import assistant_query_view
+from carda_link.users import buyer_views
+from carda_link.users import seller_views
 from carda_link.users import views as user_views
 from .api import api
 
@@ -30,6 +33,7 @@ urlpatterns = [
     # Estates management
     path("estates/", include("carda_link.estates.urls", namespace="estates")),
     # AI Assistant
+    path("assistant/query/", assistant_query_view, name="assistant_query"),
     path("assistant/", include("carda_link.assistant.urls")),
     # Role Selection & Registration
     path("signup/", user_views.signup_selection_view, name="signup"),
@@ -37,17 +41,36 @@ urlpatterns = [
     path("signup-selection/", user_views.signup_selection_view, name="signup_selection"),
     path("signup/seller/", user_views.seller_signup_view, name="seller_signup"),
     path("signup/buyer/", user_views.buyer_signup_view, name="buyer_signup"),
-    path("register/seller/", user_views.seller_signup_view),
-    path("register/buyer/", user_views.buyer_signup_view),
-    # Dashboard Routes (supports both /seller-dashboard/ and /seller/dashboard/)
-    path("seller-dashboard/", user_views.seller_dashboard_view, name="seller_dashboard"),
-    path("seller/dashboard/", user_views.seller_dashboard_view),
+    path("register/seller/", user_views.seller_signup_view, name="register_seller"),
+    path("register/buyer/", user_views.buyer_signup_view, name="register_buyer"),
+    # Seller Portal & Sub-pages
+    path("seller-dashboard/", seller_views.seller_dashboard_view, name="seller_dashboard"),
+    path("seller/dashboard/", seller_views.seller_dashboard_view),
+    path("seller/estates/", seller_views.seller_estates_view, name="seller_estates"),
+    path("seller/estates/<int:pk>/edit/", seller_views.seller_estate_edit_view, name="seller_estate_edit"),
+    path("seller/estates/<int:pk>/delete/", seller_views.seller_estate_delete_view, name="seller_estate_delete"),
+    path("seller/batches/", seller_views.seller_batches_view, name="seller_batches"),
+    path("seller/lots/", seller_views.seller_lots_view, name="seller_lots"),
+    path("seller/sales/", seller_views.seller_sales_history_view, name="seller_sales_history"),
+    path("seller/earnings/", seller_views.seller_earnings_view, name="seller_earnings"),
+    path("seller/notifications/", seller_views.seller_notifications_view, name="seller_notifications"),
     path("seller/profile/", user_views.seller_profile_view, name="seller_profile"),
     path("seller/profile/edit/", user_views.seller_profile_edit_view, name="seller_profile_edit"),
-    path("buyer-dashboard/", user_views.buyer_dashboard_view, name="buyer_dashboard"),
-    path("buyer/dashboard/", user_views.buyer_dashboard_view),
+    # Buyer Portal & Sub-pages
+    path("buyer-dashboard/", buyer_views.buyer_dashboard_view, name="buyer_dashboard"),
+    path("buyer/dashboard/", buyer_views.buyer_dashboard_view),
+    path("buyer/auctions/", buyer_views.buyer_auctions_view, name="buyer_auctions"),
+    path("buyer/watchlist/", buyer_views.buyer_watchlist_view, name="buyer_watchlist"),
+    path("buyer/watchlist/<int:lot_id>/toggle/", buyer_views.buyer_watchlist_toggle_view, name="buyer_watchlist_toggle"),
+    path("buyer/bids/", buyer_views.buyer_bids_view, name="buyer_bids"),
+    path("buyer/won-lots/", buyer_views.buyer_won_lots_view, name="buyer_won_lots"),
+    path("buyer/invoices/", buyer_views.buyer_invoices_view, name="buyer_invoices"),
+    path("buyer/invoices/<int:pk>/pay/", buyer_views.buyer_invoice_pay_view, name="buyer_invoice_pay"),
+    path("buyer/notifications/", buyer_views.buyer_notifications_view, name="buyer_notifications"),
     path("buyer/profile/", user_views.buyer_profile_view, name="buyer_profile"),
     path("buyer/profile/edit/", user_views.buyer_profile_edit_view, name="buyer_profile_edit"),
+    # Notifications helper
+    path("notifications/mark-all-read/", buyer_views.mark_all_notifications_read, name="mark_all_notifications_read"),
     # Admin Portal (all admin routes live under /admin-dashboard/)
     path("admin-dashboard/", include("carda_link.users.admin_urls")),
     path("admin-dashboard/logout/", user_views.admin_logout_view, name="admin_logout"),

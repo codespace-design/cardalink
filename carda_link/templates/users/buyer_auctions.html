@@ -1,0 +1,196 @@
+{% extends "users/buyer_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Live Auctions — Buyer Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Live &amp; Upcoming Cardamom Auctions</h4>
+    <div class="text-muted small mt-1">Browse certified cardamom lots, filter by grade &amp; origin, and monitor live bidding</div>
+  </div>
+  <div>
+    <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-emerald text-white d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm">
+      <i class="bi bi-broadcast"></i> Enter Floor Simulator
+    </a>
+  </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="admin-card mb-4 p-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-12 col-md-3">
+      <label class="form-label small fw-semibold text-secondary mb-1">Cardamom Grade</label>
+      <select name="grade" class="form-select form-select-sm">
+        <option value="">All Certified Grades</option>
+        {% for g_code, g_name in grade_choices %}
+          <option value="{{ g_code }}" {% if grade_filter == g_code %}selected{% endif %}>{{ g_code }} ({{ g_name }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label small fw-semibold text-secondary mb-1">Origin / District</label>
+      <input type="text" name="origin" class="form-control form-control-sm" placeholder="e.g. Idukki, Vandanmedu" value="{{ origin_filter }}">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small fw-semibold text-secondary mb-1">Min Base (₹/kg)</label>
+      <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min ₹" value="{{ min_price }}">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small fw-semibold text-secondary mb-1">Max Base (₹/kg)</label>
+      <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max ₹" value="{{ max_price }}">
+    </div>
+    <div class="col-12 col-md-2 d-flex gap-1.5">
+      <button type="submit" class="btn btn-sm btn-emerald text-white w-100 fw-semibold">
+        <i class="bi bi-funnel me-1"></i>Filter
+      </button>
+      {% if grade_filter or origin_filter or min_price or max_price %}
+        <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-light border text-secondary" title="Reset Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Auction Lots Grid -->
+<div class="row g-3">
+  {% for lot in lots %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="admin-card h-100 d-flex flex-direction-column justify-content-between p-3 position-relative">
+        <div>
+          <!-- Card Header: Auction & Watchlist Star -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge {% if lot.auction.status == 'ACTIVE' %}bg-emerald-subtle text-emerald border border-emerald-light{% else %}bg-slate text-secondary{% endif %} font-monospace small">
+              <i class="bi bi-broadcast me-1"></i>{{ lot.auction.get_status_display }}
+            </span>
+            <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none watchlist-toggle-btn" data-lot-id="{{ lot.id }}" title="Toggle Watchlist">
+              <i class="bi {% if lot.id in watched_lot_ids %}bi-star-fill text-warning{% else %}bi-star text-muted{% endif %} fs-5"></i>
+            </button>
+          </div>
+
+          <!-- Lot & Grade Info -->
+          <div class="d-flex align-items-baseline gap-2 mb-1">
+            <h5 class="fw-bold text-dark font-monospace mb-0">Lot #{{ lot.lot_number }}</h5>
+            <span class="badge bg-secondary font-monospace">{{ lot.harvest_batch.grade }}</span>
+          </div>
+
+          <p class="text-muted small mb-2 text-truncate" title="{{ lot.auction.title }}">
+            {{ lot.auction.title }}
+          </p>
+
+          <!-- Origin & Batch Meta -->
+          <div class="bg-light p-2.5 rounded-3 mb-3" style="font-size: 0.8rem;">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Estate:</span>
+              <span class="fw-semibold text-dark">{{ lot.harvest_batch.estate.name }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Location:</span>
+              <span class="text-dark text-truncate" style="max-width: 170px;">{{ lot.harvest_batch.estate.location }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Available Weight:</span>
+              <span class="fw-bold text-emerald">{{ lot.harvest_batch.weight_kg }} kg</span>
+            </div>
+          </div>
+
+          <!-- Pricing Display -->
+          <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+              <div class="text-muted" style="font-size: 0.72rem;">Base Price</div>
+              <div class="fw-bold text-secondary font-monospace">₹{{ lot.base_price_per_kg }}/kg</div>
+            </div>
+            <div class="text-end">
+              <div class="text-muted" style="font-size: 0.72rem;">Current Floor Bid</div>
+              <div class="fw-bold text-emerald fs-5 font-monospace">
+                {% if lot.highest_bid_per_kg %}
+                  ₹{{ lot.highest_bid_per_kg }}/kg
+                {% else %}
+                  <span class="text-muted small">No Bids Yet</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer: Countdown Timer & CTA -->
+        <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+          <div class="countdown-box small text-muted" data-end-time="{{ lot.auction.end_time|date:'c' }}">
+            <i class="bi bi-stopwatch text-emerald me-1"></i><span class="timer-display">Calculating...</span>
+          </div>
+          <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3">
+            Bid Now <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12 text-center py-5">
+      <div class="empty-state-icon-circle">
+        <i class="bi bi-search text-emerald fs-3"></i>
+      </div>
+      <h6 class="fw-bold text-dark">No Auction Lots Match Your Filter</h6>
+      <p class="small text-muted mb-3">Try adjusting your grade, price, or origin criteria to see available cardamom lots.</p>
+      <a href="{% url 'buyer_auctions' %}" class="btn btn-sm btn-emerald text-white">Reset All Filters</a>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Watchlist Star Toggle via AJAX
+    document.querySelectorAll(".watchlist-toggle-btn").forEach(function(btn) {
+      btn.addEventListener("click", async function(e) {
+        e.preventDefault();
+        const lotId = btn.getAttribute("data-lot-id");
+        const icon = btn.querySelector("i");
+
+        try {
+          const res = await fetch(`/buyer-dashboard/watchlist/toggle/${lotId}/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}",
+              "x-requested-with": "XMLHttpRequest"
+            }
+          });
+          const data = await res.json();
+          if (data.is_watched) {
+            icon.classList.remove("bi-star", "text-muted");
+            icon.classList.add("bi-star-fill", "text-warning");
+          } else {
+            icon.classList.remove("bi-star-fill", "text-warning");
+            icon.classList.add("bi-star", "text-muted");
+          }
+        } catch (err) {
+          console.error("Failed to toggle watchlist", err);
+        }
+      });
+    });
+
+    // Countdown Timers
+    function updateTimers() {
+      const now = new Date().getTime();
+      document.querySelectorAll(".countdown-box").forEach(function(box) {
+        const endTimeStr = box.getAttribute("data-end-time");
+        if (!endTimeStr) return;
+        const endTime = new Date(endTimeStr).getTime();
+        const distance = endTime - now;
+        const display = box.querySelector(".timer-display");
+
+        if (distance < 0) {
+          display.textContent = "Auction Ended";
+          display.classList.add("text-danger");
+        } else {
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          display.textContent = `${hours}h ${minutes}m ${seconds}s`;
+        }
+      });
+    }
+    updateTimers();
+    setInterval(updateTimers, 1000);
+  });
+</script>
+{% endblock dashboard_content %}

@@ -88,9 +88,9 @@
               <div class="d-flex align-items-center gap-2">
                 {% if request.user.is_authenticated %}
                   {% if request.user.role == 'SELLER' %}
-                    <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
-                      <i class="bi bi-plus-circle-fill"></i>
-                      <span>Register Estate</span>
+                    <a href="{% url 'seller_dashboard' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">
+                      <i class="bi bi-person-badge-fill"></i>
+                      <span>Seller Portal</span>
                     </a>
                   {% elif request.user.role == 'BUYER' %}
                     <a href="{% url 'auctions:simulation' %}" class="btn btn-emerald-register text-white shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-pill fw-semibold">

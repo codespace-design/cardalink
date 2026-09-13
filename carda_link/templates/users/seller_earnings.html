@@ -1,0 +1,156 @@
+{% extends "users/seller_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Earnings &amp; Payouts — Seller Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Earnings &amp; Payout Overview</h4>
+    <div class="text-muted small mt-1">Breakdown of gross auction revenue, pending buyer remittances, and completed bank payouts</div>
+  </div>
+  <div>
+    <span class="badge bg-emerald-subtle text-emerald border border-emerald-light font-monospace px-3 py-1.5">
+      <i class="bi bi-bank me-1"></i>Direct Bank Transfer
+    </span>
+  </div>
+</div>
+
+<!-- 3 Earnings KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-4">
+    <div class="admin-kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-purple">
+          <i class="bi bi-cash-stack"></i>
+        </div>
+        <span class="kpi-tag kpi-tag-purple">Gross Auction Volume</span>
+      </div>
+      <div class="kpi-value">₹{{ gross_earnings|default:"0"|floatformat:2 }}</div>
+      <div class="kpi-label">Total Sold ({{ total_kg_sold|default:"0" }} kg cardamom)</div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="admin-kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-amber">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <span class="kpi-tag kpi-tag-amber">Awaiting Buyer Payment</span>
+      </div>
+      <div class="kpi-value text-amber">₹{{ pending_payout|default:"0"|floatformat:2 }}</div>
+      <div class="kpi-label">Pending Payout to Seller</div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="admin-kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-emerald">
+          <i class="bi bi-check2-circle"></i>
+        </div>
+        <span class="kpi-tag kpi-tag-emerald">Settled &amp; Deposited</span>
+      </div>
+      <div class="kpi-value text-emerald">₹{{ completed_payout|default:"0"|floatformat:2 }}</div>
+      <div class="kpi-label">Completed Payout to Bank</div>
+    </div>
+  </div>
+</div>
+
+<!-- Bank Account Details Card -->
+<div class="admin-card mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-bank text-emerald fs-5"></i>
+      <h5 class="fw-bold font-heading mb-0 text-dark">Registered Payout Bank Account</h5>
+    </div>
+    <span class="badge bg-emerald-subtle text-emerald border border-emerald font-monospace">
+      <i class="bi bi-shield-lock-fill me-1"></i>Encrypted Storage
+    </span>
+  </div>
+
+  <div class="bg-light p-3 rounded-3">
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <span class="text-muted small d-block">Account Holder Name</span>
+        <span class="fw-bold text-dark">{{ profile.bank_account_holder|default:request.user.name }}</span>
+      </div>
+      <div class="col-12 col-md-4">
+        <span class="text-muted small d-block">Bank IFSC Code</span>
+        <span class="fw-bold text-dark font-monospace">{{ profile.bank_ifsc|default:"Not Configured" }}</span>
+      </div>
+      <div class="col-12 col-md-4">
+        <span class="text-muted small d-block">Masked Account Number</span>
+        <span class="fw-bold text-dark font-monospace">{{ masked_acc|default:"•••• •••• ••••" }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+    <i class="bi bi-info-circle me-1"></i>To modify your settlement account details, please visit your <a href="{% url 'seller_profile_edit' %}" class="text-emerald fw-semibold">Farm Profile Settings</a>.
+  </div>
+</div>
+
+<!-- Sold Lots Breakdown Table -->
+<div class="admin-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold font-heading mb-0 text-dark">Settlement Status by Lot</h5>
+    <a href="{% url 'seller_sales_history' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+      Sales History &rarr;
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Lot #</th>
+          <th>Grade</th>
+          <th>Weight</th>
+          <th>Sale Rate</th>
+          <th>Gross Amount</th>
+          <th>Invoice #</th>
+          <th>Settlement Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lot in sold_lots %}
+          <tr>
+            <td class="fw-bold text-dark font-monospace">Lot #{{ lot.lot_number }}</td>
+            <td><span class="badge bg-slate text-secondary font-monospace">{{ lot.harvest_batch.grade }}</span></td>
+            <td>{{ lot.harvest_batch.weight_kg }} kg</td>
+            <td class="font-monospace text-emerald">₹{{ lot.highest_bid_per_kg|default:lot.base_price_per_kg }}/kg</td>
+            <td class="font-monospace fw-bold text-dark">
+              ₹{{ lot.harvest_batch.weight_kg|floatformat:0 }} × ₹{{ lot.highest_bid_per_kg|default:lot.base_price_per_kg }}
+            </td>
+            <td>
+              {% if lot.invoice %}
+                <span class="font-monospace text-muted">INV-{{ lot.invoice.id|stringformat:"05d" }}</span>
+              {% else %}
+                <span class="badge bg-light text-muted border">Pending</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if lot.invoice and lot.invoice.status == 'PAID' %}
+                <span class="badge bg-success font-monospace"><i class="bi bi-check2 me-1"></i>Paid to Seller</span>
+              {% else %}
+                <span class="badge bg-warning text-dark font-monospace"><i class="bi bi-hourglass-split me-1"></i>Pending Payout</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-wallet2 text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Payout Records Available</h6>
+              <p class="small text-muted mb-0">Earnings from your sold lots will be calculated and displayed here.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock dashboard_content %}

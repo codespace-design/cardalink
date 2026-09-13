@@ -337,3 +337,4 @@ SOCIALACCOUNT_PROVIDERS = {}
 # Your stuff...
 # ------------------------------------------------------------------------------
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="")

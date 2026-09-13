@@ -1,0 +1,68 @@
+{% extends "users/seller_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Edit Estate — Seller Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">Edit Estate: {{ estate.name }}</h4>
+    <div class="text-muted small mt-1">Update estate geographical and canopy information</div>
+  </div>
+  <div>
+    <a href="{% url 'seller_estates' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back to Estates
+    </a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-7">
+    <div class="admin-card p-4">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-secondary">Estate Name <span class="text-danger">*</span></label>
+          <input type="text" name="name" class="form-control" value="{{ estate.name }}" required>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-7">
+            <label class="form-label small fw-semibold text-secondary">Location / District <span class="text-danger">*</span></label>
+            <input type="text" name="location" class="form-control" value="{{ estate.location }}" required>
+          </div>
+          <div class="col-5">
+            <label class="form-label small fw-semibold text-secondary">Area (Acres) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" name="area_in_acres" class="form-control" value="{{ estate.area_in_acres }}" required>
+          </div>
+        </div>
+
+        {% if estate.primary_photo %}
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Current Photo</label>
+            <div class="rounded-3 overflow-hidden mb-2" style="max-height: 160px; max-width: 260px;">
+              <img src="{{ estate.primary_photo.url }}" alt="{{ estate.name }}" class="w-100 h-100" style="object-fit: cover;">
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-secondary">Change Cover Photo</label>
+          <input type="file" name="primary_photo" class="form-control" accept="image/*">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-semibold text-secondary">Description</label>
+          <textarea name="description" class="form-control" rows="3">{{ estate.description }}</textarea>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'seller_estates' %}" class="btn btn-sm btn-light border">Cancel</a>
+          <button type="submit" class="btn btn-sm btn-emerald text-white px-4 fw-bold">
+            <i class="bi bi-check2 me-1"></i>Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock dashboard_content %}

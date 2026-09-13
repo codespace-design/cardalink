@@ -18,9 +18,19 @@
         </p>
       </div>
       <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-        <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white shadow-lg rounded-pill px-4 py-2 fw-semibold">
-          <i class="bi bi-plus-circle-fill me-1"></i> Register New Estate
-        </a>
+        {% if request.user.is_authenticated and request.user.role == 'SELLER' %}
+          <a href="{% url 'seller_estates' %}" class="btn btn-emerald-register text-white shadow-lg rounded-pill px-4 py-2 fw-semibold">
+            <i class="bi bi-tree-fill me-1"></i> Manage My Estates
+          </a>
+        {% elif request.user.is_authenticated and request.user.role == 'ADMIN' %}
+          <a href="{% url 'admin_user_create' %}" class="btn btn-emerald-register text-white shadow-lg rounded-pill px-4 py-2 fw-semibold">
+            <i class="bi bi-person-plus-fill me-1"></i> Add Grower &amp; Estate
+          </a>
+        {% elif not request.user.is_authenticated %}
+          <a href="{% url 'register_seller' %}" class="btn btn-emerald-register text-white shadow-lg rounded-pill px-4 py-2 fw-semibold">
+            <i class="bi bi-person-plus-fill me-1"></i> Register as Grower
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -171,9 +181,19 @@
           Be the first grower to register your cardamom plantation and start showcasing harvests to certified buyers!
         {% endif %}
       </p>
-      <a href="{% url 'estates:register' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow">
-        <i class="bi bi-plus-circle-fill me-1"></i> Register Cardamom Estate
-      </a>
+      {% if request.user.is_authenticated and request.user.role == 'SELLER' %}
+        <a href="{% url 'seller_estates' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow">
+          <i class="bi bi-tree-fill me-1"></i> Manage My Estates
+        </a>
+      {% elif request.user.is_authenticated and request.user.role == 'ADMIN' %}
+        <a href="{% url 'admin_user_create' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow">
+          <i class="bi bi-person-plus-fill me-1"></i> Add Grower &amp; Estate
+        </a>
+      {% else %}
+        <a href="{% url 'register_seller' %}" class="btn btn-emerald-register text-white rounded-pill px-4 py-2 fw-semibold shadow">
+          <i class="bi bi-person-plus-fill me-1"></i> Register as Grower
+        </a>
+      {% endif %}
     </div>
   {% endif %}
 </div>

@@ -1,258 +1,59 @@
-{% extends "base.html" %}
+{% extends "users/dashboard_base.html" %}
 {% load static i18n %}
 
-{% block title %}{% block dash_title %}Console{% endblock %} — CardaLink Admin{% endblock %}
+{% block dash_title %}Console{% endblock %}
 
-{% block bodyclass %}admin-app-body{% endblock %}
+{% block sidebar_nav %}
+<div class="admin-sidebar-section">Main</div>
+<a href="{% url 'admin_dashboard' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+  <i class="bi bi-grid-1x2-fill item-icon"></i>
+  <span>Dashboard</span>
+</a>
 
-{% block header %}
-<header class="admin-topbar sticky-top">
-  <div class="admin-topbar-inner">
-    <!-- Brand & Mobile Toggle -->
-    <div class="d-flex align-items-center gap-3">
-      <button class="btn btn-sm btn-light d-lg-none border" type="button" id="adminSidebarToggle" aria-label="Toggle Navigation">
-        <i class="bi bi-list fs-5"></i>
-      </button>
-      <a href="{% url 'admin_dashboard' %}" class="d-flex align-items-center text-decoration-none">
-        <span class="admin-brand-carda">Carda</span><span class="admin-brand-link">Link</span>
-        <span class="admin-badge-console ms-2">ADMIN CONSOLE</span>
-      </a>
-    </div>
+<div class="admin-sidebar-section">Operations</div>
+<a href="{% url 'admin_auctions' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_auctions' or request.resolver_match.url_name == 'admin_auction_detail' or request.resolver_match.url_name == 'admin_auction_create' or request.resolver_match.url_name == 'admin_auction_lots_add' or request.resolver_match.url_name == 'admin_auction_edit' %}active{% endif %}">
+  <i class="bi bi-hammer item-icon"></i>
+  <span>Auctions</span>
+  {% if active_auctions %}<span class="admin-badge-count admin-badge-emerald">{{ active_auctions }} live</span>{% endif %}
+</a>
+<a href="{% url 'admin_batches_ungraded' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_batches_ungraded' %}active{% endif %}">
+  <i class="bi bi-patch-check-fill item-icon"></i>
+  <span>Grade Verification</span>
+  {% if ungraded_batches %}<span class="admin-badge-count admin-badge-amber">{{ ungraded_batches }}</span>{% endif %}
+</a>
+<a href="{% url 'admin_batch_create' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_batch_create' %}active{% endif %}">
+  <i class="bi bi-plus-circle-fill item-icon"></i>
+  <span>Log Harvest Batch</span>
+</a>
+<a href="{% url 'admin_estates' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_estates' or request.resolver_match.url_name == 'admin_estate_detail' %}active{% endif %}">
+  <i class="bi bi-tree-fill item-icon"></i>
+  <span>Plantations</span>
+  {% if total_estates %}<span class="admin-badge-count admin-badge-slate">{{ total_estates }}</span>{% endif %}
+</a>
+<a href="{% url 'admin_invoices_list' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_invoices_list' %}active{% endif %}">
+  <i class="bi bi-receipt-cutoff item-icon"></i>
+  <span>Invoices Oversight</span>
+  {% if pending_invoices %}<span class="admin-badge-count admin-badge-amber">{{ pending_invoices }}</span>{% endif %}
+</a>
 
-    <!-- Right Quick Actions & Profile -->
-    <div class="d-flex align-items-center gap-3">
-      <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald d-none d-sm-inline-flex align-items-center gap-1.5 fw-semibold font-monospace">
-        <i class="bi bi-broadcast"></i> Live Auction Console
-      </a>
+<div class="admin-sidebar-section">User Directory</div>
+<a href="{% url 'admin_pending_registrations' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_pending_registrations' %}active{% endif %}">
+  <i class="bi bi-person-plus-fill item-icon"></i>
+  <span>Pending Approvals</span>
+  {% if pending_users %}<span class="admin-badge-count admin-badge-amber">{{ pending_users }}</span>{% endif %}
+</a>
+<a href="{% url 'admin_all_users' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_all_users' or request.resolver_match.url_name == 'admin_user_detail' or request.resolver_match.url_name == 'admin_user_create' %}active{% endif %}">
+  <i class="bi bi-people-fill item-icon"></i>
+  <span>All Accounts</span>
+</a>
 
-      <div class="dropdown">
-        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle text-dark" id="adminUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
-          <div class="admin-avatar">
-            {{ request.user.name|default:request.user.email|slice:":1"|upper }}
-          </div>
-          <div class="d-none d-sm-block text-start">
-            <div class="fw-bold small text-dark line-clamp-1">{{ request.user.name|default:"Administrator" }}</div>
-            <div class="text-muted" style="font-size: 0.72rem;">{{ request.user.email }}</div>
-          </div>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end shadow-lg border rounded-3 mt-2 py-2" aria-labelledby="adminUserMenu">
-          <li class="px-3 py-2 border-bottom">
-            <span class="text-muted small">Signed in as</span>
-            <div class="fw-bold small text-truncate">{{ request.user.email }}</div>
-            <span class="badge bg-emerald-subtle text-emerald font-monospace mt-1" style="font-size: 0.65rem;">System Administrator</span>
-          </li>
-          <li><a class="dropdown-item py-2" href="{% url 'admin_dashboard' %}"><i class="bi bi-grid-1x2 me-2 text-emerald"></i>Dashboard</a></li>
-          <li><a class="dropdown-item py-2" href="{% url 'admin_platform_settings' %}"><i class="bi bi-sliders me-2 text-emerald"></i>Platform Settings</a></li>
-          <li><a class="dropdown-item py-2" href="{% url 'admin_audit_logs' %}"><i class="bi bi-journal-text me-2 text-emerald"></i>Audit Logs</a></li>
-          <li><hr class="dropdown-divider my-1"></li>
-          <li>
-            <button type="button" class="dropdown-item py-2 text-danger d-flex align-items-center border-0 bg-transparent w-100 text-start" data-bs-toggle="modal" data-bs-target="#adminSignoutModal">
-              <i class="bi bi-box-arrow-right me-2"></i>Sign Out
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</header>
-{% endblock header %}
-
-{% block footer %}{% endblock footer %}
-
-{% block main_container %}
-<div class="admin-layout">
-  <!-- Modern SaaS Admin Sidebar -->
-  <aside class="admin-sidebar" id="adminSidebar">
-    <!-- Mobile Drawer Header -->
-    <div class="admin-sidebar-mobile-header d-flex d-lg-none align-items-center justify-content-between px-3 py-3 border-bottom">
-      <div class="d-flex align-items-center">
-        <span class="admin-brand-carda">Carda</span><span class="admin-brand-link">Link</span>
-        <span class="admin-badge-console ms-2">ADMIN</span>
-      </div>
-      <button class="btn btn-sm btn-light border-0" type="button" id="adminSidebarClose" aria-label="Close Sidebar">
-        <i class="bi bi-x-lg fs-6 text-secondary"></i>
-      </button>
-    </div>
-
-    <div class="admin-sidebar-nav">
-      <div class="admin-sidebar-section">Main</div>
-      <a href="{% url 'admin_dashboard' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-        <i class="bi bi-grid-1x2-fill item-icon"></i>
-        <span>Dashboard</span>
-      </a>
-
-      <div class="admin-sidebar-section">Operations</div>
-      <a href="{% url 'admin_auctions' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_auctions' or request.resolver_match.url_name == 'admin_auction_detail' or request.resolver_match.url_name == 'admin_auction_create' or request.resolver_match.url_name == 'admin_auction_lots_add' or request.resolver_match.url_name == 'admin_auction_edit' %}active{% endif %}">
-        <i class="bi bi-hammer item-icon"></i>
-        <span>Auctions</span>
-        {% if active_auctions %}<span class="admin-badge-count admin-badge-emerald">{{ active_auctions }} live</span>{% endif %}
-      </a>
-      <a href="{% url 'admin_batches_ungraded' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_batches_ungraded' %}active{% endif %}">
-        <i class="bi bi-patch-check-fill item-icon"></i>
-        <span>Grade Verification</span>
-        {% if ungraded_batches %}<span class="admin-badge-count admin-badge-amber">{{ ungraded_batches }}</span>{% endif %}
-      </a>
-      <a href="{% url 'admin_estates' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_estates' or request.resolver_match.url_name == 'admin_estate_detail' %}active{% endif %}">
-        <i class="bi bi-tree-fill item-icon"></i>
-        <span>Plantations</span>
-        {% if total_estates %}<span class="admin-badge-count admin-badge-slate">{{ total_estates }}</span>{% endif %}
-      </a>
-      <a href="{% url 'admin_invoices_list' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_invoices_list' %}active{% endif %}">
-        <i class="bi bi-receipt-cutoff item-icon"></i>
-        <span>Invoices Oversight</span>
-        {% if pending_invoices %}<span class="admin-badge-count admin-badge-amber">{{ pending_invoices }}</span>{% endif %}
-      </a>
-
-      <div class="admin-sidebar-section">User Directory</div>
-      <a href="{% url 'admin_pending_registrations' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_pending_registrations' %}active{% endif %}">
-        <i class="bi bi-person-plus-fill item-icon"></i>
-        <span>Pending Approvals</span>
-        {% if pending_users %}<span class="admin-badge-count admin-badge-amber">{{ pending_users }}</span>{% endif %}
-      </a>
-      <a href="{% url 'admin_all_users' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_all_users' or request.resolver_match.url_name == 'admin_user_detail' or request.resolver_match.url_name == 'admin_user_create' %}active{% endif %}">
-        <i class="bi bi-people-fill item-icon"></i>
-        <span>All Accounts</span>
-      </a>
-
-      <div class="admin-sidebar-section">System &amp; Audit</div>
-      <a href="{% url 'admin_platform_settings' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_platform_settings' %}active{% endif %}">
-        <i class="bi bi-sliders item-icon"></i>
-        <span>Platform Settings</span>
-      </a>
-      <a href="{% url 'admin_audit_logs' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_audit_logs' %}active{% endif %}">
-        <i class="bi bi-journal-text item-icon"></i>
-        <span>Audit Trail</span>
-      </a>
-    </div>
-
-    <!-- Pinned Bottom User Identity -->
-    <div class="admin-sidebar-footer">
-      <div class="d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2 overflow-hidden">
-          <div class="admin-avatar-sm">
-            {{ request.user.name|default:request.user.email|slice:":1"|upper }}
-          </div>
-          <div class="overflow-hidden">
-            <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem; line-height: 1.2;">{{ request.user.name|default:"Administrator" }}</div>
-            <div class="text-muted text-truncate" style="font-size: 0.7rem;">{{ request.user.email }}</div>
-          </div>
-        </div>
-        <button type="button" class="btn btn-sm btn-link text-danger p-1 text-decoration-none border-0" data-bs-toggle="modal" data-bs-target="#adminSignoutModal" title="Sign Out">
-          <i class="bi bi-box-arrow-right fs-5"></i>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Mobile Drawer Backdrop -->
-  <div class="admin-sidebar-backdrop d-lg-none" id="adminSidebarBackdrop"></div>
-
-  <!-- Main Canvas -->
-  <main class="admin-main">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %} mb-4 shadow-sm border-0 rounded-3">
-          <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
-
-    {% block dashboard_content %}{% endblock dashboard_content %}
-  </main>
-</div>
-
-<!-- Sign Out Confirmation Warning Modal -->
-<div class="modal fade" id="adminSignoutModal" tabindex="-1" aria-labelledby="adminSignoutModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
-      <div class="modal-body p-4 text-center">
-        <div class="mb-3">
-          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 60px; height: 60px; background: #fee2e2; color: #dc2626; border: 2px solid #fecaca;">
-            <i class="bi bi-box-arrow-right fs-3"></i>
-          </div>
-        </div>
-        <h5 class="fw-bold text-dark mb-2" id="adminSignoutModalLabel">Sign Out of Admin Console?</h5>
-        <p class="text-muted small mb-4 px-2" style="line-height: 1.55;">
-          Are you sure you want to end your administrative session? All active operations will be securely finalized and unsaved changes will be lost.
-        </p>
-        <div class="d-flex gap-2 justify-content-center">
-          <button type="button" class="btn btn-light px-4 py-2 rounded-3 fw-semibold border text-secondary" data-bs-dismiss="modal">
-            Stay Signed In
-          </button>
-          <form method="post" action="{% url 'admin_logout' %}" class="d-inline m-0">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger px-4 py-2 rounded-3 fw-semibold shadow-sm">
-              <i class="bi bi-box-arrow-right me-1"></i> Yes, Sign Out
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("adminSidebarToggle");
-    const closeBtn = document.getElementById("adminSidebarClose");
-    const sidebar = document.getElementById("adminSidebar");
-    const backdrop = document.getElementById("adminSidebarBackdrop");
-
-    function openSidebar() {
-      if (sidebar) sidebar.classList.add("show");
-      if (backdrop) backdrop.classList.add("show");
-      document.body.classList.add("sidebar-open");
-    }
-
-    function closeSidebar() {
-      if (sidebar) sidebar.classList.remove("show");
-      if (backdrop) backdrop.classList.remove("show");
-      document.body.classList.remove("sidebar-open");
-    }
-
-    if (toggleBtn) {
-      toggleBtn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        if (sidebar && sidebar.classList.contains("show")) {
-          closeSidebar();
-        } else {
-          openSidebar();
-        }
-      });
-    }
-
-    if (closeBtn) {
-      closeBtn.addEventListener("click", closeSidebar);
-    }
-
-    if (backdrop) {
-      backdrop.addEventListener("click", closeSidebar);
-    }
-
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape") {
-        closeSidebar();
-      }
-    });
-
-    // Inactivity Session Guardian (2-hour sliding limit)
-    const INACTIVITY_LIMIT_MS = 2 * 60 * 60 * 1000;
-    let lastUserActivity = Date.now();
-    ["mousedown", "keydown", "scroll", "touchstart"].forEach(function(evt) {
-      window.addEventListener(evt, function() { lastUserActivity = Date.now(); }, { passive: true });
-    });
-
-    setInterval(function() {
-      if (Date.now() - lastUserActivity >= INACTIVITY_LIMIT_MS) {
-        const signoutForm = document.querySelector("#adminSignoutModal form");
-        if (signoutForm) {
-          signoutForm.submit();
-        } else {
-          window.location.href = "{% url 'admin_logout' %}";
-        }
-      }
-    }, 60000);
-  });
-</script>
-{% endblock main_container %}
+<div class="admin-sidebar-section">System &amp; Audit</div>
+<a href="{% url 'admin_platform_settings' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_platform_settings' %}active{% endif %}">
+  <i class="bi bi-sliders item-icon"></i>
+  <span>Platform Settings</span>
+</a>
+<a href="{% url 'admin_audit_logs' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'admin_audit_logs' %}active{% endif %}">
+  <i class="bi bi-journal-text item-icon"></i>
+  <span>Audit Trail</span>
+</a>
+{% endblock sidebar_nav %}

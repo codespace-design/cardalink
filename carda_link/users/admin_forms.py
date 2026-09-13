@@ -179,6 +179,20 @@ class AdminManualUserCreationForm(forms.Form):
                 cardamom_plants=data.get("cardamom_plants") or 0,
                 cultivation_details=data.get("cultivation_details", ""),
             )
+            from carda_link.estates.models import Estate
+            area_val = data.get("farm_area") or Decimal("1.00")
+            if area_val <= 0:
+                area_val = Decimal("1.00")
+            Estate.objects.create(
+                owner=user,
+                name=data["farm_name"],
+                owner_name=user.name or user.email,
+                phone_number=user.phone_number or "",
+                address=user.address or data.get("farm_location", ""),
+                location=data.get("farm_location", "Idukki, Kerala") or "Idukki, Kerala",
+                area_in_acres=area_val,
+                description=data.get("cultivation_details", ""),
+            )
         elif role == User.Role.BUYER:
             BuyerProfile.objects.create(
                 user=user,

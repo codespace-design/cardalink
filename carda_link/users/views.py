@@ -159,10 +159,26 @@ def signup_selection_view(request):
 
 def seller_signup_view(request):
     if request.method == "POST":
-        form = SellerSignupForm(request.POST)
+        form = SellerSignupForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return render(request, "users/seller_signup.html", {"success": True})
+            user = form.save()
+            phone_to_use = user.phone_number or "9876543210"
+            otp = generate_otp()
+            dispatch_result = send_sms_otp(phone_to_use, otp)
+
+            request.session["otp_user_id"] = user.id
+            request.session["otp_phone"] = phone_to_use
+            request.session["otp_code"] = otp
+            request.session["otp_expiry"] = (datetime.now() + timedelta(minutes=10)).timestamp()
+            request.session["otp_attempts"] = 0
+            request.session["otp_purpose"] = "registration"
+            if dispatch_result.get("demo_otp"):
+                request.session["otp_demo"] = dispatch_result["demo_otp"]
+            else:
+                request.session.pop("otp_demo", None)
+
+            messages.success(request, "Registration details received! Please enter the 6-digit OTP sent to your phone to complete verification.")
+            return redirect("account_verify_otp")
     else:
         form = SellerSignupForm()
     return render(request, "users/seller_signup.html", {"form": form})
@@ -170,10 +186,26 @@ def seller_signup_view(request):
 
 def buyer_signup_view(request):
     if request.method == "POST":
-        form = BuyerSignupForm(request.POST)
+        form = BuyerSignupForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return render(request, "users/buyer_signup.html", {"success": True})
+            user = form.save()
+            phone_to_use = user.phone_number or "9876543210"
+            otp = generate_otp()
+            dispatch_result = send_sms_otp(phone_to_use, otp)
+
+            request.session["otp_user_id"] = user.id
+            request.session["otp_phone"] = phone_to_use
+            request.session["otp_code"] = otp
+            request.session["otp_expiry"] = (datetime.now() + timedelta(minutes=10)).timestamp()
+            request.session["otp_attempts"] = 0
+            request.session["otp_purpose"] = "registration"
+            if dispatch_result.get("demo_otp"):
+                request.session["otp_demo"] = dispatch_result["demo_otp"]
+            else:
+                request.session.pop("otp_demo", None)
+
+            messages.success(request, "Registration details received! Please enter the 6-digit OTP sent to your phone to complete verification.")
+            return redirect("account_verify_otp")
     else:
         form = BuyerSignupForm()
     return render(request, "users/buyer_signup.html", {"form": form})
@@ -386,6 +418,21 @@ def admin_estate_detail_view(request, pk):
         Estate.objects.select_related("owner").prefetch_related("harvest_batches__auction_lot", "photos"),
         pk=pk,
     )
+    if request.method == "POST" and request.POST.get("action") == "log_harvest":
+        from carda_link.estates.forms import HarvestBatchForm
+        form = HarvestBatchForm(request.POST, request.FILES)
+        if form.is_valid():
+            batch = form.save(commit=False)
+            batch.estate = estate
+            batch.save()
+            messages.success(
+                request,
+                f"Harvest batch #{batch.id} ({batch.weight_kg} kg, {batch.get_grade_display()}) successfully logged for '{estate.name}'.",
+            )
+            return redirect("admin_estate_detail", pk=estate.pk)
+        else:
+            messages.error(request, "Please correct the errors in the harvest batch submission.")
+
     harvest_batches = estate.harvest_batches.all().order_by("-harvest_date")
     context = {
         "estate": estate,
@@ -720,6 +767,27 @@ def mobile_verify_otp_view(request):
             error = "Please enter the 6-digit verification code."
         elif entered_otp == expected_otp:
             request.session["otp_verified"] = True
+            if request.session.get("otp_purpose") == "registration":
+                user = User.objects.filter(id=user_id).first()
+                if user:
+                    user.is_verified = True
+                    user.save(update_fields=["is_verified"])
+                for key in [
+                    "otp_user_id",
+                    "otp_phone",
+                    "otp_code",
+                    "otp_expiry",
+                    "otp_attempts",
+                    "otp_verified",
+                    "otp_demo",
+                    "otp_purpose",
+                ]:
+                    request.session.pop(key, None)
+                messages.success(
+                    request,
+                    "Mobile number verified successfully! Your application has been submitted and is currently pending administrator approval.",
+                )
+                return redirect("home")
             return redirect("account_set_password")
         else:
             attempts = request.session.get("otp_attempts", 0) + 1

@@ -62,40 +62,48 @@ class EstateDetailView(DetailView):
             .all()
         )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_authenticated:
+            role = getattr(user, "role", None)
+            if role == "ADMIN":
+                context["base_template"] = "users/admin_base.html"
+            elif role == "SELLER":
+                context["base_template"] = "users/seller_base.html"
+            elif role == "BUYER":
+                context["base_template"] = "users/buyer_base.html"
+            else:
+                context["base_template"] = "users/dashboard_base.html"
+        else:
+            context["base_template"] = "base.html"
+        return context
 
-class EstateCreateView(LoginRequiredMixin, CreateView):
-    model = Estate
-    form_class = EstateRegistrationForm
-    template_name = "estates/estate_form.html"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
+class EstateCreateView(View):
+    """
+    Decommissioned standalone estate registration.
+    Redirects users role-sensitively to their unified portals:
+    - Sellers to /seller/estates/
+    - Admins to /admin-dashboard/users/create/
+    - Buyers to /buyer-dashboard/
+    - Guests to /register/seller/
+    """
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("register_seller")
 
-    def form_valid(self, form):
-        estate = form.save(commit=False, user=self.request.user)
-        estate.save()
+        user_role = getattr(request.user, "role", None)
+        if user_role == "SELLER":
+            messages.info(request, _("Please manage and register your estates directly from your Seller Portal."))
+            return redirect("seller_estates")
+        elif user_role == "ADMIN":
+            messages.info(request, _("Register cardamom plantations directly via Manual User Registration."))
+            return redirect("admin_user_create")
+        elif user_role == "BUYER":
+            return redirect("buyer_dashboard")
 
-        # Handle multiple uploaded gallery photos
-        photos = self.request.FILES.getlist("photos")
-        photo_count = 0
-        for photo_file in photos:
-            EstatePhoto.objects.create(
-                estate=estate,
-                image=photo_file,
-                caption=f"Photo of {estate.name}",
-            )
-            photo_count += 1
-
-        messages.success(
-            self.request,
-            _(
-                f"Estate '{estate.name}' successfully registered! "
-                + (f"Added {photo_count} gallery photo(s)." if photo_count else "")
-            ),
-        )
-        return redirect(estate.get_absolute_url())
+        return redirect("seller_estates")
 
 
 class EstateUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -191,11 +199,24 @@ class HarvestBatchCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView
             self.request.user == estate.owner
             or self.request.user.is_staff
             or self.request.user.is_superuser
+            or getattr(self.request.user, "role", None) == "ADMIN"
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["estate"] = self.get_estate()
+        estate = self.get_estate()
+        context["estate"] = estate
+        user = self.request.user
+        if user.is_authenticated:
+            role = getattr(user, "role", None)
+            if role == "ADMIN":
+                context["base_template"] = "users/admin_base.html"
+            elif role == "SELLER":
+                context["base_template"] = "users/seller_base.html"
+            else:
+                context["base_template"] = "users/dashboard_base.html"
+        else:
+            context["base_template"] = "base.html"
         return context
 
     def form_valid(self, form):
@@ -207,6 +228,8 @@ class HarvestBatchCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView
             self.request,
             _(f"Harvest batch of {batch.weight_kg} kg ({batch.get_grade_display()}) successfully logged for '{estate.name}'!"),
         )
+        if getattr(self.request.user, "role", None) == "ADMIN":
+            return redirect("admin_estate_detail", pk=estate.pk)
         return redirect(estate.get_absolute_url())
 
 
@@ -221,11 +244,24 @@ class HarvestBatchUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             self.request.user == batch.estate.owner
             or self.request.user.is_staff
             or self.request.user.is_superuser
+            or getattr(self.request.user, "role", None) == "ADMIN"
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["estate"] = self.get_object().estate
+        estate = self.get_object().estate
+        context["estate"] = estate
+        user = self.request.user
+        if user.is_authenticated:
+            role = getattr(user, "role", None)
+            if role == "ADMIN":
+                context["base_template"] = "users/admin_base.html"
+            elif role == "SELLER":
+                context["base_template"] = "users/seller_base.html"
+            else:
+                context["base_template"] = "users/dashboard_base.html"
+        else:
+            context["base_template"] = "base.html"
         return context
 
     def form_valid(self, form):
@@ -234,6 +270,8 @@ class HarvestBatchUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
             self.request,
             _(f"Harvest batch #{batch.id} details updated successfully!"),
         )
+        if getattr(self.request.user, "role", None) == "ADMIN":
+            return redirect("admin_estate_detail", pk=batch.estate.pk)
         return redirect(batch.estate.get_absolute_url())
 
 
@@ -247,15 +285,30 @@ class HarvestBatchDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView
             self.request.user == batch.estate.owner
             or self.request.user.is_staff
             or self.request.user.is_superuser
+            or getattr(self.request.user, "role", None) == "ADMIN"
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["estate"] = self.get_object().estate
+        estate = self.get_object().estate
+        context["estate"] = estate
+        user = self.request.user
+        if user.is_authenticated:
+            role = getattr(user, "role", None)
+            if role == "ADMIN":
+                context["base_template"] = "users/admin_base.html"
+            elif role == "SELLER":
+                context["base_template"] = "users/seller_base.html"
+            else:
+                context["base_template"] = "users/dashboard_base.html"
+        else:
+            context["base_template"] = "base.html"
         return context
 
     def get_success_url(self):
-        return self.object.estate.get_absolute_url()
+        if getattr(self.request.user, "role", None) == "ADMIN":
+            return reverse_lazy("admin_estate_detail", kwargs={"pk": self.get_object().estate.pk})
+        return self.get_object().estate.get_absolute_url()
 
     def form_valid(self, form):
         batch = self.get_object()

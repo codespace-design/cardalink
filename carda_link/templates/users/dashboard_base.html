@@ -1,23 +1,266 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% block dash_title %}Dashboard{% endblock %} — CardaLink{% endblock %}
+{% block title %}{% block dash_title %}Console{% endblock %} — CardaLink{% endblock %}
 
-{% block content %}
-<div class="dashboard-wrapper">
-  {% block sidebar %}{% endblock sidebar %}
+{% block bodyclass %}admin-app-body{% endblock %}
 
-  <div class="dashboard-content">
+{% block header %}
+<header class="admin-topbar sticky-top">
+  <div class="admin-topbar-inner">
+    <!-- Brand & Mobile Toggle -->
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-sm btn-light d-lg-none border" type="button" id="adminSidebarToggle" aria-label="Toggle Navigation">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+      <a href="{% if request.user.role == 'ADMIN' %}{% url 'admin_dashboard' %}{% elif request.user.role == 'BUYER' %}{% url 'buyer_dashboard' %}{% elif request.user.role == 'SELLER' %}{% url 'seller_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="d-flex align-items-center text-decoration-none">
+        <span class="admin-brand-carda">Carda</span><span class="admin-brand-link">Link</span>
+        <span class="admin-badge-console ms-2">
+          {% if request.user.role == 'ADMIN' %}ADMIN CONSOLE
+          {% elif request.user.role == 'BUYER' %}BUYER PORTAL
+          {% elif request.user.role == 'SELLER' %}SELLER PORTAL
+          {% else %}DASHBOARD{% endif %}
+        </span>
+      </a>
+    </div>
+
+    <!-- Right Quick Actions, Notifications & Profile -->
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald d-none d-sm-inline-flex align-items-center gap-1.5 fw-semibold font-monospace">
+        <i class="bi bi-broadcast"></i> Live Auction Console
+      </a>
+
+      <!-- Notification Bell Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-sm btn-light border position-relative rounded-pill px-2.5 py-1.5" type="button" id="dashboardNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+          <i class="bi bi-bell-fill text-secondary fs-6"></i>
+          {% if unread_notifications_count and unread_notifications_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style="font-size: 0.65rem;">
+              {{ unread_notifications_count }}
+            </span>
+          {% endif %}
+        </button>
+        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-0 mt-2" style="width: 320px; max-width: 90vw;" aria-labelledby="dashboardNotificationDropdown">
+          <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-3">
+            <div class="fw-bold small text-dark"><i class="bi bi-bell-fill text-emerald me-1.5"></i>Notifications</div>
+            {% if unread_notifications_count %}
+              <span class="badge bg-emerald-subtle text-emerald small font-monospace">{{ unread_notifications_count }} unread</span>
+            {% else %}
+              <span class="text-muted" style="font-size: 0.75rem;">All caught up</span>
+            {% endif %}
+          </div>
+          <div class="list-group list-group-flush overflow-auto" style="max-height: 280px;">
+            {% for notif in recent_notifications %}
+              <a href="{{ notif.link|default:'#' }}" class="list-group-item list-group-item-action p-2.5 border-bottom {% if not notif.is_read %}bg-light-subtle{% endif %}">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                  <span class="badge bg-slate text-secondary font-monospace" style="font-size: 0.65rem;">{{ notif.get_notification_type_display|default:"Alert" }}</span>
+                  <small class="text-muted" style="font-size: 0.7rem;">{{ notif.created_at|timesince }} ago</small>
+                </div>
+                <p class="mb-0 text-dark small text-truncate">{{ notif.message }}</p>
+              </a>
+            {% empty %}
+              <div class="p-3 text-center text-muted small">
+                <i class="bi bi-check2-circle fs-4 d-block text-emerald mb-1"></i>
+                No notifications right now.
+              </div>
+            {% endfor %}
+          </div>
+          <div class="p-2 text-center bg-light rounded-bottom-3 border-top">
+            <a href="{% if request.user.role == 'BUYER' %}{% url 'buyer_notifications' %}{% elif request.user.role == 'SELLER' %}{% url 'seller_notifications' %}{% else %}#{% endif %}" class="small text-emerald fw-semibold text-decoration-none">
+              View All Notifications &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown -->
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle text-dark" id="adminUserMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="admin-avatar">
+            {{ request.user.name|default:request.user.email|slice:":1"|upper }}
+          </div>
+          <div class="d-none d-sm-block text-start">
+            <div class="fw-bold small text-dark line-clamp-1">{{ request.user.name|default:request.user.email }}</div>
+            <div class="text-muted" style="font-size: 0.72rem;">{{ request.user.email }}</div>
+          </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border rounded-3 mt-2 py-2" aria-labelledby="adminUserMenu">
+          <li class="px-3 py-2 border-bottom">
+            <span class="text-muted small">Signed in as</span>
+            <div class="fw-bold small text-truncate">{{ request.user.email }}</div>
+            <span class="badge bg-emerald-subtle text-emerald font-monospace mt-1" style="font-size: 0.65rem;">{{ request.user.get_role_display|default:request.user.role }}</span>
+          </li>
+          {% if request.user.role == 'ADMIN' %}
+            <li><a class="dropdown-item py-2" href="{% url 'admin_dashboard' %}"><i class="bi bi-grid-1x2 me-2 text-emerald"></i>Dashboard</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'admin_platform_settings' %}"><i class="bi bi-sliders me-2 text-emerald"></i>Platform Settings</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'admin_audit_logs' %}"><i class="bi bi-journal-text me-2 text-emerald"></i>Audit Logs</a></li>
+          {% elif request.user.role == 'BUYER' %}
+            <li><a class="dropdown-item py-2" href="{% url 'buyer_dashboard' %}"><i class="bi bi-grid-1x2 me-2 text-emerald"></i>Dashboard</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'buyer_profile' %}"><i class="bi bi-building me-2 text-emerald"></i>Business Profile</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'buyer_watchlist' %}"><i class="bi bi-star me-2 text-emerald"></i>My Watchlist</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'buyer_invoices' %}"><i class="bi bi-receipt me-2 text-emerald"></i>Invoices &amp; Payments</a></li>
+          {% elif request.user.role == 'SELLER' %}
+            <li><a class="dropdown-item py-2" href="{% url 'seller_dashboard' %}"><i class="bi bi-grid-1x2 me-2 text-emerald"></i>Dashboard</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'seller_profile' %}"><i class="bi bi-person-badge me-2 text-emerald"></i>Farm Profile</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'seller_estates' %}"><i class="bi bi-tree me-2 text-emerald"></i>My Estates</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'seller_batches' %}"><i class="bi bi-boxes me-2 text-emerald"></i>Harvest Batches</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'seller_earnings' %}"><i class="bi bi-wallet2 me-2 text-emerald"></i>Earnings &amp; Payouts</a></li>
+          {% endif %}
+          <li><hr class="dropdown-divider my-1"></li>
+          <li>
+            <button type="button" class="dropdown-item py-2 text-danger d-flex align-items-center border-0 bg-transparent w-100 text-start" data-bs-toggle="modal" data-bs-target="#dashboardSignoutModal">
+              <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock header %}
+
+{% block footer %}{% endblock footer %}
+
+{% block main_container %}
+<div class="admin-layout">
+  <!-- Shared Modern SaaS Sidebar Shell -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <!-- Mobile Drawer Header -->
+    <div class="admin-sidebar-mobile-header d-flex d-lg-none align-items-center justify-content-between px-3 py-3 border-bottom">
+      <div class="d-flex align-items-center">
+        <span class="admin-brand-carda">Carda</span><span class="admin-brand-link">Link</span>
+        <span class="admin-badge-console ms-2">
+          {% if request.user.role == 'ADMIN' %}ADMIN
+          {% elif request.user.role == 'BUYER' %}BUYER
+          {% elif request.user.role == 'SELLER' %}SELLER
+          {% else %}PORTAL{% endif %}
+        </span>
+      </div>
+      <button class="btn btn-sm btn-light border-0" type="button" id="adminSidebarClose" aria-label="Close Sidebar">
+        <i class="bi bi-x-lg fs-6 text-secondary"></i>
+      </button>
+    </div>
+
+    <!-- Role-Specific Sidebar Navigation Injected via Block -->
+    <div class="admin-sidebar-nav">
+      {% block sidebar_nav %}
+        <!-- Default or override navigation -->
+      {% endblock sidebar_nav %}
+    </div>
+
+    <!-- Pinned Bottom User Identity -->
+    <div class="admin-sidebar-footer">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2 overflow-hidden">
+          <div class="admin-avatar-sm">
+            {{ request.user.name|default:request.user.email|slice:":1"|upper }}
+          </div>
+          <div class="overflow-hidden">
+            <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem; line-height: 1.2;">{{ request.user.name|default:request.user.email }}</div>
+            <div class="text-muted text-truncate" style="font-size: 0.7rem;">{{ request.user.email }}</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-link text-danger p-1 text-decoration-none border-0" data-bs-toggle="modal" data-bs-target="#dashboardSignoutModal" title="Sign Out">
+          <i class="bi bi-box-arrow-right fs-5"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Drawer Backdrop -->
+  <div class="admin-sidebar-backdrop d-lg-none" id="adminSidebarBackdrop"></div>
+
+  <!-- Main Canvas -->
+  <main class="admin-main">
     {% if messages %}
       {% for message in messages %}
-        <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %} mb-3">
-          {{ message }}
+        <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %} mb-4 shadow-sm border-0 rounded-3">
+          <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endfor %}
     {% endif %}
 
     {% block dashboard_content %}{% endblock dashboard_content %}
+  </main>
+</div>
+
+<!-- Sign Out Confirmation Modal -->
+<div class="modal fade" id="dashboardSignoutModal" tabindex="-1" aria-labelledby="dashboardSignoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
+      <div class="modal-body p-4 text-center">
+        <div class="mb-3">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 60px; height: 60px; background: #fee2e2; color: #dc2626; border: 2px solid #fecaca;">
+            <i class="bi bi-box-arrow-right fs-3"></i>
+          </div>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" id="dashboardSignoutModalLabel">Sign Out of CardaLink?</h5>
+        <p class="text-muted small mb-4 px-2" style="line-height: 1.55;">
+          Are you sure you want to end your current session? You can sign back in anytime.
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+          <button type="button" class="btn btn-light px-4 py-2 rounded-3 fw-semibold border text-secondary" data-bs-dismiss="modal">
+            Stay Signed In
+          </button>
+          <form method="post" action="{% if request.user.role == 'ADMIN' %}{% url 'admin_logout' %}{% else %}{% url 'account_logout' %}{% endif %}" class="d-inline m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger px-4 py-2 rounded-3 fw-semibold shadow-sm">
+              <i class="bi bi-box-arrow-right me-1"></i> Yes, Sign Out
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-{% endblock content %}
+
+<!-- Persistent Collapsible AI Assistant Widget (Platform-Wide) -->
+{% include "assistant/widget.html" %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("adminSidebarToggle");
+    const closeBtn = document.getElementById("adminSidebarClose");
+    const sidebar = document.getElementById("adminSidebar");
+    const backdrop = document.getElementById("adminSidebarBackdrop");
+
+    function openSidebar() {
+      if (sidebar) sidebar.classList.add("show");
+      if (backdrop) backdrop.classList.add("show");
+      document.body.classList.add("sidebar-open");
+    }
+
+    function closeSidebar() {
+      if (sidebar) sidebar.classList.remove("show");
+      if (backdrop) backdrop.classList.remove("show");
+      document.body.classList.remove("sidebar-open");
+    }
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        if (sidebar && sidebar.classList.contains("show")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", closeSidebar);
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener("click", closeSidebar);
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closeSidebar();
+      }
+    });
+  });
+</script>
+{% endblock main_container %}

@@ -1,0 +1,88 @@
+{% extends "users/seller_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}My Auction Lots — Seller Portal{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-bold font-heading mb-0 text-dark">My Auction Lots</h4>
+    <div class="text-muted small mt-1">Read-only real-time tracking of auction lots created from your certified harvest batches</div>
+  </div>
+  <div>
+    <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald fw-semibold">
+      <i class="bi bi-broadcast me-1"></i> Live Floor Simulator
+    </a>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Lot #</th>
+          <th>Auction Event</th>
+          <th>Estate &amp; Grade</th>
+          <th>Cataloged Weight</th>
+          <th>Base Price</th>
+          <th>Live Current Highest Bid</th>
+          <th>Auction Status</th>
+          <th>Sale State</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lot in lots %}
+          <tr>
+            <td class="fw-bold text-dark font-monospace fs-6">Lot #{{ lot.lot_number }}</td>
+            <td>
+              <div class="fw-semibold text-dark">{{ lot.auction.title }}</div>
+              <div class="text-muted small">{{ lot.auction.start_time|date:"d M Y, H:i" }}</div>
+            </td>
+            <td>
+              <span class="badge bg-slate text-secondary font-monospace">{{ lot.harvest_batch.grade }}</span>
+              <div class="text-muted small">{{ lot.harvest_batch.estate.name }}</div>
+            </td>
+            <td class="fw-bold text-dark">{{ lot.harvest_batch.weight_kg }} kg</td>
+            <td class="font-monospace text-muted">₹{{ lot.base_price_per_kg }}/kg</td>
+            <td>
+              {% if lot.highest_bid_per_kg %}
+                <span class="font-monospace fw-bold text-emerald fs-6">
+                  <i class="bi bi-graph-up-arrow me-1"></i>₹{{ lot.highest_bid_per_kg }}/kg
+                </span>
+              {% else %}
+                <span class="text-muted small">No bids placed yet</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {% if lot.auction.status == 'ACTIVE' %}bg-emerald-subtle text-emerald border border-emerald font-monospace{% elif lot.auction.status == 'UPCOMING' %}bg-slate text-secondary font-monospace{% else %}bg-light text-muted border font-monospace{% endif %}">
+                {{ lot.auction.get_status_display }}
+              </span>
+            </td>
+            <td>
+              {% if lot.is_sold %}
+                <span class="badge bg-success font-monospace"><i class="bi bi-check-circle me-1"></i>Sold</span>
+              {% elif lot.auction.status == 'COMPLETED' %}
+                <span class="badge bg-secondary font-monospace">Unsold</span>
+              {% else %}
+                <span class="badge bg-warning text-dark font-monospace">In Bidding</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              <div class="empty-state-icon-circle">
+                <i class="bi bi-hammer text-emerald fs-3"></i>
+              </div>
+              <h6 class="fw-bold text-dark">No Auction Lots Cataloged</h6>
+              <p class="small text-muted mb-3">Once your harvest batches are certified by an administrator, they will be cataloged into live auctions and displayed here.</p>
+              <a href="{% url 'seller_batches' %}" class="btn btn-sm btn-emerald text-white">View Harvest Batches</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock dashboard_content %}

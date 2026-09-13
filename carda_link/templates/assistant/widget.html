@@ -1,0 +1,293 @@
+{# Persistent Collapsible AI Assistant Widget #}
+<style>
+  .assistant-launcher-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.4), 0 8px 10px -6px rgba(4, 120, 87, 0.2);
+    cursor: pointer;
+    z-index: 1055;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .assistant-launcher-btn:hover {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(4, 120, 87, 0.5);
+    color: #ffffff;
+  }
+  .assistant-launcher-btn .pulse-dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 14px;
+    height: 14px;
+    background: #10b981;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+  }
+
+  .assistant-widget-box {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    width: 380px;
+    height: 540px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 120px);
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1055;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px) scale(0.96);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .assistant-widget-box.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .assistant-header {
+    background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
+    color: #ffffff;
+    padding: 1rem 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .assistant-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scrollbar-width: thin;
+  }
+  .assistant-bubble {
+    max-width: 86%;
+    padding: 0.65rem 0.9rem;
+    border-radius: 14px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .assistant-bubble.bot {
+    align-self: flex-start;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+  .assistant-bubble.user {
+    align-self: flex-end;
+    background: #047857;
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+  }
+  .assistant-bubble .category-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #047857;
+    margin-bottom: 0.25rem;
+  }
+  .assistant-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+  .assistant-suggestion-chip {
+    font-size: 0.75rem;
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .assistant-suggestion-chip:hover {
+    background: #d1fae5;
+  }
+  .assistant-footer {
+    padding: 0.75rem 0.85rem;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+  }
+</style>
+
+<!-- Launcher Button -->
+<div class="assistant-launcher-btn" id="cardaAssistantLauncher" title="Ask CardaLink Assistant">
+  <i class="bi bi-robot"></i>
+  <span class="pulse-dot"></span>
+</div>
+
+<!-- Chat Popup Window -->
+<div class="assistant-widget-box" id="cardaAssistantWidget">
+  <div class="assistant-header">
+    <div class="d-flex align-items-center gap-2">
+      <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; background: rgba(255,255,255,0.2);">
+        <i class="bi bi-robot fs-5"></i>
+      </div>
+      <div>
+        <div class="fw-bold text-white small" style="line-height: 1.2;">CardaLink AI Assistant</div>
+        <div class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-circle-fill text-emerald-light" style="font-size: 6px;"></i> Role-Aware Intelligence</div>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm btn-link text-white p-0 text-decoration-none" id="cardaAssistantClose" aria-label="Close Assistant">
+      <i class="bi bi-dash-lg fs-5"></i>
+    </button>
+  </div>
+
+  <div class="assistant-messages" id="cardaAssistantMessages">
+    <!-- Welcome message -->
+    <div class="assistant-bubble bot">
+      <div class="category-tag">Welcome</div>
+      Hello <strong>{{ request.user.name|default:request.user.email }}</strong>! I am your CardaLink assistant. Ask me about your {{ request.user.get_role_display|default:request.user.role|lower }} operations, live auctions, harvest quality, or cardamom farming.
+      <div class="assistant-suggestions" id="cardaInitialSuggestions">
+        {% if request.user.role == 'SELLER' %}
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('What is the status of my harvest batches?')">My batches</span>
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('How do I treat cardamom capsule rot?')">Pest control</span>
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('Show my live auction lots')">My auction lots</span>
+        {% elif request.user.role == 'BUYER' %}
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('What is my current bid status?')">My bid status</span>
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('Show active cardamom auctions')">Active auctions</span>
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('Do I have unpaid invoices?')">Pending invoices</span>
+        {% else %}
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('What are today\'s pending approvals?')">Pending approvals</span>
+          <span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('How many batches need grading?')">Ungraded batches</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="assistant-footer">
+    <form id="cardaAssistantForm" class="d-flex gap-2 align-items-center m-0">
+      {% csrf_token %}
+      <input type="text" class="form-control form-control-sm rounded-pill px-3" id="cardaAssistantInput" placeholder="Type your query..." autocomplete="off" required>
+      <button type="submit" class="btn btn-sm btn-emerald rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 36px; height: 36px; flex-shrink: 0;">
+        <i class="bi bi-send-fill text-white" style="font-size: 0.82rem;"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const launcher = document.getElementById("cardaAssistantLauncher");
+    const widget = document.getElementById("cardaAssistantWidget");
+    const closeBtn = document.getElementById("cardaAssistantClose");
+    const form = document.getElementById("cardaAssistantForm");
+    const input = document.getElementById("cardaAssistantInput");
+    const messages = document.getElementById("cardaAssistantMessages");
+
+    if (launcher && widget) {
+      launcher.addEventListener("click", function() {
+        widget.classList.toggle("open");
+        if (widget.classList.contains("open")) {
+          input.focus();
+        }
+      });
+    }
+
+    if (closeBtn && widget) {
+      closeBtn.addEventListener("click", function() {
+        widget.classList.remove("open");
+      });
+    }
+
+    window.sendAssistantSuggestion = function(text) {
+      if (input) {
+        input.value = text;
+        form.dispatchEvent(new Event("submit"));
+      }
+    };
+
+    if (form) {
+      form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        // Render user message bubble
+        const userDiv = document.createElement("div");
+        userDiv.className = "assistant-bubble user";
+        userDiv.textContent = msg;
+        messages.appendChild(userDiv);
+        input.value = "";
+        messages.scrollTop = messages.scrollHeight;
+
+        // Render loading bubble
+        const loadingDiv = document.createElement("div");
+        loadingDiv.className = "assistant-bubble bot";
+        loadingDiv.innerHTML = `<span class="text-muted small"><i class="bi bi-hourglass-split me-1"></i>Thinking...</span>`;
+        messages.appendChild(loadingDiv);
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+          const csrfToken = document.querySelector("#cardaAssistantForm input[name='csrfmiddlewaretoken']").value;
+          const res = await fetch("{% url 'assistant_query' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({ message: msg })
+          });
+
+          const data = await res.json();
+          loadingDiv.remove();
+
+          const botDiv = document.createElement("div");
+          botDiv.className = "assistant-bubble bot";
+          let categoryHtml = data.category ? `<div class="category-tag">${data.category}</div>` : "";
+          
+          let formattedAnswer = (data.answer || "")
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+
+          let suggestionsHtml = "";
+          if (data.suggestions && data.suggestions.length > 0) {
+            suggestionsHtml = '<div class="assistant-suggestions mt-2">';
+            data.suggestions.slice(0, 3).forEach(function(s) {
+              suggestionsHtml += `<span class="assistant-suggestion-chip" onclick="sendAssistantSuggestion('${s.replace(/'/g, "\\'")}')">${s}</span>`;
+            });
+            suggestionsHtml += '</div>';
+          }
+
+          botDiv.innerHTML = `${categoryHtml}<div>${formattedAnswer}</div>${suggestionsHtml}`;
+          messages.appendChild(botDiv);
+        } catch (err) {
+          loadingDiv.remove();
+          const errDiv = document.createElement("div");
+          errDiv.className = "assistant-bubble bot text-danger";
+          errDiv.textContent = "Unable to process query. Please try again in a moment.";
+          messages.appendChild(errDiv);
+        }
+
+        messages.scrollTop = messages.scrollHeight;
+      });
+    }
+  });
+</script>

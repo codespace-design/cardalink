@@ -1,0 +1,48 @@
+{% extends "users/dashboard_base.html" %}
+{% load static i18n %}
+
+{% block dash_title %}Seller Portal{% endblock %}
+
+{% block sidebar_nav %}
+<div class="admin-sidebar-section">Main</div>
+<a href="{% url 'seller_dashboard' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_dashboard' %}active{% endif %}">
+  <i class="bi bi-grid-1x2-fill item-icon"></i>
+  <span>Dashboard</span>
+</a>
+
+<div class="admin-sidebar-section">Farming &amp; Inventory</div>
+<a href="{% url 'seller_estates' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_estates' or request.resolver_match.url_name == 'seller_estate_edit' %}active{% endif %}">
+  <i class="bi bi-tree-fill item-icon"></i>
+  <span>My Estates</span>
+  {% if estates_count %}<span class="admin-badge-count admin-badge-slate">{{ estates_count }}</span>{% endif %}
+</a>
+<a href="{% url 'seller_batches' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_batches' %}active{% endif %}">
+  <i class="bi bi-boxes item-icon"></i>
+  <span>Harvest Batches</span>
+  {% if ungraded_count %}<span class="admin-badge-count admin-badge-amber">{{ ungraded_count }} pending</span>{% endif %}
+</a>
+<a href="{% url 'seller_lots' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_lots' %}active{% endif %}">
+  <i class="bi bi-hammer item-icon"></i>
+  <span>My Lots</span>
+  {% if active_lots_count %}<span class="admin-badge-count admin-badge-emerald">{{ active_lots_count }} live</span>{% endif %}
+</a>
+
+<div class="admin-sidebar-section">Finance &amp; Account</div>
+<a href="{% url 'seller_sales_history' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_sales_history' %}active{% endif %}">
+  <i class="bi bi-clock-history item-icon"></i>
+  <span>Sales History</span>
+</a>
+<a href="{% url 'seller_earnings' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_earnings' %}active{% endif %}">
+  <i class="bi bi-wallet2 item-icon"></i>
+  <span>Earnings &amp; Payouts</span>
+</a>
+<a href="{% url 'seller_notifications' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_notifications' %}active{% endif %}">
+  <i class="bi bi-bell-fill item-icon"></i>
+  <span>Notifications</span>
+  {% if unread_notifications_count %}<span class="admin-badge-count admin-badge-rose">{{ unread_notifications_count }}</span>{% endif %}
+</a>
+<a href="{% url 'seller_profile' %}" class="admin-sidebar-item {% if request.resolver_match.url_name == 'seller_profile' or request.resolver_match.url_name == 'seller_profile_edit' %}active{% endif %}">
+  <i class="bi bi-person-badge item-icon"></i>
+  <span>Farm Profile</span>
+</a>
+{% endblock sidebar_nav %}
