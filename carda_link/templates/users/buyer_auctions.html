@@ -57,12 +57,13 @@
 <div class="row g-3">
   {% for lot in lots %}
     <div class="col-12 col-md-6 col-lg-4">
-      <div class="admin-card h-100 d-flex flex-direction-column justify-content-between p-3 position-relative">
+      <div class="admin-card h-100 d-flex flex-column justify-content-between p-3 position-relative shadow-sm border rounded-3 bg-white">
         <div>
-          <!-- Card Header: Auction & Watchlist Star -->
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="badge {% if lot.auction.status == 'ACTIVE' %}bg-emerald-subtle text-emerald border border-emerald-light{% else %}bg-slate text-secondary{% endif %} font-monospace small">
-              <i class="bi bi-broadcast me-1"></i>{{ lot.auction.get_status_display }}
+          <!-- Card Header: Auction Status Badge & Watchlist Star -->
+          <div class="d-flex justify-content-between align-items-center mb-2.5">
+            <span class="badge lot-status-badge {% if lot.auction.status == 'ACTIVE' %}bg-emerald-subtle text-emerald border border-emerald-light{% elif lot.auction.status == 'COMPLETED' or lot.is_sold %}bg-secondary text-white{% else %}bg-slate text-secondary{% endif %} font-monospace small">
+              <i class="bi {% if lot.auction.status == 'ACTIVE' %}bi-broadcast{% elif lot.auction.status == 'COMPLETED' or lot.is_sold %}bi-clock-history{% else %}bi-calendar-event{% endif %} me-1"></i>
+              <span class="badge-text">{{ lot.auction.get_status_display }}</span>
             </span>
             <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none watchlist-toggle-btn" data-lot-id="{{ lot.id }}" title="Toggle Watchlist">
               <i class="bi {% if lot.id in watched_lot_ids %}bi-star-fill text-warning{% else %}bi-star text-muted{% endif %} fs-5"></i>
@@ -75,7 +76,7 @@
             <span class="badge bg-secondary font-monospace">{{ lot.harvest_batch.grade }}</span>
           </div>
 
-          <p class="text-muted small mb-2 text-truncate" title="{{ lot.auction.title }}">
+          <p class="text-muted small mb-2.5 text-truncate" title="{{ lot.auction.title }}">
             {{ lot.auction.title }}
           </p>
 
@@ -83,11 +84,11 @@
           <div class="bg-light p-2.5 rounded-3 mb-3" style="font-size: 0.8rem;">
             <div class="d-flex justify-content-between mb-1">
               <span class="text-muted">Estate:</span>
-              <span class="fw-semibold text-dark">{{ lot.harvest_batch.estate.name }}</span>
+              <span class="fw-semibold text-dark text-truncate ps-2" style="max-width: 180px;">{{ lot.harvest_batch.estate.name }}</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
               <span class="text-muted">Location:</span>
-              <span class="text-dark text-truncate" style="max-width: 170px;">{{ lot.harvest_batch.estate.location }}</span>
+              <span class="text-dark text-truncate ps-2" style="max-width: 180px;">{{ lot.harvest_batch.estate.location }}</span>
             </div>
             <div class="d-flex justify-content-between">
               <span class="text-muted">Available Weight:</span>
@@ -115,13 +116,17 @@
         </div>
 
         <!-- Footer: Countdown Timer & CTA -->
-        <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+        <div class="pt-2.5 mt-auto border-top d-flex justify-content-between align-items-center w-100">
           <div class="countdown-box small text-muted" data-end-time="{{ lot.auction.end_time|date:'c' }}">
             <i class="bi bi-stopwatch text-emerald me-1"></i><span class="timer-display">Calculating...</span>
           </div>
-          <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3">
-            Bid Now <i class="bi bi-arrow-right"></i>
-          </a>
+          {% if lot.auction.status == 'COMPLETED' or lot.is_sold %}
+            <span class="badge bg-secondary-subtle text-secondary border px-3 py-1.5 rounded-pill">Auction Closed</span>
+          {% else %}
+            <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald rounded-pill px-3 bid-now-btn">
+              Bid Now <i class="bi bi-arrow-right"></i>
+            </a>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -147,7 +152,7 @@
         const icon = btn.querySelector("i");
 
         try {
-          const res = await fetch(`/buyer-dashboard/watchlist/toggle/${lotId}/`, {
+          const res = await fetch(`/buyer/watchlist/${lotId}/toggle/`, {
             method: "POST",
             headers: {
               "X-CSRFToken": "{{ csrf_token }}",
@@ -168,7 +173,7 @@
       });
     });
 
-    // Countdown Timers
+    // Live Countdown Timers & Dynamic Status Updater
     function updateTimers() {
       const now = new Date().getTime();
       document.querySelectorAll(".countdown-box").forEach(function(box) {
@@ -177,10 +182,29 @@
         const endTime = new Date(endTimeStr).getTime();
         const distance = endTime - now;
         const display = box.querySelector(".timer-display");
+        const card = box.closest(".admin-card");
 
-        if (distance < 0) {
+        if (distance <= 0) {
           display.textContent = "Auction Ended";
           display.classList.add("text-danger");
+
+          if (card) {
+            // Update top status badge to Completed / Closed
+            const statusBadge = card.querySelector(".lot-status-badge");
+            if (statusBadge && !statusBadge.classList.contains("bg-secondary")) {
+              statusBadge.className = "badge lot-status-badge bg-secondary text-white font-monospace small";
+              statusBadge.innerHTML = '<i class="bi bi-clock-history me-1"></i>Completed / Closed';
+            }
+
+            // Replace Bid Now button with closed badge
+            const bidBtn = card.querySelector(".bid-now-btn");
+            if (bidBtn) {
+              const closedSpan = document.createElement("span");
+              closedSpan.className = "badge bg-secondary-subtle text-secondary border px-3 py-1.5 rounded-pill";
+              closedSpan.textContent = "Auction Closed";
+              bidBtn.replaceWith(closedSpan);
+            }
+          }
         } else {
           const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));

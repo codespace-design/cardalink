@@ -150,6 +150,11 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         self.is_active = self.status == self.Status.ACTIVE
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            update_fields = set(update_fields)
+            update_fields.add("is_active")
+            kwargs["update_fields"] = update_fields
         super().save(*args, **kwargs)
 
 

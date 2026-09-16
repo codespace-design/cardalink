@@ -33,14 +33,17 @@ class LotCreateSchema(BaseModel):
 
 class BidCreateSchema(BaseModel):
     amount_per_kg: Decimal = Field(..., description="Bid amount per kg in ₹")
+    is_rival: bool = Field(False, description="Simulate bid as rival buyer")
 
 
 class BidOutSchema(BaseModel):
     id: int
     lot_id: int
+    lot_number: int | None = None
     bidder_id: int
     bidder_email: str
     bidder_name: str
+    is_rival: bool = False
     amount_per_kg: Decimal
     timestamp: datetime
 

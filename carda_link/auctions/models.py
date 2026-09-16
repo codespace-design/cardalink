@@ -52,7 +52,7 @@ class Auction(models.Model):
 
     def close_auction(self):
         from .services import close_auction as service_close_auction
-        service_close_auction(self)
+        return service_close_auction(self)
 
 
 class Lot(models.Model):

@@ -1,5 +1,8 @@
+import random
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from ninja import Router
 from ninja.errors import HttpError
 
@@ -106,15 +109,27 @@ def update_auction(request, auction_id: int, payload: AuctionUpdateSchema):
     return _serialize_auction(auction)
 
 
+@router.post("/{auction_id}/start/", response=AuctionOutSchema, auth=None)
+def start_auction(request, auction_id: int):
+    auction = get_object_or_404(Auction, pk=auction_id)
+    now = timezone.now()
+    auction.status = "ACTIVE"
+    auction.start_time = now
+    # Ensure end time is at least 15 minutes ahead for demo/testing
+    if auction.end_time <= now:
+        auction.end_time = now + timezone.timedelta(minutes=15)
+    auction.save(update_fields=["status", "start_time", "end_time"])
+    return _serialize_auction(auction)
+
+
 @router.post("/{auction_id}/close/", response=MessageResponseSchema, auth=None)
 def close_auction(request, auction_id: int):
     auction = get_object_or_404(Auction, pk=auction_id)
-    auction.close_auction()
-    return MessageResponseSchema(
-        message=(
-            f"Auction '{auction.title}' successfully closed and sold lots finalized."
-        ),
-    )
+    sold_count, returned_count = auction.close_auction()
+    msg = f"Auction '{auction.title}' successfully closed ({sold_count} lot(s) sold)."
+    if returned_count > 0:
+        msg += f" {returned_count} unbid lot(s) returned to seller inventory for future auctions."
+    return MessageResponseSchema(message=msg)
 
 
 @router.post("/{auction_id}/lots/", response=LotOutSchema, auth=None)
@@ -147,16 +162,40 @@ def retrieve_lot(request, lot_id: int):
     return LotOutSchema.from_orm_model(lot)
 
 
+RIVAL_BUYER_PROFILES = [
+    ("malabar.exports@spicemarket.in", "Malabar Spices Export Corp"),
+    ("highland.traders@idukki.org", "Highland Green Traders"),
+    ("cochin.spices@kerala.com", "Cochin Commodity Merchants"),
+    ("cardamom.express@southspices.in", "Cardamom Express International"),
+]
+
+
 @router.post("/lots/{lot_id}/bids/", response=BidOutSchema, auth=None)
 def place_bid_on_lot(request, lot_id: int, payload: BidCreateSchema):
-    bidder = request.user if (request.user and request.user.is_authenticated) else None
-    if not bidder:
-        user_model = get_user_model()
-        bidder = (
-            user_model.objects.filter(role="BUYER").first()
-            or user_model.objects.filter(is_superuser=True).first()
-            or user_model.objects.first()
+    user_model = get_user_model()
+    if payload.is_rival:
+        chosen_email, chosen_name = random.choice(RIVAL_BUYER_PROFILES)
+        bidder, created = user_model.objects.get_or_create(
+            email=chosen_email,
+            defaults={
+                "name": chosen_name,
+                "role": "BUYER",
+                "status": "ACTIVE",
+                "is_active": True,
+                "is_verified": True,
+            },
         )
+        if bidder.name != chosen_name:
+            bidder.name = chosen_name
+            bidder.save(update_fields=["name"])
+    else:
+        bidder = request.user if (request.user and request.user.is_authenticated) else None
+        if not bidder:
+            bidder = (
+                user_model.objects.filter(role="BUYER").first()
+                or user_model.objects.filter(is_superuser=True).first()
+                or user_model.objects.first()
+            )
 
     if not bidder:
         raise HttpError(401, "Authentication required to place bids.")
@@ -177,9 +216,11 @@ def place_bid_on_lot(request, lot_id: int, payload: BidCreateSchema):
     return BidOutSchema(
         id=bid.id,
         lot_id=lot.id,
+        lot_number=lot.lot_number,
         bidder_id=bidder.id,
         bidder_email=getattr(bidder, "email", "buyer@cardalink.com"),
         bidder_name=bidder_name,
+        is_rival=payload.is_rival,
         amount_per_kg=bid.amount_per_kg,
         timestamp=bid.timestamp,
     )
@@ -189,16 +230,20 @@ def place_bid_on_lot(request, lot_id: int, payload: BidCreateSchema):
 def list_lot_bids(request, lot_id: int):
     lot = get_object_or_404(Lot, pk=lot_id)
     bids = lot.bids.select_related("bidder").all()
+    rival_emails = {r[0] for r in RIVAL_BUYER_PROFILES}
     out = []
     for b in bids:
         b_name = getattr(b.bidder, "name", "") or b.bidder.email
+        is_rival = (b.bidder.email in rival_emails)
         out.append(
             BidOutSchema(
                 id=b.id,
                 lot_id=lot.id,
+                lot_number=lot.lot_number,
                 bidder_id=b.bidder.id,
                 bidder_email=b.bidder.email,
                 bidder_name=b_name,
+                is_rival=is_rival,
                 amount_per_kg=b.amount_per_kg,
                 timestamp=b.timestamp,
             ),

@@ -143,9 +143,10 @@ def admin_user_detail_view(request, pk):
 def admin_user_approve_view(request, pk):
     target_user = get_object_or_404(User, pk=pk)
     target_user.status = User.Status.ACTIVE
+    target_user.is_active = True
     target_user.is_verified = True
     target_user.rejection_reason = ""
-    target_user.save(update_fields=["status", "is_verified", "rejection_reason"])
+    target_user.save(update_fields=["status", "is_active", "is_verified", "rejection_reason"])
 
     log_admin_action(
         admin_user=request.user,
@@ -171,8 +172,9 @@ def admin_user_reject_view(request, pk):
         reason = "Registration rejected by administrator."
 
     target_user.status = User.Status.REJECTED
+    target_user.is_active = False
     target_user.rejection_reason = reason
-    target_user.save(update_fields=["status", "rejection_reason"])
+    target_user.save(update_fields=["status", "is_active", "rejection_reason"])
 
     log_admin_action(
         admin_user=request.user,
@@ -196,8 +198,9 @@ def admin_user_suspend_view(request, pk):
         reason = "Account suspended by administrator."
 
     target_user.status = User.Status.SUSPENDED
+    target_user.is_active = False
     target_user.suspension_reason = reason
-    target_user.save(update_fields=["status", "suspension_reason"])
+    target_user.save(update_fields=["status", "is_active", "suspension_reason"])
 
     log_admin_action(
         admin_user=request.user,
@@ -213,8 +216,9 @@ def admin_user_suspend_view(request, pk):
 def admin_user_reactivate_view(request, pk):
     target_user = get_object_or_404(User, pk=pk)
     target_user.status = User.Status.ACTIVE
+    target_user.is_active = True
     target_user.suspension_reason = ""
-    target_user.save(update_fields=["status", "suspension_reason"])
+    target_user.save(update_fields=["status", "is_active", "suspension_reason"])
 
     log_admin_action(
         admin_user=request.user,
@@ -252,6 +256,9 @@ def admin_user_create_view(request):
 
 @is_admin_user
 def admin_auctions_list_view(request):
+    for a in Auction.objects.filter(status__in=["UPCOMING", "ACTIVE"]):
+        a.auto_update_status()
+
     status_filter = request.GET.get("status", "").strip()
     auctions = Auction.objects.prefetch_related("lots").all()
 
@@ -339,13 +346,23 @@ def admin_auction_cancel_view(request, pk):
     auction.cancellation_reason = reason
     auction.save(update_fields=["status", "cancellation_reason"])
 
+    # Release and return all unbid lots back to seller inventory
+    returned_count = 0
+    for lot in list(auction.lots.all()):
+        if not lot.is_sold:
+            lot.delete()
+            returned_count += 1
+
     log_admin_action(
         admin_user=request.user,
         action="CANCEL_AUCTION",
         target=auction,
         reason=reason,
     )
-    messages.warning(request, f"Auction '{auction.title}' has been cancelled.")
+    msg = f"Auction '{auction.title}' has been cancelled."
+    if returned_count > 0:
+        msg += f" {returned_count} lot(s) returned to seller inventory for future auctions."
+    messages.warning(request, msg)
     return redirect("admin_auction_detail", pk=auction.pk)
 
 
@@ -353,11 +370,11 @@ def admin_auction_cancel_view(request, pk):
 @is_admin_user
 def admin_auction_force_close_view(request, pk):
     auction = get_object_or_404(Auction, pk=pk)
-    if auction.status != "ACTIVE":
-        messages.error(request, "Emergency force-close is only permitted for ACTIVE auctions.")
+    if auction.status not in ["ACTIVE", "UPCOMING"]:
+        messages.error(request, "Emergency force-close is only permitted for ACTIVE or UPCOMING auctions.")
         return redirect("admin_auction_detail", pk=auction.pk)
 
-    close_auction(auction)
+    sold_count, returned_count = close_auction(auction)
 
     log_admin_action(
         admin_user=request.user,
@@ -365,7 +382,10 @@ def admin_auction_force_close_view(request, pk):
         target=auction,
         reason="Manual emergency auction close executed by administrator.",
     )
-    messages.success(request, f"Auction '{auction.title}' was force-closed. Winning lots and invoices generated.")
+    msg = f"Auction '{auction.title}' was force-closed. {sold_count} lot(s) sold."
+    if returned_count > 0:
+        msg += f" {returned_count} lot(s) with no bids were returned to seller inventory and can be reused in future auctions."
+    messages.success(request, msg)
     return redirect("admin_auction_detail", pk=auction.pk)
 
 
@@ -375,6 +395,7 @@ def admin_auction_detail_view(request, pk):
         Auction.objects.prefetch_related("lots__harvest_batch__estate__owner", "lots__bids__bidder"),
         pk=pk,
     )
+    auction.auto_update_status()
     lots = auction.lots.all()
     action_logs = AdminActionLog.objects.filter(target_model="Auction", target_id=str(auction.pk))
 
@@ -397,10 +418,8 @@ def admin_auction_lots_add_view(request, pk):
         messages.error(request, "Lots can only be added to UPCOMING auctions.")
         return redirect("admin_auction_detail", pk=auction.pk)
 
-    # Eligible batches: graded (not UNGRADED), not rejected, not already in an active or upcoming auction
-    assigned_batch_ids = Lot.objects.filter(
-        auction__status__in=["UPCOMING", "ACTIVE"]
-    ).values_list("harvest_batch_id", flat=True)
+    # Eligible batches: graded (not UNGRADED), not rejected, not already assigned to ANY lot
+    assigned_batch_ids = Lot.objects.values_list("harvest_batch_id", flat=True)
 
     eligible_batches = (
         HarvestBatch.objects.exclude(grade="UNGRADED")
@@ -424,6 +443,14 @@ def admin_auction_lots_add_view(request, pk):
         with transaction.atomic():
             for b_id in batch_ids:
                 batch = get_object_or_404(HarvestBatch, pk=b_id)
+                # Safeguard: Verify batch does not already have an auction lot
+                if hasattr(batch, "auction_lot") or Lot.objects.filter(harvest_batch=batch).exists():
+                    messages.warning(
+                        request,
+                        f"Harvest Batch #{batch.id} ({batch.estate.name}) is already assigned to a lot and was skipped.",
+                    )
+                    continue
+
                 # Check base price and lot number per selection
                 base_price_raw = request.POST.get(f"base_price_{b_id}", "").strip()
                 custom_lot_num = request.POST.get(f"lot_number_{b_id}", "").strip()
@@ -450,7 +477,8 @@ def admin_auction_lots_add_view(request, pk):
                     reason=f"Assigned batch #{batch.id} as Lot #{lot.lot_number} to Auction #{auction.id}",
                 )
 
-        messages.success(request, f"Successfully assigned {added_count} lot(s) to '{auction.title}'.")
+        if added_count > 0:
+            messages.success(request, f"Successfully assigned {added_count} lot(s) to '{auction.title}'.")
         return redirect("admin_auction_detail", pk=auction.pk)
 
     return render(request, "users/admin_auction_lots_add.html", {

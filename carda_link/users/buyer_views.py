@@ -126,6 +126,9 @@ def buyer_dashboard_view(request):
 @login_required
 @buyer_required
 def buyer_auctions_view(request):
+    for a in Auction.objects.filter(status__in=["UPCOMING", "ACTIVE"]):
+        a.auto_update_status()
+
     grade_filter = request.GET.get("grade", "").strip()
     origin_filter = request.GET.get("origin", "").strip()
     min_price = request.GET.get("min_price", "").strip()

@@ -228,13 +228,162 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: var(--accent-emerald-light);
-        border: 1px solid var(--accent-emerald);
-        color: var(--accent-emerald-dark);
         padding: 6px 14px;
         border-radius: 20px;
         font-weight: 700;
         font-size: 13px;
+      }
+
+      .status-indicator.status-active {
+        background: var(--accent-emerald-light);
+        border: 1px solid var(--accent-emerald);
+        color: var(--accent-emerald-dark);
+      }
+
+      .status-indicator.status-completed {
+        background: #f1f5f9;
+        border: 1px solid #94a3b8;
+        color: #475569;
+      }
+
+      .status-indicator.status-upcoming {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        color: #b45309;
+      }
+
+      /* Rubber Stamps for Finished / Sold Lots */
+      .stamp-sold {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-14deg);
+        border: 3.5px dashed #dc2626;
+        color: #dc2626;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: 2.5px;
+        padding: 5px 16px;
+        border-radius: 8px;
+        text-transform: uppercase;
+        background: rgba(254, 242, 242, 0.94);
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.15);
+        pointer-events: none;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .stamp-closed {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-12deg);
+        border: 3.5px dashed #64748b;
+        color: #475569;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 18px;
+        letter-spacing: 2px;
+        padding: 5px 14px;
+        border-radius: 8px;
+        text-transform: uppercase;
+        background: rgba(248, 250, 252, 0.94);
+        box-shadow: 0 4px 12px rgba(100, 116, 139, 0.15);
+        pointer-events: none;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .lot-card.is-closed {
+        opacity: 0.88;
+        background: #f8fafc;
+      }
+
+      .target-badge {
+        display: none;
+        position: absolute;
+        top: -9px;
+        right: 14px;
+        background: var(--accent-emerald);
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+      }
+
+      .lot-card.active-selected .target-badge {
+        display: inline-block;
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 8px;
+        background: #ffffff;
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 16px;
+      }
+
+      .filter-tab-btn {
+        background: transparent;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-tab-btn:hover {
+        color: var(--text-main);
+        background: #f1f5f9;
+      }
+
+      .filter-tab-btn.active {
+        background: #047857;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+      }
+
+      .quick-inc-btn {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+        border-radius: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 3px 8px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .quick-inc-btn:hover {
+        background: #d1fae5;
+        transform: translateY(-1px);
+      }
+
+      .bidding-locked-alert {
+        display: none;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin-bottom: 14px;
       }
 
       .pulse-dot {
@@ -533,33 +682,92 @@
       </div>
     </header>
     <div class="container">
-      <div class="hero-banner">
+      <div class="hero-banner" id="heroBanner"
+           data-start-time="{{ active_auction.start_time|date:'c' }}"
+           data-end-time="{{ active_auction.end_time|date:'c' }}"
+           data-server-time="{% now 'U' %}"
+           data-status="{{ active_auction.status }}">
         <div>
-          <h1 class="hero-title">{{ active_auction.title }}</h1>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap;">
+            <h1 class="hero-title" style="margin-bottom: 0;">{{ active_auction.title }}</h1>
+            {% if auctions|length > 1 %}
+              <select onchange="location.href='?auction_id=' + this.value" style="font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border-color); background: #ffffff; color: var(--text-main); cursor: pointer;">
+                {% for auc in auctions %}
+                  <option value="{{ auc.id }}" {% if auc.id == active_auction.id %}selected{% endif %}>
+                    Session #{{ auc.id }} ({{ auc.get_status_display }})
+                  </option>
+                {% endfor %}
+              </select>
+            {% endif %}
+          </div>
           <p class="hero-subtitle">Real-time Cardamom Auction & Bidding Engine | Idukki Spice Market</p>
         </div>
-        <div>
-          <span class="status-indicator">
-            <span class="pulse-dot"></span>
-            {{ active_auction.get_status_display }}
-          </span>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          {% if active_auction.status == 'UPCOMING' %}
+            <button type="button" class="btn btn-sm" onclick="forceStartAuction({{ active_auction.id }})" style="background: #059669; color: #ffffff; font-weight: 700; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="bi bi-play-circle-fill"></i> Go Live Now
+            </button>
+          {% endif %}
+          {% if active_auction.status == 'ACTIVE' or active_auction.status == 'UPCOMING' %}
+            <button type="button" class="btn btn-sm" onclick="forceCloseAuction({{ active_auction.id }})" style="background: #ffffff; color: #dc2626; border: 1.5px solid #dc2626; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Emergency close: finalizes winning lots and returns unbid lots to seller inventory">
+              <i class="bi bi-stop-circle-fill"></i> Force Close Session
+            </button>
+          {% endif %}
+          <div id="heroStatusContainer">
+            {% if active_auction.status == 'ACTIVE' %}
+              <span class="status-indicator status-active" id="heroStatusBadge">
+                <span class="pulse-dot"></span>
+                <span id="heroStatusText">Active / Bidding Open</span>
+              </span>
+            {% elif active_auction.status == 'COMPLETED' %}
+              <span class="status-indicator status-completed" id="heroStatusBadge">
+                <i class="bi bi-lock-fill me-1"></i>
+                <span id="heroStatusText">Auction Completed / Closed</span>
+              </span>
+            {% elif active_auction.status == 'UPCOMING' %}
+              <span class="status-indicator status-upcoming" id="heroStatusBadge">
+                <i class="bi bi-clock-history me-1"></i>
+                <span id="heroStatusText">Upcoming Session</span>
+              </span>
+            {% else %}
+              <span class="status-indicator status-completed" id="heroStatusBadge">
+                <span id="heroStatusText">{{ active_auction.get_status_display }}</span>
+              </span>
+            {% endif %}
+          </div>
         </div>
       </div>
+
       <div class="grid-layout">
         <!-- Left Column: Catalog Lots -->
         <div>
           <div class="section-title">
             <span>Catalog Lots ({{ active_auction.lots.count }})</span>
-            <span style="font-size: 12px;
-                         font-weight: normal;
-                         color: var(--text-muted)">Click any lot card to
-            target</span>
+            <span style="font-size: 12px; font-weight: normal; color: var(--text-muted)">Click any lot card to target</span>
           </div>
+
+          <!-- Interactive Filter Tabs -->
+          <div class="filter-tabs">
+            <button class="filter-tab-btn active" id="filterTabAll" onclick="filterLots('all', this)">All Lots ({{ active_auction.lots.count }})</button>
+            <button class="filter-tab-btn" id="filterTabActive" onclick="filterLots('active', this)">Active / Open (<span id="activeLotsCount">0</span>)</button>
+            <button class="filter-tab-btn" id="filterTabClosed" onclick="filterLots('closed', this)">Sold / Closed (<span id="closedLotsCount">0</span>)</button>
+          </div>
+
           <div class="lot-grid" id="lotCatalogGrid">
             {% for lot in active_auction.lots.all %}
-              <div class="lot-card {% if forloop.first %}active-selected{% endif %}"
+              <div class="lot-card {% if forloop.first %}active-selected{% endif %} {% if lot.is_sold or lot.auction.status == 'COMPLETED' %}is-closed{% endif %}"
                    id="lot-card-{{ lot.id }}"
-                   onclick="selectLot({{ lot.id }}, {{ lot.lot_number }}, '{{ lot.harvest_batch.grade }}', {{ lot.current_price }})">
+                   data-status="{% if lot.is_sold or lot.auction.status == 'COMPLETED' %}closed{% else %}active{% endif %}"
+                   onclick="selectLot({{ lot.id }}, {{ lot.lot_number }}, '{{ lot.harvest_batch.grade }}', {{ lot.current_price }}, {{ lot.is_sold|yesno:'true,false' }}, '{{ lot.auction.status }}')">
+                
+                <span class="target-badge"><i class="bi bi-bullseye me-1"></i>Target</span>
+
+                {% if lot.is_sold %}
+                  <div class="stamp-sold"><i class="bi bi-check2-circle"></i> SOLD</div>
+                {% elif lot.auction.status == 'COMPLETED' %}
+                  <div class="stamp-closed"><i class="bi bi-lock-fill"></i> CLOSED</div>
+                {% endif %}
+
                 <div class="lot-header">
                   <span class="lot-num">LOT #{{ lot.lot_number }}</span>
                   <span class="grade-badge grade-{{ lot.harvest_batch.grade }}">{{ lot.harvest_batch.grade }}</span>
@@ -576,13 +784,59 @@
                 <div class="highest-price" id="highest-price-{{ lot.id }}">₹{{ lot.current_price }}/kg</div>
               </div>
             {% empty %}
-              <div style="color: var(--text-muted); padding: 20px;">
-                No active lots in this auction. Run
-                <code>python manage.py seed_auction_data</code> to populate test data.
+              <div style="color: var(--text-muted); padding: 24px; background: #ffffff; border: 1px dashed var(--border-color); border-radius: 12px; text-align: center; grid-column: 1 / -1;">
+                <i class="bi bi-box-seam fs-3 d-block text-secondary mb-2"></i>
+                <strong>No lots registered in this session.</strong>
+                <p class="small text-muted mb-0">Unbid lots from force-closed auctions have been returned to seller stock and can be allocated to new sessions.</p>
               </div>
             {% endfor %}
           </div>
+
+          <!-- Empty Filter State Notice & Fallback to Previous Closed Lots -->
+          <div id="noLotsFilterMsg" style="display: none; padding: 24px; text-align: center; color: var(--text-muted); background: #ffffff; border: 1.5px dashed var(--border-color); border-radius: 12px; margin-top: 14px;">
+            <i class="bi bi-inbox fs-3 text-secondary mb-2 d-block"></i>
+            <h6 class="fw-bold text-dark mb-1">No Closed / Sold Lots In Current Session</h6>
+            <span class="small text-muted">Session #{{ active_auction.id }} is {% if active_auction.status == 'ACTIVE' %}currently active — lots finalize upon auction completion.{% elif active_auction.status == 'UPCOMING' %}upcoming.{% else %}settled.{% endif %}</span>
+          </div>
+
+          <!-- Recently Sold & Settled Lots from Completed Sessions -->
+          <div id="pastClosedLotsContainer" style="display: none; margin-top: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h6 class="fw-bold mb-0 text-dark" style="font-size: 14px;"><i class="bi bi-journal-check text-success me-1"></i> Sold & Finalized Lots (Across Completed Sessions)</h6>
+              <span class="badge bg-light text-secondary border">{{ all_closed_lots|length }} settled</span>
+            </div>
+            <div class="lot-grid">
+              {% for cl in all_closed_lots %}
+                <div class="lot-card is-closed" style="cursor: default; opacity: 0.95;">
+                  <div class="stamp-sold"><i class="bi bi-check2-circle"></i> SOLD</div>
+                  <div class="lot-header">
+                    <span class="lot-num">LOT #{{ cl.lot_number }}</span>
+                    <span class="grade-badge grade-{{ cl.harvest_batch.grade }}">{{ cl.harvest_batch.grade }}</span>
+                  </div>
+                  <div class="estate-info">
+                    🌱 {{ cl.harvest_batch.estate.name }}
+                    <br />
+                    📁 Session #{{ cl.auction_id }} ({{ cl.auction.title }})
+                    <br />
+                    ⚖️ Weight: {{ cl.harvest_batch.weight_kg }} kg
+                  </div>
+                  <div class="price-row">
+                    <span class="price-label">Winning Hammer Price:</span>
+                    <span class="price-value" style="color: var(--accent-emerald-dark); font-weight: 700;">₹{{ cl.highest_bid_per_kg|default:cl.base_price_per_kg }}/kg</span>
+                  </div>
+                  <div style="margin-top: 8px; font-size: 11px; color: var(--accent-emerald-dark); font-weight: 700; background: #ecfdf5; padding: 4px 8px; border-radius: 4px; text-align: center;">
+                    ✓ Finalized & Invoiced
+                  </div>
+                </div>
+              {% empty %}
+                <div style="color: var(--text-muted); padding: 16px; font-size: 13px; text-align: center; grid-column: 1 / -1;">
+                  No previously settled lots found in the system yet.
+                </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
+
         <!-- Right Column: Interactive Bidding Console -->
         <div>
           <div class="bidding-panel">
@@ -590,42 +844,64 @@
                        font-weight: 700;
                        margin-bottom: 16px;
                        color: var(--text-main)">
-              Bid Submission
-              Console
+              Bid Submission Console
             </h2>
+
+            <div id="biddingLockedAlert" class="bidding-locked-alert" style="display: {% if active_auction.status == 'COMPLETED' or not first_lot or first_lot.is_sold %}block{% else %}none{% endif %};">
+              <i class="bi bi-lock-fill me-1"></i>
+              <span>Bidding is closed for this lot. Auction session has concluded.</span>
+            </div>
+
             <div class="form-group">
               {% csrf_token %}
               <label class="form-label">Target Lot</label>
               <input type="text"
                      id="targetLotDisplay"
                      class="form-control"
-                     value="Lot #1 (AGEB Grade)"
+                     value="Lot #{{ first_lot.lot_number|default:1 }} ({{ first_lot.harvest_batch.grade|default:'AGEB' }} Grade)"
                      readonly
-                     style="background: #f8fafc" />
+                     style="background: #f8fafc; font-weight: 600;" />
               <input type="hidden"
                      id="selectedLotId"
-                     value="{% if active_auction.lots.first %}{{ active_auction.lots.first.id }}{% else %}1{% endif %}" />
+                     value="{{ first_lot.id|default:1 }}" />
+              <input type="hidden"
+                     id="selectedLotNumber"
+                     value="{{ first_lot.lot_number|default:1 }}" />
             </div>
+
             <div class="form-group">
-              <label class="form-label">Bid Amount per kg (₹)</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Bid Amount per kg (₹)</label>
+                <div style="display: flex; gap: 4px;">
+                  <button type="button" class="quick-inc-btn" onclick="quickAddBid(10)">+₹10</button>
+                  <button type="button" class="quick-inc-btn" onclick="quickAddBid(25)">+₹25</button>
+                  <button type="button" class="quick-inc-btn" onclick="quickAddBid(50)">+₹50</button>
+                </div>
+              </div>
               <input type="number"
                      id="bidAmountInput"
                      class="form-control"
-                     placeholder="e.g. 2100.00"
+                     value="{% if first_lot %}{{ first_lot.current_price|add:20 }}{% else %}2020.00{% endif %}"
                      step="10" />
             </div>
+
             <button class="btn btn-primary"
+                    id="submitBidBtn"
                     style="width: 100%;
                            justify-content: center;
                            padding: 12px"
-                    onclick="submitBid()">Submit Bid via Ninja API</button>
+                    onclick="submitBid(false)">Submit Bid via Ninja API</button>
+
             <button class="btn btn-secondary"
+                    id="rivalBidBtn"
                     style="width: 100%;
                            justify-content: center;
                            margin-top: 10px;
                            padding: 10px"
                     onclick="simulateAutoBid()">Simulate Random Rival Bid</button>
+
             <div id="toastMsg" class="toast-msg"></div>
+
             <h3 style="font-size: 13px;
                        font-weight: 700;
                        color: var(--text-muted);
@@ -633,34 +909,134 @@
                        margin-top: 24px;
                        margin-bottom: 10px">Live Bid Activity Stream</h3>
             <div class="bid-stream" id="bidStream">
-              <div class="bid-log-item">
-                <div>
-                  <strong style="color: var(--text-main);">Global Spices Traders</strong> placed bid on Lot #1
-                  <div class="bid-time">Just now</div>
+              {% for b in recent_bids %}
+                <div class="bid-log-item">
+                  <div>
+                    <strong style="color: var(--text-main);">{{ b.bidder.name|default:b.bidder.email }}</strong>
+                    {% if b.bidder.role == 'BUYER' and b.bidder != request.user and not b.bidder.is_staff %}
+                      <span style="background: #ede9fe; color: #6d28d9; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">RIVAL TRADER</span>
+                    {% elif b.bidder == request.user %}
+                      <span style="background: #d1fae5; color: #065f46; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">YOU</span>
+                    {% endif %}
+                    placed bid on Lot #{{ b.lot.lot_number }}
+                    <div class="bid-time">{{ b.timestamp|date:"h:i:s A" }}</div>
+                  </div>
+                  <div class="bid-amount">₹{{ b.amount_per_kg }}/kg</div>
                 </div>
-                <div class="bid-amount">₹2050.00/kg</div>
-              </div>
+              {% empty %}
+                <div class="bid-log-item" id="noBidsInitial" style="color: var(--text-muted); justify-content: center; padding: 14px;">
+                  No bids placed yet. Submit a bid or click Simulate Rival Bid above.
+                </div>
+              {% endfor %}
             </div>
           </div>
         </div>
       </div>
     </div>
-    <script>
-      let currentSelectedPrice = 2050;
 
-      function selectLot(lotId, lotNum, grade, currentPrice) {
+    <script>
+      let currentSelectedPrice = {% if first_lot %}{{ first_lot.current_price }}{% else %}2000{% endif %};
+      let serverTimeOffset = 0;
+
+      // Sync server time offset
+      const banner = document.getElementById('heroBanner');
+      if (banner) {
+        const serverEpoch = banner.getAttribute('data-server-time');
+        if (serverEpoch) {
+          serverTimeOffset = (parseInt(serverEpoch, 10) * 1000) - Date.now();
+        }
+      }
+
+      function getNow() {
+        return Date.now() + serverTimeOffset;
+      }
+
+      function updateCounts() {
+        let activeCount = 0;
+        let closedCount = 0;
+        document.querySelectorAll('.lot-card[data-status]').forEach(card => {
+          if (card.getAttribute('data-status') === 'active') activeCount++;
+          if (card.getAttribute('data-status') === 'closed') closedCount++;
+        });
+        const activeElem = document.getElementById('activeLotsCount');
+        const closedElem = document.getElementById('closedLotsCount');
+        if (activeElem) activeElem.innerText = activeCount;
+        if (closedElem) closedElem.innerText = closedCount;
+      }
+      updateCounts();
+
+      function selectLot(lotId, lotNum, grade, currentPrice, isSold, auctionStatus) {
         document.querySelectorAll('.lot-card').forEach(card => card.classList.remove('active-selected'));
         const selectedCard = document.getElementById(`lot-card-${lotId}`);
         if (selectedCard) selectedCard.classList.add('active-selected');
 
         document.getElementById('selectedLotId').value = lotId;
+        document.getElementById('selectedLotNumber').value = lotNum;
         document.getElementById('targetLotDisplay').value = `Lot #${lotNum} (${grade} Grade)`;
         currentSelectedPrice = parseFloat(currentPrice);
-        document.getElementById('bidAmountInput').value = (currentSelectedPrice + 50).toFixed(2);
+        document.getElementById('bidAmountInput').value = (currentSelectedPrice + 20).toFixed(2);
+
+        // Status locking
+        const lockedAlert = document.getElementById('biddingLockedAlert');
+        const submitBtn = document.getElementById('submitBidBtn');
+        const rivalBtn = document.getElementById('rivalBidBtn');
+        const bidInput = document.getElementById('bidAmountInput');
+
+        if (isSold || auctionStatus === 'COMPLETED') {
+          if (lockedAlert) lockedAlert.style.display = 'block';
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+          if (rivalBtn) { rivalBtn.disabled = true; rivalBtn.style.opacity = '0.5'; rivalBtn.style.cursor = 'not-allowed'; }
+          if (bidInput) { bidInput.disabled = true; }
+        } else {
+          if (lockedAlert) lockedAlert.style.display = 'none';
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
+          if (rivalBtn) { rivalBtn.disabled = false; rivalBtn.style.opacity = '1'; rivalBtn.style.cursor = 'pointer'; }
+          if (bidInput) { bidInput.disabled = false; }
+        }
       }
 
-      async function submitBid() {
+      function quickAddBid(amount) {
+        const input = document.getElementById('bidAmountInput');
+        if (input && !input.disabled) {
+          const current = parseFloat(input.value) || currentSelectedPrice;
+          input.value = (current + amount).toFixed(2);
+        }
+      }
+
+      function filterLots(filterType, btnElem) {
+        document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
+        btnElem.classList.add('active');
+
+        let visibleCount = 0;
+        document.querySelectorAll('#lotCatalogGrid .lot-card').forEach(card => {
+          const status = card.getAttribute('data-status');
+          let show = false;
+          if (filterType === 'all') {
+            show = true;
+          } else if (filterType === 'active') {
+            show = (status === 'active');
+          } else if (filterType === 'closed') {
+            show = (status === 'closed');
+          }
+          card.style.display = show ? 'block' : 'none';
+          if (show) visibleCount++;
+        });
+
+        const emptyMsg = document.getElementById('noLotsFilterMsg');
+        const pastContainer = document.getElementById('pastClosedLotsContainer');
+
+        if (filterType === 'closed') {
+          if (emptyMsg) emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+          if (pastContainer) pastContainer.style.display = 'block';
+        } else {
+          if (emptyMsg) emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+          if (pastContainer) pastContainer.style.display = 'none';
+        }
+      }
+
+      async function submitBid(isRival = false) {
         const lotId = document.getElementById('selectedLotId').value;
+        const lotNum = document.getElementById('selectedLotNumber').value || lotId;
         const amount = parseFloat(document.getElementById('bidAmountInput').value);
 
         if (!amount || isNaN(amount)) {
@@ -676,16 +1052,20 @@
               'X-CSRFToken': getCsrfToken()
             },
             body: JSON.stringify({
-              amount_per_kg: amount
+              amount_per_kg: amount,
+              is_rival: isRival
             })
           });
 
           const data = await response.json();
 
           if (response.ok) {
-            showToast(`✓ Bid placed successfully! New highest bid: ₹${data.amount_per_kg}/kg`, true);
+            const bidderDisplay = isRival ? `${data.bidder_name} (Rival Trader)` : `${data.bidder_name} (You)`;
+            showToast(`✓ Bid placed! ${bidderDisplay}: ₹${data.amount_per_kg}/kg`, true);
             updateLotPriceUI(lotId, data.amount_per_kg);
-            appendBidStream(data.bidder_name, lotId, data.amount_per_kg);
+            appendBidStream(data.bidder_name, lotNum, data.amount_per_kg, isRival);
+            currentSelectedPrice = parseFloat(data.amount_per_kg);
+            document.getElementById('bidAmountInput').value = (currentSelectedPrice + 20).toFixed(2);
           } else {
             showToast(`❌ Error: ${data.detail || data.message || 'Bid validation failed'}`, false);
           }
@@ -697,20 +1077,68 @@
       function simulateAutoBid() {
         const lotId = document.getElementById('selectedLotId').value;
         const priceElem = document.getElementById(`highest-price-${lotId}`);
-        let current = priceElem ? parseFloat(priceElem.innerText.replace('₹', '').replace('/kg', '')) : 2000;
-        let nextBid = (current + Math.floor(Math.random() * 5 + 1) * 20).toFixed(2);
+        let current = priceElem ? parseFloat(priceElem.innerText.replace('₹', '').replace('/kg', '')) : currentSelectedPrice;
+        let nextBid = (current + Math.floor(Math.random() * 3 + 1) * 20).toFixed(2);
 
         document.getElementById('bidAmountInput').value = nextBid;
-        submitBid();
+        submitBid(true);
       }
+
+      function updateSessionLiveClock() {
+        const b = document.getElementById('heroBanner');
+        if (!b) return;
+        const startTimeStr = b.getAttribute('data-start-time');
+        const endTimeStr = b.getAttribute('data-end-time');
+        if (!startTimeStr || !endTimeStr) return;
+
+        const startTime = new Date(startTimeStr).getTime();
+        const endTime = new Date(endTimeStr).getTime();
+        const badge = document.getElementById('heroStatusBadge');
+        const now = getNow();
+
+        if (now < startTime) {
+          const diff = startTime - now;
+          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+          if (badge) {
+            badge.className = 'status-indicator status-upcoming';
+            badge.innerHTML = `<i class="bi bi-clock-history me-1"></i><span>Starts in ${mins}m ${secs}s</span>`;
+          }
+        } else if (now >= startTime && now < endTime) {
+          if (badge && !badge.classList.contains('status-active')) {
+            badge.className = 'status-indicator status-active';
+            badge.innerHTML = '<span class="pulse-dot"></span><span>Active / Bidding Open</span>';
+            const submitBtn = document.getElementById('submitBidBtn');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; }
+            const rivalBtn = document.getElementById('rivalBidBtn');
+            if (rivalBtn) { rivalBtn.disabled = false; rivalBtn.style.opacity = '1'; }
+          }
+        } else if (now >= endTime) {
+          if (badge && !badge.classList.contains('status-completed')) {
+            badge.className = 'status-indicator status-completed';
+            badge.innerHTML = '<i class="bi bi-lock-fill me-1"></i><span>Auction Completed / Closed</span>';
+            const lockedAlert = document.getElementById('biddingLockedAlert');
+            if (lockedAlert) lockedAlert.style.display = 'block';
+            const submitBtn = document.getElementById('submitBidBtn');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
+            const rivalBtn = document.getElementById('rivalBidBtn');
+            if (rivalBtn) { rivalBtn.disabled = true; rivalBtn.style.opacity = '0.5'; }
+          }
+        }
+      }
+      setInterval(updateSessionLiveClock, 1000);
+      updateSessionLiveClock();
 
       function updateLotPriceUI(lotId, newPrice) {
         const elem = document.getElementById(`highest-price-${lotId}`);
         if (elem) elem.innerText = `₹${parseFloat(newPrice).toFixed(2)}/kg`;
       }
 
-      function appendBidStream(bidder, lotId, amount) {
+      function appendBidStream(bidder, lotNum, amount, isRival) {
         const stream = document.getElementById('bidStream');
+        const initialMsg = document.getElementById('noBidsInitial');
+        if (initialMsg) initialMsg.remove();
+
         const timeStr = new Date().toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
@@ -718,14 +1146,56 @@
         });
         const item = document.createElement('div');
         item.className = 'bid-log-item';
+        const badgeHtml = isRival
+          ? '<span style="background: #ede9fe; color: #6d28d9; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">RIVAL TRADER</span>'
+          : '<span style="background: #d1fae5; color: #065f46; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">YOU</span>';
+
         item.innerHTML = `
         <div>
-          <strong style="color: var(--text-main);">${bidder || 'Simulated Buyer'}</strong> placed bid on Lot #${lotId}
+          <strong style="color: var(--text-main);">${bidder || 'Simulated Buyer'}</strong>${badgeHtml} placed bid on Lot #${lotNum}
           <div class="bid-time">${timeStr}</div>
         </div>
         <div class="bid-amount">₹${parseFloat(amount).toFixed(2)}/kg</div>
       `;
         stream.insertBefore(item, stream.firstChild);
+      }
+
+      async function forceStartAuction(auctionId) {
+        if (!confirm("Start this auction immediately for live bidding simulation?")) return;
+        try {
+          const res = await fetch(`/api/auctions/${auctionId}/start/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrfToken() }
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showToast("✓ Auction is now LIVE! Bidding is open for 15 minutes.", true);
+            setTimeout(() => location.reload(), 800);
+          } else {
+            showToast("❌ " + (data.detail || "Could not start auction"), false);
+          }
+        } catch (e) {
+          showToast("❌ " + e.message, false);
+        }
+      }
+
+      async function forceCloseAuction(auctionId) {
+        if (!confirm("Force close this session? Winning lots will be sold and invoiced. Any allotted lots with NO bids will be returned to seller stock for future auctions.")) return;
+        try {
+          const res = await fetch(`/api/auctions/${auctionId}/close/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrfToken() }
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showToast("✓ " + (data.message || "Session closed successfully!"), true);
+            setTimeout(() => location.reload(), 1200);
+          } else {
+            showToast("❌ " + (data.detail || "Could not close auction"), false);
+          }
+        } catch (e) {
+          showToast("❌ " + e.message, false);
+        }
       }
 
       function showToast(msg, isSuccess) {

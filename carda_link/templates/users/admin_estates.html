@@ -45,10 +45,9 @@
           <td class="fw-semibold text-emerald">{{ estate.total_harvest_kg }} kg</td>
           <td class="text-muted small">{{ estate.created_at|date:"d M Y" }}</td>
           <td>
-            <div class="d-flex gap-1">
-              <a href="{% url 'admin_estate_detail' estate.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i> Details</a>
-              <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-sm btn-outline-emerald"><i class="bi bi-box-arrow-up-right"></i> Public</a>
-            </div>
+            <a href="{% url 'estates:detail' estate.pk %}" class="btn btn-sm btn-outline-emerald">
+              <i class="bi bi-eye me-1"></i>View
+            </a>
           </td>
         </tr>
         {% endfor %}
