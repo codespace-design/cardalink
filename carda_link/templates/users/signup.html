@@ -54,14 +54,14 @@
               <div class="role-selection-card h-100 text-center p-4 d-flex flex-column justify-content-between" style="border: 2px solid #e2e8f0; transition: all 0.25s ease; cursor: pointer; border-radius: 16px; background: #ffffff;">
                 <div>
                   <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-3"
-                       style="width: 68px; height: 68px; background: #eff6ff; color: #2563eb; font-size: 2rem;">
+                       style="width: 68px; height: 68px; background: #ecfdf5; color: #059669; font-size: 2rem;">
                     <i class="bi bi-cart-check-fill"></i>
                   </div>
                   <h3 class="fw-bold font-heading h5 mb-2 text-dark">Buyer</h3>
                   <p class="text-muted small mb-0">Cardamom procurement, verified catalog access, and live auction participation.</p>
                 </div>
                 <div class="mt-4">
-                  <div class="btn btn-outline-primary w-100 py-2 fw-semibold">
+                  <div class="btn btn-emerald-primary w-100 py-2 fw-semibold">
                     Continue as Buyer &rarr;
                   </div>
                 </div>
@@ -87,10 +87,9 @@
 <script>
   document.querySelectorAll('.role-selection-card[style*="cursor: pointer"]').forEach(card => {
     card.addEventListener('mouseenter', () => {
-      const isGreen = card.querySelector('.bi-tree-fill');
-      card.style.borderColor = isGreen ? '#10b981' : '#3b82f6';
+      card.style.borderColor = '#047857';
       card.style.transform = 'translateY(-4px)';
-      card.style.boxShadow = '0 12px 30px -5px rgba(15,23,42,0.12)';
+      card.style.boxShadow = '0 12px 30px -5px rgba(4,120,87,0.18)';
     });
     card.addEventListener('mouseleave', () => {
       card.style.borderColor = '#e2e8f0';

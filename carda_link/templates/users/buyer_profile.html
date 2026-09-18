@@ -1,11 +1,7 @@
-{% extends "users/dashboard_base.html" %}
+{% extends "users/buyer_base.html" %}
 {% load static i18n %}
 
 {% block dash_title %}Buyer Profile — {{ request.user.name|default:request.user.email }}{% endblock %}
-
-{% block sidebar %}
-{% include "users/partials/buyer_sidebar.html" with active_item="profile" %}
-{% endblock sidebar %}
 
 {% block dashboard_content %}
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">

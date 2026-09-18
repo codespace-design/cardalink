@@ -56,12 +56,12 @@
       </div>
       <div class="col-md-6">
         <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">Temporary Password <span class="text-danger">*</span></label>
-        {{ form.password }}
+        <div class="password-input-group">{{ form.password }}<button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" data-target="{{ form.password.id_for_label }}"><i class="bi bi-eye" aria-hidden="true"></i></button></div>
         <div class="form-text small">Minimum 8 characters with letters, numbers, and symbols.</div>
       </div>
       <div class="col-md-6">
         <label for="{{ form.confirm_password.id_for_label }}" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
-        {{ form.confirm_password }}
+        <div class="password-input-group">{{ form.confirm_password }}<button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" data-target="{{ form.confirm_password.id_for_label }}"><i class="bi bi-eye" aria-hidden="true"></i></button></div>
       </div>
       <div class="col-md-6">
         <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold">Contact Phone</label>

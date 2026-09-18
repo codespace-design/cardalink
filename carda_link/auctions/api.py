@@ -62,6 +62,8 @@ def auctions_health_check(request):
 
 @router.get("/", response=list[AuctionOutSchema], auth=None)
 def list_auctions(request, status: str | None = None):
+    from carda_link.auctions.services import sync_expired_auctions
+    sync_expired_auctions()
     qs = Auction.objects.all()
     if status:
         qs = qs.filter(status=status.upper())
@@ -83,12 +85,15 @@ def create_auction(request, payload: AuctionCreateSchema):
 
 @router.get("/lots/", response=list[LotOutSchema], auth=None)
 def list_lots(request, auction_id: int | None = None, is_sold: bool | None = None):
+    from carda_link.auctions.services import sync_expired_auctions
+    sync_expired_auctions()
     qs = Lot.objects.select_related("harvest_batch__estate", "auction").all()
     if auction_id is not None:
         qs = qs.filter(auction_id=auction_id)
     if is_sold is not None:
         qs = qs.filter(is_sold=is_sold)
     return [LotOutSchema.from_orm_model(lot) for lot in qs]
+
 
 
 @router.get("/{auction_id}/", response=AuctionDetailOutSchema, auth=None)

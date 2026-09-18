@@ -70,7 +70,7 @@
             <i class="bi bi-hammer"></i>
           </div>
           {% if active_lots_count %}
-            <span class="kpi-tag kpi-tag-emerald">Live Bidding</span>
+            <span class="kpi-tag kpi-tag-emerald">In Auction</span>
           {% else %}
             <span class="kpi-tag kpi-tag-gray">None Live</span>
           {% endif %}
@@ -129,15 +129,18 @@
     </a>
   </div>
   <div class="col-6 col-lg-3">
-    <a href="{% url 'seller_lots' %}" class="text-decoration-none">
+    <a href="{% url 'seller_notifications' %}" class="text-decoration-none">
       <div class="admin-action-tile">
         <div class="action-tile-icon action-icon-purple">
-          <i class="bi bi-broadcast"></i>
+          <i class="bi bi-bell-fill"></i>
         </div>
         <div class="action-tile-content">
-          <div class="action-tile-title">Live Floor</div>
-          <div class="action-tile-subtitle">Track bids on your lots</div>
+          <div class="action-tile-title">Auction Alerts</div>
+          <div class="action-tile-subtitle">Live bid &amp; sale updates</div>
         </div>
+        {% if unread_notifications_count %}
+          <span class="badge bg-danger rounded-pill me-1" style="font-size: 0.7rem;">{{ unread_notifications_count }}</span>
+        {% endif %}
         <i class="bi bi-chevron-right action-tile-arrow"></i>
       </div>
     </a>

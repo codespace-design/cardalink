@@ -51,8 +51,17 @@
             </td>
             <td>
               <span class="badge {{ bid.computed_status.badge }} font-monospace px-2.5 py-1">
-                {{ bid.computed_status.label }}
+                <i class="bi {{ bid.computed_status.icon }} me-1"></i>{{ bid.computed_status.label }}
               </span>
+              {% if bid.computed_status.code == 'WON' %}
+                <a href="{% url 'buyer_invoices' %}" class="btn btn-sm btn-success ms-1 py-0 px-2 text-white fw-bold shadow-sm" style="font-size: 11px;" title="View and settle invoice">
+                  <i class="bi bi-receipt me-1"></i>Invoice
+                </a>
+              {% elif bid.computed_status.code == 'LEADING' %}
+                <span class="badge bg-emerald-subtle ms-1" style="font-size: 10px;" title="You hold the top floor bid">
+                  Top Bid
+                </span>
+              {% endif %}
             </td>
             <td class="text-muted small">{{ bid.timestamp|date:"d M Y, H:i" }}</td>
           </tr>
@@ -72,4 +81,18 @@
     </table>
   </div>
 </div>
+
+{% block extra_javascript %}
+<script>
+  // If there are any leading or active bids, auto-refresh every 8 seconds
+  // so that winning status and invoices are loaded seamlessly without manual page refresh.
+  const hasActiveBids = document.querySelectorAll('.badge-leading').length > 0;
+  if (hasActiveBids) {
+    setTimeout(function() {
+      window.location.reload();
+    }, 8000);
+  }
+</script>
+{% endblock extra_javascript %}
 {% endblock dashboard_content %}
+

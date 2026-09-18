@@ -18,7 +18,8 @@ from carda_link.users.admin_forms import (
     PlatformSettingsForm,
 )
 from carda_link.users.decorators import is_admin_user
-from carda_link.users.models import AdminActionLog, User, log_admin_action
+from carda_link.users.models import AdminActionLog, Notification, User, log_admin_action
+from django.urls import reverse
 
 
 # -----------------------------------------------------------------------------
@@ -470,6 +471,18 @@ def admin_auction_lots_add_view(request, pk):
                     base_price_per_kg=base_price,
                 )
                 added_count += 1
+
+                # Notify planter that their batch is cataloged in an active/scheduled auction
+                if batch.estate and batch.estate.owner:
+                    try:
+                        Notification.objects.create(
+                            user=batch.estate.owner,
+                            notification_type=Notification.NotificationType.AUCTION,
+                            link=reverse("seller_lots"),
+                            message=f"Harvest batch #{batch.id} ({batch.estate.name}) cataloged into Auction '{auction.title}' as Lot #{lot.lot_number} (Base: ₹{lot.base_price_per_kg}/kg).",
+                        )
+                    except Exception:
+                        pass
                 log_admin_action(
                     admin_user=request.user,
                     action="ADD_LOT",
@@ -552,6 +565,18 @@ def admin_batch_grade_view(request, pk):
     batch.rejection_reason = ""
     batch.save(update_fields=["grade", "is_rejected", "rejection_reason"])
 
+    # Notify planter of certified grading
+    if batch.estate and batch.estate.owner:
+        try:
+            Notification.objects.create(
+                user=batch.estate.owner,
+                notification_type=Notification.NotificationType.BATCH,
+                link=reverse("seller_batches"),
+                message=f"Harvest batch #{batch.id} ({batch.estate.name}) certified as {assigned_grade} by Spices Board graders.",
+            )
+        except Exception:
+            pass
+
     log_admin_action(
         admin_user=request.user,
         action="GRADE_BATCH",
@@ -574,6 +599,18 @@ def admin_batch_reject_view(request, pk):
     batch.is_rejected = True
     batch.rejection_reason = reason
     batch.save(update_fields=["is_rejected", "rejection_reason"])
+
+    # Notify planter of batch rejection
+    if batch.estate and batch.estate.owner:
+        try:
+            Notification.objects.create(
+                user=batch.estate.owner,
+                notification_type=Notification.NotificationType.BATCH,
+                link=reverse("seller_batches"),
+                message=f"Harvest batch #{batch.id} ({batch.estate.name}) was rejected. Reason: {reason}",
+            )
+        except Exception:
+            pass
 
     log_admin_action(
         admin_user=request.user,

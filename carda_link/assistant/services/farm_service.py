@@ -65,8 +65,9 @@ Instructions:
         max_retries = 3
         for attempt in range(1, max_retries + 1):
             try:
+                model_name = getattr(settings, "GEMINI_MODEL", "gemini-3.6-flash")
                 response = client.models.generate_content(
-                    model="gemini-3.6-flash",
+                    model=model_name,
                     contents=full_prompt,
                 )
                 if hasattr(response, "text") and response.text:

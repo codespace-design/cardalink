@@ -689,20 +689,24 @@ def mobile_password_reset_view(request):
     error = None
 
     if request.method == "POST":
-        query = request.POST.get("email_or_phone", "").strip() or request.POST.get("email", "").strip()
+        query = (
+            request.POST.get("phone_number", "").strip()
+            or request.POST.get("email_or_phone", "").strip()
+            or request.POST.get("email", "").strip()
+        )
         if not query:
-            error = "Please enter your registered mobile number or email address."
+            error = "Please enter your registered phone number or email address."
         else:
             user = None
             clean_phone = normalize_phone_number(query)
             if clean_phone and len(clean_phone) >= 10:
-                user = User.objects.filter(phone_number__endswith=clean_phone).first()
+                user = User.objects.filter(phone_number__endswith=clean_phone[-10:]).first()
 
             if not user:
                 user = User.objects.filter(email__iexact=query).first()
 
             if not user:
-                error = "No CardaLink account is registered with this mobile number or email. Please verify your details or sign up."
+                error = "No CardaLink account is registered with this phone number or email. Please verify your details or sign up."
             else:
                 phone_to_use = user.phone_number
                 if not phone_to_use:
@@ -721,6 +725,7 @@ def mobile_password_reset_view(request):
                 request.session["otp_code"] = otp
                 request.session["otp_expiry"] = (datetime.now() + timedelta(minutes=10)).timestamp()
                 request.session["otp_attempts"] = 0
+                request.session["otp_purpose"] = "password_reset"
                 if dispatch_result.get("demo_otp"):
                     request.session["otp_demo"] = dispatch_result["demo_otp"]
                 else:
@@ -767,7 +772,8 @@ def mobile_verify_otp_view(request):
             error = "Please enter the 6-digit verification code."
         elif entered_otp == expected_otp:
             request.session["otp_verified"] = True
-            if request.session.get("otp_purpose") == "registration":
+            otp_purpose = request.session.get("otp_purpose")
+            if otp_purpose == "registration":
                 user = User.objects.filter(id=user_id).first()
                 if user:
                     user.is_verified = True
@@ -788,7 +794,7 @@ def mobile_verify_otp_view(request):
                     "Mobile number verified successfully! Your application has been submitted and is currently pending administrator approval.",
                 )
                 return redirect("home")
-            return redirect("account_set_password")
+            return redirect("account_reset_password_set")
         else:
             attempts = request.session.get("otp_attempts", 0) + 1
             request.session["otp_attempts"] = attempts
@@ -845,9 +851,10 @@ def mobile_set_password_view(request):
                     "otp_attempts",
                     "otp_verified",
                     "otp_demo",
+                    "otp_purpose",
                 ]:
                     request.session.pop(key, None)
-                messages.success(request, "Your password has been successfully updated! You can now sign in.")
+                messages.success(request, "Your password has been successfully reset! You can now sign in with your new password.")
                 return redirect("home")
             except ValidationError as e:
                 error = " ".join(e.messages)

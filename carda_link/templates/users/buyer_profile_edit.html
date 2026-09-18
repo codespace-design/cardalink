@@ -1,11 +1,7 @@
-{% extends "users/dashboard_base.html" %}
+{% extends "users/buyer_base.html" %}
 {% load static i18n %}
 
 {% block dash_title %}Edit Buyer Profile{% endblock %}
-
-{% block sidebar %}
-{% include "users/partials/buyer_sidebar.html" with active_item="profile" %}
-{% endblock sidebar %}
 
 {% block dashboard_content %}
 <div class="mb-4">

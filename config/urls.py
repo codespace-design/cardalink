@@ -27,7 +27,8 @@ urlpatterns = [
     # Mobile OTP Password Recovery
     path("accounts/password/reset/", user_views.mobile_password_reset_view, name="account_reset_password"),
     path("accounts/password/reset/verify-otp/", user_views.mobile_verify_otp_view, name="account_verify_otp"),
-    path("accounts/password/reset/set-password/", user_views.mobile_set_password_view, name="account_set_password"),
+    path("accounts/password/reset/set-password/", user_views.mobile_set_password_view, name="account_reset_password_set"),
+    path("accounts/password/set/", user_views.mobile_set_password_view, name="account_set_password"),
     path("accounts/login/", user_views.home_view, name="account_login"),
     path("accounts/", include("allauth.urls")),
     # Estates management

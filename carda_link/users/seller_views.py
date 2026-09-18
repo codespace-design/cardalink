@@ -28,6 +28,9 @@ def seller_required(view_func):
 
 def get_seller_context(request):
     """Helper for seller common notification counters."""
+    from carda_link.auctions.services import sync_expired_auctions
+    sync_expired_auctions()
+
     unread_notifs = Notification.objects.filter(user=request.user, is_read=False)
     recent_notifs = Notification.objects.filter(user=request.user)[:5]
     estates_count = Estate.objects.filter(owner=request.user).count()
@@ -36,6 +39,7 @@ def get_seller_context(request):
         "recent_notifications": recent_notifs,
         "estates_count": estates_count,
     }
+
 
 
 # -----------------------------------------------------------------------------

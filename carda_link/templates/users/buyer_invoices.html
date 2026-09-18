@@ -74,7 +74,7 @@
           <th>Platform Commission</th>
           <th>Status</th>
           <th>Issued Date</th>
-          <th class="text-end">Actions</th>
+          <th class="text-end text-nowrap" style="min-width: 190px;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -102,16 +102,18 @@
                 <span class="badge bg-secondary font-monospace">{{ inv.get_status_display }}</span>
               {% endif %}
             </td>
-            <td class="text-muted small">{{ inv.issued_at|date:"d M Y" }}</td>
-            <td class="text-end">
-              {% if inv.status == 'PENDING' %}
-                <a href="{% url 'buyer_invoice_pay' inv.pk %}" class="btn btn-sm btn-emerald text-white rounded-pill px-3 shadow-sm me-1">
-                  <i class="bi bi-credit-card me-1"></i>Pay Now
-                </a>
-              {% endif %}
-              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#invoiceDetailModal{{ inv.id }}">
-                <i class="bi bi-eye me-1"></i>View
-              </button>
+            <td class="text-muted small text-nowrap">{{ inv.issued_at|date:"d M Y" }}</td>
+            <td class="text-end text-nowrap">
+              <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                {% if inv.status == 'PENDING' %}
+                  <a href="{% url 'buyer_invoice_pay' inv.pk %}" class="btn btn-sm btn-emerald text-white rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-credit-card me-1"></i>Pay Now
+                  </a>
+                {% endif %}
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#invoiceDetailModal{{ inv.id }}">
+                  <i class="bi bi-eye me-1"></i>View
+                </button>
+              </div>
 
               <!-- Invoice Detail Modal -->
               <div class="modal fade text-start" id="invoiceDetailModal{{ inv.id }}" tabindex="-1" aria-labelledby="invModalLabel{{ inv.id }}" aria-hidden="true">

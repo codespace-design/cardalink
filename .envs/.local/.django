@@ -7,3 +7,4 @@ DJANGO_SECRET_KEY=szjIUdxGbl5fXy6YwrxuaXzS0oUyTBfkiOuvSCskUPn46RN6DLzkLkBTGHcX5j
 DJANGO_ADMIN_URL=admin/
 DJANGO_ALLOWED_HOSTS=.localhost,127.0.0.1,0.0.0.0,django
 DATABASE_URL=postgres://debug:debug@postgres:5432/carda_link
+GEMINI_API_KEY=

@@ -81,12 +81,12 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label small fw-semibold text-secondary" for="{{ form.password.id_for_label }}">{{ form.password.label }} <span class="text-danger">*</span></label>
-                  {{ form.password }}
+                  <div class="password-input-group">{{ form.password }}<button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" data-target="{{ form.password.id_for_label }}"><i class="bi bi-eye" aria-hidden="true"></i></button></div>
                   {% for error in form.password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label small fw-semibold text-secondary" for="{{ form.confirm_password.id_for_label }}">{{ form.confirm_password.label }} <span class="text-danger">*</span></label>
-                  {{ form.confirm_password }}
+                  <div class="password-input-group">{{ form.confirm_password }}<button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" data-target="{{ form.confirm_password.id_for_label }}"><i class="bi bi-eye" aria-hidden="true"></i></button></div>
                   {% for error in form.confirm_password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                 </div>
               </div>

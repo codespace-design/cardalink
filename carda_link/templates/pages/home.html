@@ -111,13 +111,15 @@
                   <label for="id_password" class="form-label small fw-semibold text-secondary mb-0">Password</label>
                   <a href="{% url 'account_reset_password' %}" class="small text-emerald text-decoration-none fw-medium">Forgot password?</a>
                 </div>
-                <input type="password" name="password" id="id_password" class="form-control form-control-lg form-input-clean" placeholder="••••••••" required autocomplete="new-password" value="">
+                <div class="password-input-group">
+                  <input type="password" name="password" id="id_password" class="form-control form-control-lg form-input-clean" placeholder="••••••••" required autocomplete="current-password" value="">
+                  <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" data-target="id_password">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
 
-              <div class="mb-3 form-check">
-                <input type="checkbox" name="remember" id="id_remember" class="form-check-input">
-                <label class="form-check-label text-muted small" for="id_remember">Remember this device</label>
-              </div>
+            
 
               <button type="submit" class="btn btn-emerald-primary w-100 py-3 fw-bold">
                 Sign In

@@ -22,12 +22,16 @@ class TestAuctionAPI:
             password="Password123!",
             name="API Buyer",
             role="BUYER",
+            status=User.Status.ACTIVE,
+            is_verified=True,
         )
         seller = User.objects.create_user(
             email="seller_api@cardalink.com",
             password="Password123!",
             name="API Seller",
             role="SELLER",
+            status=User.Status.ACTIVE,
+            is_verified=True,
         )
         estate = Estate.objects.create(
             owner=seller,
@@ -139,3 +143,45 @@ class TestAuctionAPI:
         assert response.status_code == 200
         auction.refresh_from_db()
         assert auction.status == "COMPLETED"
+
+    def test_live_bidding_view_buyer_has_no_go_live_or_force_close(self, setup_api_data):
+        client = setup_api_data["client"]
+        user = setup_api_data["user"]
+        auction = setup_api_data["auction"]
+        # Ensure auction is active
+        auction.status = "ACTIVE"
+        auction.end_time = timezone.now() + timedelta(hours=2)
+        auction.save(update_fields=["status", "end_time"])
+
+        client.force_login(user)
+        response = client.get(f"/auctions/simulation/?auction_id={auction.id}")
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "Go Live Now" not in content
+        assert "Force Close" not in content
+        assert "forceStartAuction" not in content
+        assert "forceCloseAuction" not in content
+
+    def test_live_bidding_view_admin_has_controls(self, setup_api_data):
+        client = setup_api_data["client"]
+        auction = setup_api_data["auction"]
+        auction.status = "ACTIVE"
+        auction.end_time = timezone.now() + timedelta(hours=2)
+        auction.save(update_fields=["status", "end_time"])
+
+        admin = User.objects.create_user(
+            email="admin_auction_test@cardalink.com",
+            password="Password123!",
+            name="Admin Tester",
+            role="ADMIN",
+            status=User.Status.ACTIVE,
+            is_verified=True,
+            is_staff=True,
+        )
+        client.force_login(admin)
+        response = client.get(f"/auctions/simulation/?auction_id={auction.id}")
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "Force Close" in content
+        assert "forceCloseAuction" in content
+

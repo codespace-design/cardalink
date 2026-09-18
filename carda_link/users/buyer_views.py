@@ -30,6 +30,9 @@ def buyer_required(view_func):
 
 def get_buyer_context(request):
     """Helper to populate common buyer badge counts and notification alerts."""
+    from carda_link.auctions.services import sync_expired_auctions
+    sync_expired_auctions()
+
     unread_notifs = Notification.objects.filter(user=request.user, is_read=False)
     recent_notifs = Notification.objects.filter(user=request.user)[:5]
     watchlist_count = Watchlist.objects.filter(buyer=request.user).count()
@@ -44,19 +47,70 @@ def compute_bid_status(bid: Bid) -> dict[str, str]:
     """Compute real-time bid status: Leading, Outbid, Won, or Lost."""
     lot = bid.lot
     auction = lot.auction
+    now = timezone.now()
+
+    # Instant check: If auction has reached end_time, close and finalize immediately
+    if auction.status == "ACTIVE" and auction.end_time and now >= auction.end_time:
+        auction.close_auction()
+        auction.refresh_from_db()
+        lot.refresh_from_db()
+
     is_top_bid = (lot.highest_bid_per_kg is not None and bid.amount_per_kg == lot.highest_bid_per_kg)
 
     if auction.status == "COMPLETED" or lot.is_sold:
         if is_top_bid:
-            return {"code": "WON", "label": "Won", "badge": "bg-success text-white"}
-        return {"code": "LOST", "label": "Lost", "badge": "bg-secondary text-white"}
+            return {
+                "code": "WON",
+                "label": "Won",
+                "badge": "badge-won",
+                "icon": "bi-trophy-fill",
+                "lot_id": lot.id,
+                "lot_number": lot.lot_number,
+            }
+        return {
+            "code": "LOST",
+            "label": "Lost",
+            "badge": "badge-lost",
+            "icon": "bi-x-circle",
+            "lot_id": lot.id,
+            "lot_number": lot.lot_number,
+        }
     elif auction.status == "ACTIVE":
         if is_top_bid:
-            return {"code": "LEADING", "label": "Leading", "badge": "bg-emerald text-white"}
-        return {"code": "OUTBID", "label": "Outbid", "badge": "bg-danger text-white"}
+            return {
+                "code": "LEADING",
+                "label": "Leading",
+                "badge": "badge-leading",
+                "icon": "bi-arrow-up-circle-fill",
+                "lot_id": lot.id,
+                "lot_number": lot.lot_number,
+            }
+        return {
+            "code": "OUTBID",
+            "label": "Outbid",
+            "badge": "badge-outbid",
+            "icon": "bi-arrow-down-circle",
+            "lot_id": lot.id,
+            "lot_number": lot.lot_number,
+        }
     elif auction.status == "CANCELLED":
-        return {"code": "CANCELLED", "label": "Cancelled", "badge": "bg-dark text-white"}
-    return {"code": "PENDING", "label": "Auction Pending", "badge": "bg-slate text-secondary"}
+        return {
+            "code": "CANCELLED",
+            "label": "Cancelled",
+            "badge": "bg-dark text-white",
+            "icon": "bi-slash-circle",
+            "lot_id": lot.id,
+            "lot_number": lot.lot_number,
+        }
+    return {
+        "code": "PENDING",
+        "label": "Auction Pending",
+        "badge": "bg-light text-secondary border",
+        "icon": "bi-clock",
+        "lot_id": lot.id,
+        "lot_number": lot.lot_number,
+    }
+
 
 
 # -----------------------------------------------------------------------------

@@ -139,6 +139,23 @@ class Lot(models.Model):
 
         self.highest_bid_per_kg = amount_decimal
         self.save(update_fields=["highest_bid_per_kg"])
+
+        # Notify planter (seller) about incoming bid on their lot
+        try:
+            seller = getattr(getattr(self.harvest_batch, "estate", None), "owner", None)
+            if seller and seller != bidder:
+                from django.urls import reverse
+                from carda_link.users.models import Notification
+
+                Notification.objects.create(
+                    user=seller,
+                    notification_type=Notification.NotificationType.AUCTION,
+                    link=reverse("seller_lots"),
+                    message=f"New bid of ₹{amount_decimal}/kg received on Lot #{self.lot_number} ({self.harvest_batch.estate.name}).",
+                )
+        except Exception:
+            pass
+
         return bid
 
 

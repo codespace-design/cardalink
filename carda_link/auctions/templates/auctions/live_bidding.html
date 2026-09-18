@@ -647,6 +647,210 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* ==========================================================================
+         Single Auction Live Timer & Professional Warning Styles
+         ========================================================================== */
+      .auction-timer-widget {
+        background: #ffffff;
+        color: var(--text-main);
+        border-radius: 12px;
+        padding: 9px 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 190px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border: 1.5px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auction-timer-widget.is-upcoming {
+        border-color: #f59e0b;
+        background: #fffdf5;
+      }
+
+      .auction-timer-widget.is-warning {
+        border-color: #f59e0b;
+        background: #fffdf5;
+      }
+
+      .auction-timer-widget.is-critical {
+        border-color: #ef4444;
+        background: #fffafa;
+      }
+
+      .timer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 2px;
+      }
+
+      .timer-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .auction-timer-widget.is-upcoming .timer-label,
+      .auction-timer-widget.is-warning .timer-label {
+        color: #b45309;
+      }
+
+      .auction-timer-widget.is-critical .timer-label {
+        color: #dc2626;
+      }
+
+      .timer-digits {
+        display: flex;
+        align-items: baseline;
+        gap: 3px;
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: 21px;
+        line-height: 1.1;
+        letter-spacing: 0.5px;
+        color: var(--text-main);
+      }
+
+      .auction-timer-widget.is-upcoming .timer-digits .timer-val,
+      .auction-timer-widget.is-warning .timer-digits .timer-val {
+        color: #b45309;
+      }
+
+      .auction-timer-widget.is-critical .timer-digits .timer-val {
+        color: #dc2626;
+      }
+
+      .timer-segment {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .timer-val {
+        color: var(--text-main);
+        font-size: 21px;
+      }
+
+      .timer-sub {
+        font-size: 8px;
+        color: var(--text-muted);
+        font-weight: 700;
+        margin-top: 1px;
+        letter-spacing: 0.5px;
+      }
+
+      .timer-colon {
+        color: #94a3b8;
+        font-size: 16px;
+        margin: 0 1px;
+      }
+
+      .timer-bar-track {
+        width: 100%;
+        height: 3px;
+        background: #f1f5f9;
+        border-radius: 2px;
+        margin-top: 6px;
+        overflow: hidden;
+      }
+
+      .timer-bar-fill {
+        height: 100%;
+        background: var(--accent-emerald);
+        border-radius: 2px;
+        transition: width 1s linear, background-color 0.3s ease;
+      }
+
+      .auction-timer-widget.is-upcoming .timer-bar-fill,
+      .auction-timer-widget.is-warning .timer-bar-fill {
+        background: #f59e0b;
+      }
+
+      .auction-timer-widget.is-critical .timer-bar-fill {
+        background: #ef4444;
+      }
+
+      /* Professional Clean Warning Bar */
+      .auction-warning-bar {
+        border-radius: 10px;
+        padding: 9px 16px;
+        margin-bottom: 20px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .auction-warning-bar.warning-amber {
+        display: flex;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #92400e;
+      }
+
+      .auction-warning-bar.warning-critical {
+        display: flex;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+      }
+
+      .warning-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .warning-icon {
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+
+      .warning-badge-pill {
+        padding: 2px 9px;
+        border-radius: 5px;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+      }
+
+      .warning-amber .warning-badge-pill {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+      }
+
+      .warning-critical .warning-badge-pill {
+        background: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+      }
+
+      .bidding-locked-alert {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin-bottom: 14px;
+      }
     </style>
   </head>
   <body>
@@ -702,40 +906,102 @@
           </div>
           <p class="hero-subtitle">Real-time Cardamom Auction & Bidding Engine | Idukki Spice Market</p>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          {% if active_auction.status == 'UPCOMING' %}
-            <button type="button" class="btn btn-sm" onclick="forceStartAuction({{ active_auction.id }})" style="background: #059669; color: #ffffff; font-weight: 700; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              <i class="bi bi-play-circle-fill"></i> Go Live Now
-            </button>
-          {% endif %}
-          {% if active_auction.status == 'ACTIVE' or active_auction.status == 'UPCOMING' %}
-            <button type="button" class="btn btn-sm" onclick="forceCloseAuction({{ active_auction.id }})" style="background: #ffffff; color: #dc2626; border: 1.5px solid #dc2626; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Emergency close: finalizes winning lots and returns unbid lots to seller inventory">
-              <i class="bi bi-stop-circle-fill"></i> Force Close Session
-            </button>
-          {% endif %}
-          <div id="heroStatusContainer">
-            {% if active_auction.status == 'ACTIVE' %}
-              <span class="status-indicator status-active" id="heroStatusBadge">
-                <span class="pulse-dot"></span>
-                <span id="heroStatusText">Active / Bidding Open</span>
-              </span>
-            {% elif active_auction.status == 'COMPLETED' %}
-              <span class="status-indicator status-completed" id="heroStatusBadge">
-                <i class="bi bi-lock-fill me-1"></i>
-                <span id="heroStatusText">Auction Completed / Closed</span>
-              </span>
-            {% elif active_auction.status == 'UPCOMING' %}
-              <span class="status-indicator status-upcoming" id="heroStatusBadge">
-                <i class="bi bi-clock-history me-1"></i>
-                <span id="heroStatusText">Upcoming Session</span>
-              </span>
-            {% else %}
-              <span class="status-indicator status-completed" id="heroStatusBadge">
-                <span id="heroStatusText">{{ active_auction.get_status_display }}</span>
-              </span>
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <!-- Live Session Countdown Timer Widget -->
+          <div class="auction-timer-widget" id="auctionTimerWidget">
+            <div class="timer-header">
+              <div class="timer-label" id="timerLabel">
+                <i class="bi bi-clock-history"></i> <span id="timerLabelText">AUCTION CLOCK</span>
+              </div>
+            </div>
+            <div class="timer-digits">
+              <div class="timer-segment"><span class="timer-val" id="timerHours">00</span><span class="timer-sub">HRS</span></div>
+              <span class="timer-colon">:</span>
+              <div class="timer-segment"><span class="timer-val" id="timerMinutes">00</span><span class="timer-sub">MIN</span></div>
+              <span class="timer-colon">:</span>
+              <div class="timer-segment"><span class="timer-val" id="timerSeconds">00</span><span class="timer-sub">SEC</span></div>
+            </div>
+            <div class="timer-bar-track">
+              <div class="timer-bar-fill" id="timerProgressBar" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div id="heroStatusContainer">
+              {% if active_auction.status == 'ACTIVE' %}
+                <span class="status-indicator status-active" id="heroStatusBadge">
+                  <span class="pulse-dot"></span>
+                  <span id="heroStatusText">Active / Bidding Open</span>
+                </span>
+              {% elif active_auction.status == 'COMPLETED' %}
+                <span class="status-indicator status-completed" id="heroStatusBadge">
+                  <i class="bi bi-lock-fill me-1"></i>
+                  <span id="heroStatusText">Auction Completed / Closed</span>
+                </span>
+              {% elif active_auction.status == 'UPCOMING' %}
+                <span class="status-indicator status-upcoming" id="heroStatusBadge">
+                  <i class="bi bi-clock-history me-1"></i>
+                  <span id="heroStatusText">Upcoming Session</span>
+                </span>
+              {% else %}
+                <span class="status-indicator status-completed" id="heroStatusBadge">
+                  <span id="heroStatusText">{{ active_auction.get_status_display }}</span>
+                </span>
+              {% endif %}
+            </div>
+
+            {% if can_manage_auction %}
+            <div style="display: flex; gap: 6px;">
+              {% if active_auction.status == 'UPCOMING' %}
+                <button type="button" class="btn btn-sm" onclick="forceStartAuction({{ active_auction.id }})" style="background: #059669; color: #ffffff; font-weight: 700; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="bi bi-play-circle-fill"></i> Go Live Now
+                </button>
+              {% endif %}
+              {% if active_auction.status == 'ACTIVE' or active_auction.status == 'UPCOMING' %}
+                <button type="button" class="btn btn-sm" onclick="forceCloseAuction({{ active_auction.id }})" style="background: #ffffff; color: #dc2626; border: 1.5px solid #dc2626; font-weight: 700; padding: 5px 12px; border-radius: 8px; font-size: 11.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Emergency close: finalizes winning lots and returns unbid lots to seller inventory">
+                  <i class="bi bi-stop-circle-fill"></i> Force Close
+                </button>
+              {% endif %}
+            </div>
             {% endif %}
           </div>
         </div>
+      </div>
+
+      <!-- Winner Celebration & Instant Invoice Alert Banner -->
+      <div id="winnerCelebrationBanner" style="display: {% if user_won_lots %}block{% else %}none{% endif %}; background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 2px solid #10b981; border-radius: 14px; padding: 18px 24px; margin-bottom: 24px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.18);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 32px;">🏆</div>
+            <div>
+              <h4 style="color: #065f46; font-weight: 800; margin-bottom: 3px; font-size: 18px;">
+                Congratulations! You Won {% if user_won_lots %}{{ user_won_lots|length }} Lot(s){% else %}This Lot{% endif %}!
+              </h4>
+              <div style="color: #047857; font-size: 13.5px;" id="winnerBannerSubtext">
+                Your winning bid has been confirmed and your settlement invoice has been generated instantly.
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'buyer_invoices' %}" class="btn btn-primary" style="background: #059669; font-weight: 700; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; text-decoration: none;">
+              <i class="bi bi-receipt me-1"></i> View Invoices &amp; Settle
+            </a>
+            <a href="{% url 'buyer_bids' %}" class="btn btn-secondary" style="font-weight: 600; padding: 9px 16px; border-radius: 8px; font-size: 13px; text-decoration: none;">
+              <i class="bi bi-clock-history me-1"></i> My Bidding History
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Auction Session Warning Alert Bar -->
+      <div id="auctionWarningBar" class="auction-warning-bar">
+        <div class="warning-left">
+          <div class="warning-icon"><i class="bi bi-exclamation-triangle-fill" id="warningIcon"></i></div>
+          <div id="warningText">
+            <strong>Notice:</strong> Bidding closes shortly.
+          </div>
+        </div>
+        <div class="warning-badge-pill" id="warningBadgePill">CLOSING SOON</div>
       </div>
 
       <div class="grid-layout">
@@ -839,17 +1105,24 @@
 
         <!-- Right Column: Interactive Bidding Console -->
         <div>
-          <div class="bidding-panel">
-            <h2 style="font-size: 16px;
-                       font-weight: 700;
-                       margin-bottom: 16px;
-                       color: var(--text-main)">
-              Bid Submission Console
-            </h2>
+          <div class="bidding-panel" id="biddingPanel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h2 style="font-size: 16px;
+                         font-weight: 700;
+                         margin-bottom: 0;
+                         color: var(--text-main)">
+                Bid Submission Console
+              </h2>
+              <span class="badge" id="consoleLiveIndicator" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                <span class="pulse-dot" style="width: 6px; height: 6px; display: inline-block; background: #10b981; border-radius: 50%; margin-right: 4px;"></span>LIVE
+              </span>
+            </div>
+
+
 
             <div id="biddingLockedAlert" class="bidding-locked-alert" style="display: {% if active_auction.status == 'COMPLETED' or not first_lot or first_lot.is_sold %}block{% else %}none{% endif %};">
               <i class="bi bi-lock-fill me-1"></i>
-              <span>Bidding is closed for this lot. Auction session has concluded.</span>
+              <span id="biddingLockedAlertText">Bidding is closed for this lot. Auction session has concluded.</span>
             </div>
 
             <div class="form-group">
@@ -883,6 +1156,9 @@
                      class="form-control"
                      value="{% if first_lot %}{{ first_lot.current_price|add:20 }}{% else %}2020.00{% endif %}"
                      step="10" />
+              <div id="bidMinIncrementHint" style="font-size: 11.5px; color: var(--text-muted); margin-top: 5px;">
+                <i class="bi bi-info-circle me-1"></i> Minimum increment: ₹10/kg (Next valid bid: <strong class="text-dark font-monospace" id="minValidBidDisplay">₹{% if first_lot %}{{ first_lot.current_price|add:10 }}{% else %}2010.00{% endif %}/kg</strong>)
+              </div>
             </div>
 
             <button class="btn btn-primary"
@@ -976,14 +1252,25 @@
         currentSelectedPrice = parseFloat(currentPrice);
         document.getElementById('bidAmountInput').value = (currentSelectedPrice + 20).toFixed(2);
 
-        // Status locking
+        const minValidDisplay = document.getElementById('minValidBidDisplay');
+        if (minValidDisplay) minValidDisplay.innerText = `₹${(currentSelectedPrice + 10).toFixed(2)}/kg`;
+
+        // Status locking & informative warnings
         const lockedAlert = document.getElementById('biddingLockedAlert');
+        const lockedAlertText = document.getElementById('biddingLockedAlertText');
         const submitBtn = document.getElementById('submitBidBtn');
         const rivalBtn = document.getElementById('rivalBidBtn');
         const bidInput = document.getElementById('bidAmountInput');
 
-        if (isSold || auctionStatus === 'COMPLETED') {
+        if (isSold) {
           if (lockedAlert) lockedAlert.style.display = 'block';
+          if (lockedAlertText) lockedAlertText.innerHTML = `<strong>Lot #${lotNum} is SOLD!</strong> Final winning hammer price was ₹${currentSelectedPrice.toFixed(2)}/kg. Select an active lot from the catalog to bid.`;
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+          if (rivalBtn) { rivalBtn.disabled = true; rivalBtn.style.opacity = '0.5'; rivalBtn.style.cursor = 'not-allowed'; }
+          if (bidInput) { bidInput.disabled = true; }
+        } else if (auctionStatus === 'COMPLETED') {
+          if (lockedAlert) lockedAlert.style.display = 'block';
+          if (lockedAlertText) lockedAlertText.innerHTML = '<strong>Auction Session Concluded.</strong> Hammer has fallen and bidding is locked.';
           if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
           if (rivalBtn) { rivalBtn.disabled = true; rivalBtn.style.opacity = '0.5'; rivalBtn.style.cursor = 'not-allowed'; }
           if (bidInput) { bidInput.disabled = true; }
@@ -1044,6 +1331,11 @@
           return;
         }
 
+        if (amount < currentSelectedPrice + 10) {
+          showToast(`⚠️ Bid must be at least ₹${(currentSelectedPrice + 10).toFixed(2)}/kg (higher than current price ₹${currentSelectedPrice.toFixed(2)}/kg).`, false);
+          return;
+        }
+
         try {
           const response = await fetch(`/api/auctions/lots/${lotId}/bids/`, {
             method: 'POST',
@@ -1096,34 +1388,178 @@
         const badge = document.getElementById('heroStatusBadge');
         const now = getNow();
 
+        const timerWidget = document.getElementById('auctionTimerWidget');
+        const timerLabelText = document.getElementById('timerLabelText');
+        const timerHours = document.getElementById('timerHours');
+        const timerMinutes = document.getElementById('timerMinutes');
+        const timerSeconds = document.getElementById('timerSeconds');
+        const timerProgressBar = document.getElementById('timerProgressBar');
+
+        const warningBar = document.getElementById('auctionWarningBar');
+        const warningIcon = document.getElementById('warningIcon');
+        const warningText = document.getElementById('warningText');
+        const warningBadgePill = document.getElementById('warningBadgePill');
+        const liveIndicator = document.getElementById('consoleLiveIndicator');
+
         if (now < startTime) {
-          const diff = startTime - now;
-          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+          // UPCOMING AUCTION
+          const diff = Math.max(0, startTime - now);
+          const totalSecs = Math.floor(diff / 1000);
+          const h = Math.floor(totalSecs / 3600);
+          const m = Math.floor((totalSecs % 3600) / 60);
+          const s = totalSecs % 60;
+
+          if (timerHours) timerHours.innerText = String(h).padStart(2, '0');
+          if (timerMinutes) timerMinutes.innerText = String(m).padStart(2, '0');
+          if (timerSeconds) timerSeconds.innerText = String(s).padStart(2, '0');
+          if (timerLabelText) timerLabelText.innerText = 'OPENS IN';
+          if (timerWidget) timerWidget.className = 'auction-timer-widget is-upcoming';
+          if (timerProgressBar) timerProgressBar.style.width = '100%';
+
           if (badge) {
             badge.className = 'status-indicator status-upcoming';
-            badge.innerHTML = `<i class="bi bi-clock-history me-1"></i><span>Starts in ${mins}m ${secs}s</span>`;
+            badge.innerHTML = `<i class="bi bi-clock-history me-1"></i><span>Starts in ${h > 0 ? h + 'h ' : ''}${m}m ${s}s</span>`;
           }
+
+          if (warningBar) warningBar.style.display = 'none';
+
+          if (liveIndicator) {
+            liveIndicator.style.background = '#fef3c7';
+            liveIndicator.style.color = '#b45309';
+            liveIndicator.style.borderColor = '#fde68a';
+            liveIndicator.innerHTML = '<i class="bi bi-clock me-1"></i>WAITING';
+          }
+
         } else if (now >= startTime && now < endTime) {
+          // ACTIVE AUCTION
+          const diff = Math.max(0, endTime - now);
+          const totalSecs = Math.floor(diff / 1000);
+          const h = Math.floor(totalSecs / 3600);
+          const m = Math.floor((totalSecs % 3600) / 60);
+          const s = totalSecs % 60;
+
+          const totalDuration = Math.max(1, endTime - startTime);
+          const progressPercent = Math.max(0, Math.min(100, (diff / totalDuration) * 100));
+
+          if (timerHours) timerHours.innerText = String(h).padStart(2, '0');
+          if (timerMinutes) timerMinutes.innerText = String(m).padStart(2, '0');
+          if (timerSeconds) timerSeconds.innerText = String(s).padStart(2, '0');
+          if (timerProgressBar) timerProgressBar.style.width = progressPercent.toFixed(1) + '%';
+
+          const formattedTime = (h > 0 ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+          if (liveIndicator) {
+            liveIndicator.style.background = '#ecfdf5';
+            liveIndicator.style.color = '#047857';
+            liveIndicator.style.borderColor = '#a7f3d0';
+            liveIndicator.innerHTML = '<span class="pulse-dot" style="width: 6px; height: 6px; display: inline-block; background: #10b981; border-radius: 50%; margin-right: 4px;"></span>LIVE';
+          }
+
           if (badge && !badge.classList.contains('status-active')) {
             badge.className = 'status-indicator status-active';
             badge.innerHTML = '<span class="pulse-dot"></span><span>Active / Bidding Open</span>';
-            const submitBtn = document.getElementById('submitBidBtn');
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; }
-            const rivalBtn = document.getElementById('rivalBidBtn');
-            if (rivalBtn) { rivalBtn.disabled = false; rivalBtn.style.opacity = '1'; }
           }
+
+          // Concise, professional warning thresholds
+          if (totalSecs <= 60) {
+            // Final 60 Seconds
+            if (timerWidget) timerWidget.className = 'auction-timer-widget is-critical';
+            if (timerLabelText) timerLabelText.innerText = 'FINAL CALL';
+
+            if (warningBar) {
+              warningBar.className = 'auction-warning-bar warning-critical';
+              warningBar.style.display = 'flex';
+              if (warningIcon) warningIcon.className = 'bi bi-exclamation-circle-fill text-danger';
+              if (warningBadgePill) warningBadgePill.innerText = 'FINAL CALL';
+              if (warningText) {
+                warningText.innerHTML = `<strong>Final Call:</strong> Session closes in <strong>${totalSecs}s</strong>.`;
+              }
+            }
+
+          } else if (totalSecs <= 120) {
+            // Closing Soon (Under 2 Minutes)
+            if (timerWidget) timerWidget.className = 'auction-timer-widget is-warning';
+            if (timerLabelText) timerLabelText.innerText = 'CLOSING SOON';
+
+            if (warningBar) {
+              warningBar.className = 'auction-warning-bar warning-amber';
+              warningBar.style.display = 'flex';
+              if (warningIcon) warningIcon.className = 'bi bi-clock-history text-warning';
+              if (warningBadgePill) warningBadgePill.innerText = 'CLOSING SOON';
+              if (warningText) {
+                warningText.innerHTML = `<strong>Notice:</strong> Bidding closes in <strong>${formattedTime}</strong>.`;
+              }
+            }
+
+          } else {
+            // Normal Active (> 2 Minutes) - Clean view, no redundant banner
+            if (timerWidget) timerWidget.className = 'auction-timer-widget';
+            if (timerLabelText) timerLabelText.innerText = 'TIME REMAINING';
+            if (warningBar) warningBar.style.display = 'none';
+          }
+
         } else if (now >= endTime) {
+          // COMPLETED AUCTION - AUTO FINALIZE IMMEDIATELY
+          if (!window.sessionAutoCloseTriggered && b.getAttribute('data-status') === 'ACTIVE') {
+            window.sessionAutoCloseTriggered = true;
+            b.setAttribute('data-status', 'COMPLETED');
+            fetch('/api/auctions/{{ active_auction.id }}/close/', {
+              method: 'POST',
+              headers: { 'X-CSRFToken': getCsrfToken() }
+            }).then(res => res.json()).then(data => {
+              showToast("Session concluded. Winning lots finalized.", true);
+              const winnerBanner = document.getElementById('winnerCelebrationBanner');
+              if (winnerBanner) winnerBanner.style.display = 'block';
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+            }).catch(err => {
+              console.warn("Auto-close sync:", err);
+            });
+          }
+
+          if (timerHours) timerHours.innerText = '00';
+          if (timerMinutes) timerMinutes.innerText = '00';
+          if (timerSeconds) timerSeconds.innerText = '00';
+          if (timerWidget) timerWidget.className = 'auction-timer-widget';
+          if (timerLabelText) timerLabelText.innerText = 'CLOSED';
+          if (timerProgressBar) timerProgressBar.style.width = '0%';
+
           if (badge && !badge.classList.contains('status-completed')) {
             badge.className = 'status-indicator status-completed';
             badge.innerHTML = '<i class="bi bi-lock-fill me-1"></i><span>Auction Completed / Closed</span>';
-            const lockedAlert = document.getElementById('biddingLockedAlert');
-            if (lockedAlert) lockedAlert.style.display = 'block';
-            const submitBtn = document.getElementById('submitBidBtn');
-            if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
-            const rivalBtn = document.getElementById('rivalBidBtn');
-            if (rivalBtn) { rivalBtn.disabled = true; rivalBtn.style.opacity = '0.5'; }
           }
+
+          if (warningBar) {
+            warningBar.className = 'auction-warning-bar';
+            warningBar.style.display = 'flex';
+            warningBar.style.background = '#f8fafc';
+            warningBar.style.borderColor = '#e2e8f0';
+            warningBar.style.color = '#475569';
+            if (warningIcon) warningIcon.className = 'bi bi-lock-fill text-secondary';
+            if (warningBadgePill) {
+              warningBadgePill.innerText = 'CLOSED';
+              warningBadgePill.style.background = '#e2e8f0';
+              warningBadgePill.style.color = '#475569';
+              warningBadgePill.style.borderColor = '#cbd5e1';
+            }
+            if (warningText) {
+              warningText.innerHTML = '<strong>Auction Concluded:</strong> Bidding is closed.';
+            }
+          }
+
+          const lockedAlert = document.getElementById('biddingLockedAlert');
+          if (lockedAlert) {
+            lockedAlert.style.display = 'block';
+            const alertText = document.getElementById('biddingLockedAlertText');
+            if (alertText) alertText.innerText = 'Bidding is closed. Auction session has concluded.';
+          }
+          const submitBtn = document.getElementById('submitBidBtn');
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+          const rivalBtn = document.getElementById('rivalBidBtn');
+          if (rivalBtn) { rivalBtn.disabled = true; rivalBtn.style.opacity = '0.5'; rivalBtn.style.cursor = 'not-allowed'; }
+          const bidInput = document.getElementById('bidAmountInput');
+          if (bidInput) bidInput.disabled = true;
         }
       }
       setInterval(updateSessionLiveClock, 1000);
@@ -1132,6 +1568,10 @@
       function updateLotPriceUI(lotId, newPrice) {
         const elem = document.getElementById(`highest-price-${lotId}`);
         if (elem) elem.innerText = `₹${parseFloat(newPrice).toFixed(2)}/kg`;
+        const minValidDisplay = document.getElementById('minValidBidDisplay');
+        if (minValidDisplay && document.getElementById('selectedLotId').value == lotId) {
+          minValidDisplay.innerText = `₹${(parseFloat(newPrice) + 10).toFixed(2)}/kg`;
+        }
       }
 
       function appendBidStream(bidder, lotNum, amount, isRival) {
@@ -1160,6 +1600,7 @@
         stream.insertBefore(item, stream.firstChild);
       }
 
+      {% if can_manage_auction %}
       async function forceStartAuction(auctionId) {
         if (!confirm("Start this auction immediately for live bidding simulation?")) return;
         try {
@@ -1197,6 +1638,7 @@
           showToast("❌ " + e.message, false);
         }
       }
+      {% endif %}
 
       function showToast(msg, isSuccess) {
         const toast = document.getElementById('toastMsg');

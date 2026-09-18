@@ -1,10 +1,52 @@
 {% extends "base.html" %}
+{% load i18n static %}
 
-{% block title %}
-  {% block head_title %}
-  {% endblock head_title %}
-{% endblock title %}
-{% block main %}
-  {% block content %}
-  {% endblock content %}
-{% endblock main %}
+{% block title %}{% block head_title %}Account{% endblock head_title %} — CardaLink{% endblock title %}
+
+{% block bodyclass %}landing-offwhite-body{% endblock bodyclass %}
+
+{# Suppress navbar for clean auth layout #}
+{% block header %}{% endblock header %}
+
+{% block main_container %}
+<div class="landing-page-container d-flex align-items-center justify-content-center py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+
+        <div class="auth-card">
+          <!-- Brand Header -->
+          <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+              <h1 class="landing-brand-title justify-content-center mb-2" style="font-size: 2.25rem;">
+                <span class="brand-carda">Carda</span><span class="brand-link">Link</span>
+              </h1>
+            </a>
+          </div>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} py-2 px-3 small mb-3 rounded-3 border-0 shadow-sm">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          {% block content %}
+          {% endblock content %}
+
+          {% block extra_body %}{% endblock extra_body %}
+
+          <div class="text-center pt-3 mt-2 border-top">
+            <a href="{% url 'home' %}" class="small text-emerald text-decoration-none fw-semibold">
+              &larr; Return to Sign In
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock main_container %}

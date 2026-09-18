@@ -118,6 +118,12 @@ class AdminManualUserCreationForm(forms.Form):
             raise ValidationError(_("An account with this email address already exists."))
         return email
 
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get("phone_number", "").strip() or None
+        if phone_number and User.objects.filter(phone_number=phone_number).exists():
+            raise ValidationError(_("An account with this phone number already exists."))
+        return phone_number
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")

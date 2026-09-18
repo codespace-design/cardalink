@@ -6,6 +6,13 @@
 {% block bodyclass %}admin-app-body{% endblock %}
 
 {% block header %}
+<!-- Restore saved theme before render to avoid flash -->
+<script>
+  (function(){
+    var t = localStorage.getItem('cl-theme');
+    if(t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <header class="admin-topbar sticky-top">
   <div class="admin-topbar-inner">
     <!-- Brand & Mobile Toggle -->
@@ -26,9 +33,16 @@
 
     <!-- Right Quick Actions, Notifications & Profile -->
     <div class="d-flex align-items-center gap-3">
+      {% if request.user.role == 'BUYER' or request.user.role == 'ADMIN' %}
       <a href="{% url 'auctions:simulation' %}" class="btn btn-sm btn-outline-emerald d-none d-sm-inline-flex align-items-center gap-1.5 fw-semibold font-monospace">
         <i class="bi bi-broadcast"></i> Live Auction Console
       </a>
+      {% elif request.user.role == 'SELLER' %}
+      <a href="{% url 'seller_notifications' %}" class="btn btn-sm btn-light border d-none d-sm-inline-flex align-items-center gap-1.5 fw-semibold text-secondary">
+        <i class="bi bi-bell-fill text-emerald"></i> Auction Alerts
+        {% if unread_notifications_count %}<span class="badge bg-danger rounded-pill">{{ unread_notifications_count }}</span>{% endif %}
+      </a>
+      {% endif %}
 
       <!-- Notification Bell Dropdown -->
       <div class="dropdown">
@@ -72,6 +86,12 @@
           </div>
         </div>
       </div>
+
+      <!-- Dark Mode Toggle -->
+      <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <i class="bi bi-sun-fill theme-icon-light" aria-hidden="true"></i>
+        <i class="bi bi-moon-stars-fill theme-icon-dark" aria-hidden="true"></i>
+      </button>
 
       <!-- User Profile Dropdown -->
       <div class="dropdown">
